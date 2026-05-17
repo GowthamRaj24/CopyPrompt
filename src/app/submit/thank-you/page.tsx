@@ -112,7 +112,7 @@ export default function ThankYouPage() {
           </span>
         </h1>
 
-        <p className="reveal delay-2 mt-3 text-balance text-[14px] leading-relaxed text-muted-foreground md:text-[15px]">
+        <p className="reveal delay-2 mt-3 text-balance text-[13px] leading-relaxed text-muted-foreground md:text-[14px]">
           Your prompt is in the moderation queue. We hand-review every
           submission to keep the archive sharp.
         </p>
@@ -155,10 +155,16 @@ export default function ThankYouPage() {
           </Link>
           <Link
             href="/submit"
-            className="press inline-flex h-11 items-center gap-2 rounded-lg border border-border/60 bg-card/50 px-5 text-[14px] font-medium backdrop-blur-md transition-all hover:border-border hover:bg-card"
+            className="press inline-flex h-11 items-center gap-2 rounded-lg border border-border/60 bg-card/50 px-5 text-[13px] font-medium backdrop-blur-md transition-all hover:border-border hover:bg-card"
           >
             <SparklesIcon className="size-3.5 text-primary" />
             Submit another
+          </Link>
+          <Link
+            href="/account#my-prompts"
+            className="press inline-flex h-11 items-center gap-2 rounded-lg border border-border/60 bg-card/50 px-5 text-[13px] font-medium backdrop-blur-md transition-all hover:border-border hover:bg-card"
+          >
+            My prompts
           </Link>
         </div>
 

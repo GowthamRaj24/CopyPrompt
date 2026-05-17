@@ -39,51 +39,50 @@ function SharedSuccessContent() {
         url: shareUrl,
       });
     } catch {
-      /* user cancelled */
+      /* cancelled */
     }
   }
 
   return (
-    <section className="relative flex min-h-[70svh] items-center justify-center px-4 py-12">
-      <div
-        aria-hidden
-        className="bg-spotlight-top pointer-events-none absolute inset-x-0 top-0 h-[400px]"
-      />
-      <div className="relative w-full max-w-lg text-center">
-        <div className="mx-auto mb-5 grid size-14 place-items-center rounded-full bg-primary/10 text-primary">
-          <CheckCircle2Icon className="size-7" strokeWidth={1.8} />
+    <div className="submit-studio relative flex min-h-[75svh] items-center justify-center px-4 py-16">
+      <div className="submit-studio-ambient" aria-hidden />
+      <div className="submit-panel relative mx-auto w-full max-w-lg p-8 text-center sm:p-10">
+        <div className="mx-auto mb-6 grid size-16 place-items-center rounded-2xl border border-violet-500/30 bg-violet-500/15 text-violet-400">
+          <CheckCircle2Icon className="size-8" strokeWidth={1.8} />
         </div>
-        <h1 className="text-2xl font-bold tracking-[-0.03em]">
-          Private prompt is live
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-violet-400">
+          Private · Live
+        </p>
+        <h1 className="mt-3 text-2xl font-bold tracking-[-0.03em]">
+          Your link is ready
         </h1>
-        <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-          Share this link on social media. Only people with the link can view{" "}
-          <span className="font-medium text-foreground">{title}</span> — it
-          won&apos;t appear in search or browse.
+        <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
+          Share on social or with clients. Only people with this link can view{" "}
+          <span className="font-medium text-foreground">{title}</span>.
         </p>
 
         {shareUrl ? (
           <div className="mt-8 space-y-3 text-left">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              Your share link
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Share link
             </label>
             <div className="flex gap-2">
               <Input
                 readOnly
                 value={shareUrl}
-                className="h-11 font-mono text-[12px]"
+                className="h-11 flex-1 font-mono text-[12px]"
               />
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 shrink-0 gap-1.5 px-3"
+                className="h-11 shrink-0 gap-1.5"
                 onClick={() => void copyLink()}
               >
                 <CopyIcon className="size-3.5" />
                 {copied ? "Copied" : "Copy"}
               </Button>
             </div>
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
+            <div className="flex flex-wrap justify-center gap-2 pt-3">
               <Button
                 type="button"
                 className="gap-1.5"
@@ -99,15 +98,13 @@ function SharedSuccessContent() {
           </div>
         ) : (
           <p className="mt-6 text-[13px] text-muted-foreground">
-            Missing share URL. Check{" "}
             <Link href="/account#my-prompts" className="text-primary underline">
-              My prompts
+              View in My prompts
             </Link>
-            .
           </p>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
