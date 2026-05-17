@@ -6,6 +6,7 @@ import {
   ShieldAlertIcon,
   ShieldIcon,
   SparklesIcon,
+  UserIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -44,7 +45,6 @@ export default async function AccountPage() {
   }));
 
   const privateCount = prompts.filter((p) => p.visibility === "private").length;
-  const publicCount = prompts.filter((p) => p.visibility === "public").length;
   const totalCopies = prompts.reduce((sum, p) => sum + p.copyCount, 0);
 
   const initials = (user.fullName ?? user.email)
@@ -55,74 +55,65 @@ export default async function AccountPage() {
     .join("");
 
   return (
-    <section className="relative min-h-[80svh] w-full">
+    <section className="relative">
       <div
         aria-hidden
-        className="bg-spotlight-top pointer-events-none absolute inset-x-0 top-0 h-[min(60vh,640px)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        className="bg-spotlight-top pointer-events-none absolute inset-x-0 top-0 h-[460px]"
       />
 
-      <div className="relative mx-auto w-full px-5 py-8 sm:px-8 md:py-10 lg:px-10 xl:px-12 2xl:px-14">
-        {/* Page header — full width */}
-        <header className="reveal mb-8 flex flex-col gap-6 border-b border-border/50 pb-8 md:mb-10 md:flex-row md:items-end md:justify-between md:pb-10">
+      <div className="container relative mx-auto px-4 py-10 sm:px-6 md:py-14">
+        <header className="reveal delay-1 mb-10 flex flex-col gap-4 border-b border-border pb-6 md:mb-14 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow mb-2 text-sm tracking-widest">Account</p>
-            <h1 className="text-4xl font-bold tracking-[-0.04em] sm:text-5xl lg:text-6xl">
+            <p className="eyebrow mb-2">Account</p>
+            <h1 className="flex items-center gap-3 text-3xl font-bold tracking-[-0.02em] md:text-5xl">
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10 text-primary md:size-12">
+                <UserIcon
+                  className="size-4 md:size-5"
+                  strokeWidth={2}
+                />
+              </span>
               Dashboard
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Manage your prompts, share links, and account settings — all in one
-              place.
+            <p className="mt-2 text-[12px] text-muted-foreground">
+              {prompts.length === 0
+                ? "No prompts yet — submit your first one"
+                : `${prompts.length} prompt${prompts.length === 1 ? "" : "s"} · ${privateCount} private · ${totalCopies.toLocaleString()} copies`}
             </p>
           </div>
-          <Button
-            asChild
-            size="lg"
-            className="press h-12 shrink-0 gap-2 rounded-xl px-6 text-base font-semibold"
+          <Link
+            href="/submit"
+            className="press inline-flex h-9 shrink-0 items-center gap-2 self-start rounded-md border border-border bg-card px-3 text-[13px] font-medium transition-all hover:border-foreground/30 hover:bg-muted md:self-auto"
           >
-            <Link href="/submit">
-              <PlusIcon className="size-5" />
-              New prompt
-            </Link>
-          </Button>
+            <PlusIcon className="size-3.5" />
+            New prompt
+          </Link>
         </header>
 
-        {/* Stats strip — full width */}
-        <div className="reveal delay-1 mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 md:mb-10">
-          <MetricCard label="Total prompts" value={prompts.length} />
-          <MetricCard label="Private" value={privateCount} accent="violet" />
-          <MetricCard label="Public" value={publicCount} accent="emerald" />
-          <MetricCard label="Total copies" value={totalCopies} />
-        </div>
-
-        <div className="grid w-full gap-6 lg:grid-cols-[minmax(300px,360px)_1fr] lg:gap-8 xl:gap-10">
-          {/* Sidebar */}
+        {/* Same max width as /submit two-column layout */}
+        <div className="mx-auto grid max-w-[1080px] gap-8 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="reveal delay-2 space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
-              <div className="border-b border-border/40 bg-gradient-to-br from-primary/[0.1] via-primary/[0.03] to-transparent p-6 sm:p-7">
-                <div className="flex items-center gap-5">
-                  <Avatar className="size-16 ring-2 ring-primary/25 ring-offset-2 ring-offset-card sm:size-[4.5rem]">
+            <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-soft">
+              <div className="border-b border-border/40 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent p-5">
+                <div className="flex items-center gap-4">
+                  <Avatar className="size-14 ring-2 ring-primary/20 ring-offset-2 ring-offset-card">
                     {user.avatarUrl && (
                       <AvatarImage
                         src={user.avatarUrl}
                         alt={user.fullName ?? user.email}
                       />
                     )}
-                    <AvatarFallback className="bg-primary/15 text-xl font-semibold text-primary">
+                    <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-1 text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
+                    <h2 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.02em]">
                       {user.fullName ?? "Member"}
                     </h2>
-                    <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground sm:text-base">
+                    <p className="line-clamp-1 text-[12px] text-muted-foreground">
                       {user.email}
                     </p>
-                    <div className="mt-3">
+                    <div className="mt-2">
                       {user.plan === "admin" ? (
                         <PlanBadge variant="admin">Admin</PlanBadge>
                       ) : user.plan === "premium" ? (
@@ -135,22 +126,28 @@ export default async function AccountPage() {
                 </div>
               </div>
 
-              <nav className="p-3">
+              <div className="grid grid-cols-3 divide-x divide-border/50 border-b border-border/40">
+                <StatCell label="Prompts" value={prompts.length} />
+                <StatCell label="Private" value={privateCount} />
+                <StatCell label="Copies" value={totalCopies} />
+              </div>
+
+              <nav className="p-2">
                 <NavRow
                   href="/favorites"
-                  icon={<HeartIcon className="size-5" />}
+                  icon={<HeartIcon className="size-4" />}
                   label="Favorites"
                   hint="Saved prompts"
                 />
                 <NavRow
                   href="/submit"
-                  icon={<PlusIcon className="size-5" />}
+                  icon={<PlusIcon className="size-4" />}
                   label="Submit prompt"
                   hint="Public or private"
                 />
                 <NavRow
                   href="/account#my-prompts"
-                  icon={<SparklesIcon className="size-5" />}
+                  icon={<SparklesIcon className="size-4" />}
                   label="My prompts"
                   hint={`${prompts.length} total`}
                   active
@@ -158,18 +155,18 @@ export default async function AccountPage() {
               </nav>
             </div>
 
-            <div className="rounded-2xl border border-border/60 bg-card/50 p-5 sm:p-6">
-              <h3 className="text-base font-semibold sm:text-lg">Session</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Sign out on shared devices when you&apos;re finished.
+            <div className="rounded-xl border border-border/60 bg-card/40 p-4">
+              <h3 className="text-[13px] font-semibold">Session</h3>
+              <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+                Sign out on shared devices after you&apos;re done.
               </p>
-              <form action="/auth/signout" method="post" className="mt-4">
+              <form action="/auth/signout" method="post" className="mt-3">
                 <Button
                   type="submit"
                   variant="outline"
-                  className="press h-11 w-full gap-2 text-base"
+                  className="press h-9 w-full gap-2 text-[12px]"
                 >
-                  <LogOutIcon className="size-4" />
+                  <LogOutIcon className="size-3.5" />
                   Sign out
                 </Button>
               </form>
@@ -177,26 +174,25 @@ export default async function AccountPage() {
 
             <Link
               href="/account/danger-zone"
-              className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card/40 px-5 py-4 transition-colors hover:border-destructive/30 hover:bg-destructive/[0.04] sm:px-6 sm:py-5"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/30 px-4 py-3 transition-colors hover:border-destructive/30 hover:bg-destructive/[0.03]"
             >
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-destructive/10 text-destructive">
-                <ShieldAlertIcon className="size-5" />
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-destructive/10 text-destructive">
+                <ShieldAlertIcon className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-base font-medium group-hover:text-destructive sm:text-lg">
+                <p className="text-[13px] font-medium group-hover:text-destructive">
                   Privacy & data
                 </p>
-                <p className="text-sm text-muted-foreground sm:text-base">
-                  Export or delete your account
+                <p className="text-[11px] text-muted-foreground">
+                  Export or delete account
                 </p>
               </div>
-              <ChevronRightIcon className="size-5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-destructive" />
+              <ChevronRightIcon className="size-4 text-muted-foreground/40 group-hover:text-destructive" />
             </Link>
           </aside>
 
-          {/* Main — My prompts (full remaining width) */}
           <div className="reveal delay-3 min-w-0">
-            <div className="rounded-2xl border border-border/60 bg-card/40 p-5 shadow-soft sm:p-7 md:p-8 lg:p-10">
+            <div className="rounded-xl border border-border/60 bg-card/30 p-4 shadow-soft sm:p-6 md:p-8">
               <MyPromptsSection initialPrompts={prompts} />
             </div>
           </div>
@@ -206,30 +202,13 @@ export default async function AccountPage() {
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: number;
-  accent?: "violet" | "emerald";
-}) {
-  const accentStyles = {
-    violet: "border-violet-500/20 bg-violet-500/[0.06]",
-    emerald: "border-emerald-500/20 bg-emerald-500/[0.06]",
-  };
-
+function StatCell({ label, value }: { label: string; value: number }) {
   return (
-    <div
-      className={`rounded-2xl border border-border/60 bg-card/60 px-4 py-4 sm:px-5 sm:py-5 ${
-        accent ? accentStyles[accent] : ""
-      }`}
-    >
-      <p className="font-mono text-3xl font-bold tabular-nums tracking-tight text-foreground sm:text-4xl">
+    <div className="px-2 py-3 text-center">
+      <p className="font-mono text-lg font-semibold tabular-nums tracking-tight text-foreground">
         {value.toLocaleString()}
       </p>
-      <p className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:text-sm">
+      <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
     </div>
@@ -251,10 +230,10 @@ function PlanBadge({
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wider sm:text-sm ${styles[variant]}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${styles[variant]}`}
     >
       {variant === "admin" && (
-        <ShieldIcon className="size-3" strokeWidth={2.5} />
+        <ShieldIcon className="size-2.5" strokeWidth={2.5} />
       )}
       {children}
     </span>
@@ -277,14 +256,12 @@ function NavRow({
   return (
     <Link
       href={href}
-      className={`group flex items-center gap-4 rounded-xl px-4 py-3.5 transition-colors sm:py-4 ${
-        active
-          ? "bg-primary/10 text-primary"
-          : "hover:bg-muted/50"
+      className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+        active ? "bg-primary/10" : "hover:bg-muted/50"
       }`}
     >
       <span
-        className={`grid size-10 shrink-0 place-items-center rounded-lg border transition-colors sm:size-11 ${
+        className={`grid size-8 shrink-0 place-items-center rounded-md border transition-colors ${
           active
             ? "border-primary/40 bg-primary/15 text-primary"
             : "border-border/50 bg-background/80 text-primary group-hover:border-primary/30 group-hover:bg-primary/10"
@@ -294,16 +271,16 @@ function NavRow({
       </span>
       <div className="min-w-0 flex-1">
         <p
-          className={`text-base font-medium sm:text-lg ${
+          className={`text-[13px] font-medium ${
             active ? "text-primary" : "text-foreground"
           }`}
         >
           {label}
         </p>
-        <p className="text-sm text-muted-foreground sm:text-base">{hint}</p>
+        <p className="text-[11px] text-muted-foreground">{hint}</p>
       </div>
       <ChevronRightIcon
-        className={`size-5 transition-transform group-hover:translate-x-0.5 ${
+        className={`size-4 transition-transform group-hover:translate-x-0.5 ${
           active
             ? "text-primary/60"
             : "text-muted-foreground/30 group-hover:text-foreground"
