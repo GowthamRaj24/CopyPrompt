@@ -107,9 +107,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   verification: {
-    // Add Google/Bing verification tokens here when you claim properties.
-    // google: "...",
-    // other: { "msvalidate.01": "..." },
+    google: "uGd1QDcGmlx3aDitoE46QL2v2ypQAWbW4ocI5Jz6gko"
   },
 };
 
