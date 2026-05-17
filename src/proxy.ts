@@ -13,9 +13,44 @@ import { type NextRequest, NextResponse } from "next/server";
  *   This proxy silently refreshes those cookies on every request, so the
  *   user stays signed in across SSR navigations.
  */
-/** Social / search crawlers — skip Supabase session refresh (faster, avoids bot 403s). */
+/** Meta crawlers — used by Facebook Sharing Debugger and WhatsApp previews. */
+const META_CRAWLER_UA =
+  /facebookexternalhit|Facebot|FacebookBot|Meta-ExternalAgent/i;
+
+/** Other crawlers — skip Supabase session refresh (faster, fewer edge cases). */
 const CRAWLER_UA =
-  /facebookexternalhit|Facebot|FacebookBot|Meta-ExternalAgent|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|Googlebot|bingbot|Applebot/i;
+  /Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|Googlebot|bingbot|Applebot/i;
+
+const OG_TITLE = "CopyPrompt — The fastest way to find AI prompts";
+const OG_DESCRIPTION =
+  "The fastest way to find, copy and paste prompts for every AI tool. Free forever.";
+
+function metaCrawlerHtml(origin: string): string {
+  const pageUrl = `${origin}/`;
+  const ogImage = `${origin}/opengraph-image`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>${OG_TITLE}</title>
+<meta name="description" content="${OG_DESCRIPTION}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="${pageUrl}"/>
+<meta property="og:site_name" content="CopyPrompt"/>
+<meta property="og:title" content="${OG_TITLE}"/>
+<meta property="og:description" content="${OG_DESCRIPTION}"/>
+<meta property="og:image" content="${ogImage}"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="CopyPrompt — free AI prompts for every tool"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="${OG_TITLE}"/>
+<meta name="twitter:description" content="Search, copy, paste. Prompts for every AI tool. Free forever."/>
+<meta name="twitter:image" content="${ogImage}"/>
+</head>
+<body></body>
+</html>`;
+}
 
 export async function proxy(request: NextRequest) {
   // Pass current pathname + full URL (with query) as headers so server
@@ -28,7 +63,24 @@ export async function proxy(request: NextRequest) {
   );
 
   const ua = request.headers.get("user-agent") ?? "";
-  if (CRAWLER_UA.test(ua)) {
+  const { pathname } = request.nextUrl;
+
+  // Lightweight HTML for Meta — avoids heavy SSR/DB on their scrape (403 workaround)
+  if (
+    META_CRAWLER_UA.test(ua) &&
+    request.method === "GET" &&
+    pathname === "/"
+  ) {
+    return new NextResponse(metaCrawlerHtml(request.nextUrl.origin), {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      },
+    });
+  }
+
+  if (META_CRAWLER_UA.test(ua) || CRAWLER_UA.test(ua)) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 

@@ -103,6 +103,14 @@ function allowPublicPaths(userAgent: string) {
   };
 }
 
+/** Meta link-preview bots — allow homepage only, no Disallow (Meta parser is picky). */
+function allowMetaPreviewBot(userAgent: string) {
+  return {
+    userAgent,
+    allow: ["/", "/opengraph-image"],
+  };
+}
+
 export default function robots(): MetadataRoute.Robots {
   const siteHost = (() => {
     try {
@@ -114,8 +122,8 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [
-      // Social / Meta first — Sharing Debugger checks facebookexternalhit explicitly
-      ...SOCIAL_PREVIEW_BOTS.map(allowPublicPaths),
+      // Meta / WhatsApp first — must not include Disallow for these agents
+      ...SOCIAL_PREVIEW_BOTS.map(allowMetaPreviewBot),
       // Default rule (Googlebot, Bingbot, etc.)
       allowPublicPaths("*"),
       // Other named AI crawlers
