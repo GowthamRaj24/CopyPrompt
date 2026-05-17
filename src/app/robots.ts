@@ -50,35 +50,38 @@ const PRIVATE_PATHS = [
   "/auth/",
 ];
 
+/** Link-preview crawlers — listed first so picky parsers (Meta) match immediately. */
+const SOCIAL_PREVIEW_BOTS = [
+  "facebookexternalhit",
+  "Facebot",
+  "FacebookBot",
+  "Meta-ExternalAgent",
+  "Twitterbot",
+  "LinkedInBot",
+  "WhatsApp",
+  "Slackbot",
+  "Discordbot",
+];
+
 /**
  * AI / generative-engine crawlers we explicitly welcome.
  * Keeping them in one list makes opt-out easy: flip the rule to disallow.
  */
 const AI_BOTS = [
   // OpenAI
-  "GPTBot", // ChatGPT training data
-  "OAI-SearchBot", // ChatGPT live search index
-  "ChatGPT-User", // ChatGPT user-initiated browsing (very lightweight)
+  "GPTBot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
   // Anthropic
   "anthropic-ai",
   "Claude-Web",
   "ClaudeBot",
   // Google AI
-  "Google-Extended", // Bard / Gemini / AI Overviews opt-in
+  "Google-Extended",
   // Perplexity
   "PerplexityBot",
-  // Common Crawl (fuels many open-source LLMs)
+  // Common Crawl
   "CCBot",
-  // Meta / WhatsApp link previews (facebookexternalhit is required for Sharing Debugger)
-  "facebookexternalhit",
-  "Facebot",
-  "FacebookBot",
-  "Meta-ExternalAgent",
-  // X / LinkedIn / Slack / Discord previews
-  "Twitterbot",
-  "LinkedInBot",
-  "Slackbot",
-  "Discordbot",
   // Apple
   "Applebot",
   "Applebot-Extended",
@@ -86,32 +89,40 @@ const AI_BOTS = [
   "Bytespider",
   // You.com
   "YouBot",
-  // Diffbot (used by some AI pipelines)
+  // Diffbot
   "Diffbot",
   // Mistral
   "MistralAI-User",
 ];
 
+function allowPublicPaths(userAgent: string) {
+  return {
+    userAgent,
+    allow: "/",
+    disallow: PRIVATE_PATHS,
+  };
+}
+
 export default function robots(): MetadataRoute.Robots {
+  const siteHost = (() => {
+    try {
+      return new URL(BASE_URL).host;
+    } catch {
+      return undefined;
+    }
+  })();
+
   return {
     rules: [
-      // ── 1) Default crawler rule (covers Googlebot, Bingbot, DuckDuckBot, etc.)
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: PRIVATE_PATHS,
-      },
-
-      // ── 2) Explicit per-bot rules for AI engines. Each gets the same
-      //       visibility as the default rule — we just name them so
-      //       compliance is unambiguous.
-      ...AI_BOTS.map((bot) => ({
-        userAgent: bot,
-        allow: "/",
-        disallow: PRIVATE_PATHS,
-      })),
+      // Social / Meta first — Sharing Debugger checks facebookexternalhit explicitly
+      ...SOCIAL_PREVIEW_BOTS.map(allowPublicPaths),
+      // Default rule (Googlebot, Bingbot, etc.)
+      allowPublicPaths("*"),
+      // Other named AI crawlers
+      ...AI_BOTS.map(allowPublicPaths),
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL,
+    // Host must be a hostname only (not https://…); full URLs confuse some parsers
+    ...(siteHost ? { host: siteHost } : {}),
   };
 }
