@@ -54,11 +54,13 @@ const SUBMISSION_STEPS = [
     icon: ClockIcon,
     title: "We review",
     body: "Real humans, usually within 24 hours. We test every prompt.",
+    accent: false,
   },
   {
     icon: SparklesIcon,
     title: "It goes live",
     body: "Public on CopyPrompt with your attribution. Email confirms.",
+    accent: false,
   },
 ] as const;
 

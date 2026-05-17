@@ -43,9 +43,9 @@ const client =
     prepare: false,
   });
 
-if (env.NODE_ENV !== "production") {
-  globalForDb.dbClient = client;
-}
+// Cache across HMR (dev) and Next.js build workers (each worker is its own
+// process — without this, `next build` opens poolSize × workers connections).
+globalForDb.dbClient = client;
 
 export const db = drizzle(client, {
   schema,

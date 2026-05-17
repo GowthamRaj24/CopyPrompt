@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { isTurnstileEnabled, Turnstile } from "@/components/captcha/Turnstile";
@@ -118,7 +118,15 @@ export function SubmitForm({
     formState: { errors },
     reset,
   } = useForm<SubmissionFormValues, unknown, SubmissionInput>({
-    resolver: zodResolver(submissionSchema),
+    // zodResolver's v5 typing widens `z.coerce.number()` inputs to `unknown`
+    // and treats `.optional().default([])` as optional on input, which doesn't
+    // line up with our discriminated-union variants. The runtime behaviour is
+    // exactly what we want — only the static type needs nudging.
+    resolver: zodResolver(submissionSchema) as unknown as Resolver<
+      SubmissionFormValues,
+      unknown,
+      SubmissionInput
+    >,
     defaultValues: {
       type: "image",
       title: "",
@@ -142,7 +150,7 @@ export function SubmitForm({
   const modelSlug = watch("modelSlug");
   const categorySlug = watch("categorySlug");
   const expectedOutcomeValue =
-    (watch("expectedOutcome" as never) as string | undefined) ?? "";
+    (watch("expectedOutcome" as never) as unknown as string | undefined) ?? "";
 
   // When user flips the type toggle, re-pick a sensible default model
   // for the new type so they never see an empty/invalid select.

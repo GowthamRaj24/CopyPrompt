@@ -2,6 +2,9 @@ import { ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { requireAdmin } from "@/server/lib/auth";
 
+// Admin is auth-gated and must not be statically prerendered at build time.
+export const dynamic = "force-dynamic";
+
 /**
  * Admin layout - gates all routes under /admin/*.
  * `requireAdmin()` redirects to /signin (or / with error) if not admin.
