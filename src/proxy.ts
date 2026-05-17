@@ -13,6 +13,10 @@ import { type NextRequest, NextResponse } from "next/server";
  *   This proxy silently refreshes those cookies on every request, so the
  *   user stays signed in across SSR navigations.
  */
+/** Social / search crawlers — skip Supabase session refresh (faster, avoids bot 403s). */
+const CRAWLER_UA =
+  /facebookexternalhit|Facebot|FacebookBot|Meta-ExternalAgent|Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|Googlebot|bingbot|Applebot/i;
+
 export async function proxy(request: NextRequest) {
   // Pass current pathname + full URL (with query) as headers so server
   // components can read them for conditional rendering and redirect targets.
@@ -22,6 +26,11 @@ export async function proxy(request: NextRequest) {
     "x-url",
     request.nextUrl.pathname + request.nextUrl.search,
   );
+
+  const ua = request.headers.get("user-agent") ?? "";
+  if (CRAWLER_UA.test(ua)) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   let response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -65,6 +74,6 @@ export const config = {
      * - favicon.ico, robots.txt, sitemap.xml
      * - any file with an extension (.svg, .png, .jpg, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

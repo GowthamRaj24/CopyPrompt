@@ -69,9 +69,16 @@ const AI_BOTS = [
   "PerplexityBot",
   // Common Crawl (fuels many open-source LLMs)
   "CCBot",
-  // Meta
+  // Meta / WhatsApp link previews (facebookexternalhit is required for Sharing Debugger)
+  "facebookexternalhit",
+  "Facebot",
   "FacebookBot",
   "Meta-ExternalAgent",
+  // X / LinkedIn / Slack / Discord previews
+  "Twitterbot",
+  "LinkedInBot",
+  "Slackbot",
+  "Discordbot",
   // Apple
   "Applebot",
   "Applebot-Extended",
