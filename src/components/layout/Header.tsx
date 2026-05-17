@@ -1,22 +1,17 @@
-import { HeartIcon } from "lucide-react";
+import { HeartIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { SITE_BRAND } from "@/lib/site-brand";
 import { type AppUser, getCurrentUser } from "@/server/lib/auth";
 import { CommandTrigger } from "./CommandTrigger";
+import { HeaderNav } from "./HeaderNav";
+import { LogoLink } from "./Logo";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
 /**
- * Sticky top header — clean, minimal, precision-crafted.
- * Hidden on auth routes via the parent <HiddenOnAuth /> wrapper.
- *
- * Features:
- *   - Glass-strong backdrop blur
- *   - Cmd+K search trigger
- *   - Minimal nav links with refined hover
- *   - Compact, restrained proportions
+ * Sticky top header — glass surface, pill nav, grouped actions.
  */
 export async function Header() {
   let user: AppUser | null = null;
@@ -27,115 +22,79 @@ export async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/50 bg-background/60 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-background/40">
-      <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
-        <Link
-          href="/"
-          className="group flex items-center gap-2.5 transition-opacity hover:opacity-85"
-        >
-          <Logomark />
-          <span className="text-[14px] font-semibold tracking-[-0.02em]">
-            {SITE_BRAND.name}
-          </span>
-        </Link>
+    <header className="sticky top-0 z-50">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+      />
 
-        <nav
-          className="hidden items-center gap-0.5 md:flex"
-          aria-label="Primary"
-        >
-          <NavLink href="/search">Browse</NavLink>
-          <NavLink href="/search?type=image">Image</NavLink>
-          <NavLink href="/search?type=text">Text</NavLink>
-        </nav>
+      <div className="border-b border-border/40 bg-background/75 shadow-[0_8px_32px_-12px_oklch(0_0_0/0.12)] backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-background/55 dark:shadow-[0_8px_32px_-12px_oklch(0_0_0/0.45)]">
+        <div className="container relative mx-auto flex h-[60px] items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:gap-8">
+          <LogoLink size="md" variant="header" className="shrink-0" />
 
-        {/* Desktop action row — visible from md+ */}
-        <div className="hidden items-center gap-1.5 md:flex">
-          <CommandTrigger />
-          <ThemeToggle />
-          <Link
-            href="/favorites"
-            aria-label="Favorites"
-            className="press grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <HeartIcon className="size-[15px]" strokeWidth={1.8} />
-          </Link>
-          <Button variant="ghost" size="sm" asChild className="press h-8 px-3 text-[13px]">
-            <Link href="/submit">Submit</Link>
-          </Button>
-          {user ? (
-            <UserMenu user={user} />
-          ) : (
+          <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
+            <Suspense fallback={<HeaderNavFallback />}>
+              <HeaderNav />
+            </Suspense>
+          </div>
+
+          <div className="hidden items-center gap-2 md:flex">
+            <div className="flex items-center gap-0.5 rounded-xl border border-border/50 bg-card/30 p-0.5 shadow-[inset_0_1px_0_0_oklch(1_0_0/0.05)] backdrop-blur-sm dark:bg-card/20">
+              <CommandTrigger />
+              <ThemeToggle className="size-9 rounded-lg border-0 bg-transparent hover:bg-muted/80" />
+              <Link
+                href="/favorites"
+                aria-label="Favorites"
+                className="press grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+              >
+                <HeartIcon className="size-[15px]" strokeWidth={1.8} />
+              </Link>
+            </div>
+
+            <span aria-hidden className="mx-0.5 h-6 w-px bg-border/50" />
+
             <Button
-              variant="default"
+              variant="ghost"
               size="sm"
               asChild
-              className="magnetic h-8 rounded-lg bg-primary px-3.5 text-[12px] font-medium text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1)] hover:bg-primary/90"
+              className="press h-9 gap-1.5 rounded-lg px-3 text-[13px] font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             >
-              <Link href="/signin">Sign in</Link>
+              <Link href="/submit">
+                <PlusIcon className="size-3.5" strokeWidth={2.2} />
+                Submit
+              </Link>
             </Button>
-          )}
-        </div>
 
-        {/* Mobile action row — theme toggle next to the menu trigger so
-            users can flip themes without opening the nav sheet. */}
-        <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle />
-          <MobileNav user={user} />
+            {user ? (
+              <UserMenu user={user} />
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                asChild
+                className="magnetic h-9 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.12),inset_0_1px_0_0_oklch(1_0_0/0.12),0_4px_14px_-4px_oklch(0.54_0.225_270/0.55)] hover:bg-primary/92"
+              >
+                <Link href="/signin">Sign in</Link>
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 md:hidden">
+            <CommandTrigger mobile />
+            <ThemeToggle className="size-9 rounded-lg" />
+            <MobileNav user={user} />
+          </div>
         </div>
       </div>
     </header>
   );
 }
 
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
+function HeaderNavFallback() {
   return (
-    <Link
-      href={href}
-      className="rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-    >
-      {children}
-    </Link>
-  );
-}
-
-/** Logo mark — refined gradient square with copy icon */
-function Logomark() {
-  return (
-    <span
+    <div
       aria-hidden
-      className="relative grid size-[26px] place-items-center overflow-hidden rounded-[7px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.12),0_1px_2px_0_oklch(0_0_0/0.2)]"
-    >
-      <span
-        className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent"
-        aria-hidden
-      />
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        className="relative size-3"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M5 3h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M3 9V3h6"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.5"
-        />
-      </svg>
-    </span>
+      className="h-9 w-[220px] animate-pulse rounded-xl border border-border/40 bg-muted/20"
+    />
   );
 }

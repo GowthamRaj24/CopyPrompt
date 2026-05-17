@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
 import { pageOffset, slicePage } from "@/lib/pagination";
+import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
@@ -180,10 +181,7 @@ export async function getPromptsByCategoryPage(options: {
     .from(prompts)
     .innerJoin(models, eq(models.id, prompts.modelId))
     .where(
-      and(
-        eq(prompts.categoryId, categoryId),
-        eq(prompts.status, "published"),
-      ),
+      and(eq(prompts.categoryId, categoryId), publicPublishedWhere()),
     )
     .orderBy(orderBy)
     .limit(fetchLimit)

@@ -1,21 +1,22 @@
 import { asc, count, eq, isNull } from "drizzle-orm";
 import {
   ArrowRightIcon,
-  ChevronDownIcon,
   EyeIcon,
   FlameIcon,
-  HelpCircleIcon,
   LayersIcon,
   SparklesIcon,
   StarIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
+import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
 import { PromptCarousel } from "@/components/prompt/PromptCarousel";
 import { SearchBox } from "@/components/search/SearchBox";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqJsonLd, itemListJsonLd } from "@/lib/seo/jsonld";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
+import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import { prompts } from "@/server/models/prompt.model";
 import {
   getHomepageRails,
@@ -121,7 +122,7 @@ export default async function HomePage() {
     db
       .select({ c: count() })
       .from(prompts)
-      .where(eq(prompts.status, "published")),
+      .where(publicPublishedWhere()),
   ]);
 
   const { trending, recent, mostViewed, topRated } = rails;
@@ -173,9 +174,7 @@ export default async function HomePage() {
 
           <h1 className="hero-enter mt-6 max-w-2xl text-balance text-[clamp(2rem,5.5vw,3.75rem)] font-bold leading-[1.04] tracking-[-0.045em] text-foreground">
             The fastest way to find{" "}
-            <span className="bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent">
-              AI prompts.
-            </span>
+            <span className="text-gradient-flow">AI prompts.</span>
           </h1>
 
           <p className="reveal delay-2 mt-4 max-w-lg text-balance text-[14px] leading-relaxed text-muted-foreground md:text-[15px]">
@@ -304,6 +303,8 @@ export default async function HomePage() {
           </section>
         )}
 
+      <SubmitPromptCta />
+
       {/* ════════════════════════════════════════════════════
          CATEGORIES — quiet, dense grid of clickable chips.
          Same heading rhythm as the rails so nothing breaks
@@ -351,87 +352,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ════════════════════════════════════════════════════
-         FAQ — visible accordion. Mirrors the FAQPage JSON-LD
-         exactly (same source-of-truth constant), so engines that
-         compare visible content against schema (Google does) see
-         a perfect match.
-         ════════════════════════════════════════════════════ */}
-      <section className="border-t border-border/40 bg-card/30">
-        <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
-          <SectionHeader
-            eyebrow="Frequently asked"
-            eyebrowIcon={<HelpCircleIcon className="size-3" />}
-            title="Questions, answered"
-            subtitle="The short version. For everything else, drop a note via Submit."
-          />
-
-          <div className="reveal mx-auto max-w-3xl divide-y divide-border/60 overflow-hidden rounded-2xl border border-border bg-card/60 shadow-soft">
-            {HOMEPAGE_FAQS.map((faq) => (
-              <details
-                key={faq.question}
-                className="group/faq px-5 py-4 transition-colors hover:bg-muted/30 sm:px-6"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left">
-                  <span className="text-[14px] font-semibold tracking-[-0.005em] text-foreground sm:text-[15px]">
-                    {faq.question}
-                  </span>
-                  <ChevronDownIcon
-                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open/faq:rotate-180 group-open/faq:text-primary"
-                    aria-hidden
-                  />
-                </summary>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-muted-foreground">
-                  {faq.answer}
-                </p>
-              </details>
-            ))}
-          </div>
-
-          <p className="mt-6 text-center text-[12px] text-muted-foreground/70">
-            Have another question?{" "}
-            <Link
-              href="/submit"
-              className="link-underline font-medium text-foreground"
-            >
-              Tell us
-            </Link>
-            .
-          </p>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════
-         BOTTOM CTA — single, confident ask. No extra orbs.
-         ════════════════════════════════════════════════════ */}
-      <section className="border-t border-border/40">
-        <div className="container mx-auto px-4 py-12 text-center sm:px-6 md:py-16">
-          <h2 className="mx-auto max-w-xl text-balance text-[1.625rem] font-bold leading-[1.1] tracking-[-0.03em] md:text-4xl">
-            Have a prompt that{" "}
-            <span className="bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent">
-              actually works?
-            </span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-muted-foreground">
-            Submit it. Approval typically lands within 24 hours.
-          </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5">
-            <Link
-              href="/submit"
-              className="magnetic inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-5 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1),0_4px_12px_-4px_oklch(0.66_0.21_270_/_0.35)] hover:bg-primary/90 hover:shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1),0_8px_20px_-6px_oklch(0.66_0.21_270_/_0.45)]"
-            >
-              Submit a prompt
-              <ArrowRightIcon className="size-3.5" aria-hidden />
-            </Link>
-            <Link
-              href="/search"
-              className="press inline-flex h-10 items-center rounded-lg border border-border/60 bg-card/60 px-5 text-[13px] font-medium transition-all hover:border-border hover:bg-card"
-            >
-              Browse the archive
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HomepageFaqSection faqs={HOMEPAGE_FAQS} />
     </>
   );
 }

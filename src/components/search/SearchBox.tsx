@@ -67,15 +67,18 @@ export function SearchBox({
 
   const iconSize = isHero ? "size-[17px]" : "size-4";
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className={`group relative flex items-center overflow-hidden rounded-xl border bg-card/50 backdrop-blur-md transition-[border-color,box-shadow] duration-200 ease-out ${
-        focused
-          ? "border-primary/60 shadow-[0_0_0_3px_oklch(0.66_0.21_270_/_0.12)]"
-          : "border-border/60 hover:border-border"
-      } ${heightClass}`}
-    >
+  const formClassName = `group relative z-[1] flex w-full items-center overflow-hidden rounded-xl border bg-card/60 backdrop-blur-md transition-[border-color,box-shadow] duration-300 ease-out ${heightClass} ${
+    isHero
+      ? focused
+        ? "border-primary/70 shadow-[0_0_0_1px_oklch(0.66_0.21_270/0.5),0_0_32px_-6px_oklch(0.66_0.21_270/0.45),0_0_64px_-12px_oklch(0.55_0.22_262/0.35),inset_0_1px_0_0_oklch(1_0_0/0.06)]"
+        : "border-primary/35 shadow-[0_0_0_1px_oklch(0.54_0.225_270/0.2),0_0_28px_-8px_oklch(0.54_0.225_270/0.28),0_0_48px_-16px_oklch(0.55_0.22_262/0.18)] hover:border-primary/50"
+      : focused
+        ? "border-primary/60 shadow-[0_0_0_3px_oklch(0.66_0.21_270_/_0.12)]"
+        : "border-border/60 hover:border-border"
+  }`;
+
+  const form = (
+    <form onSubmit={handleSubmit} className={formClassName}>
       {/* Leading search icon */}
       <span
         aria-hidden
@@ -135,5 +138,26 @@ export function SearchBox({
         </kbd>
       )}
     </form>
+  );
+
+  if (!isHero) return form;
+
+  return (
+    <div className="search-hero-glow-wrap relative w-full">
+      {/* Ambient glow behind the bar */}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/40 via-[#3B82F6]/30 to-[#8B5CF6]/40 opacity-70 blur-2xl transition-[opacity,transform] duration-300 sm:-inset-1.5 sm:blur-3xl ${
+          focused ? "opacity-100 scale-[1.02]" : "scale-100"
+        }`}
+      />
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 rounded-xl ring-1 ring-primary/25 transition-opacity duration-300 ${
+          focused ? "opacity-100 ring-primary/45" : "opacity-60"
+        }`}
+      />
+      {form}
+    </div>
   );
 }

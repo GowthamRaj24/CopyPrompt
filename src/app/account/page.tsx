@@ -85,12 +85,18 @@ export default async function AccountPage() {
         </div>
 
         {/* Quick links */}
-        <div className="reveal delay-2 mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="reveal delay-2 mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <QuickLink
             href="/favorites"
             icon={<HeartIcon className="size-4" />}
             label="Favorites"
             sublabel="Your saved prompts"
+          />
+          <QuickLink
+            href="/account/prompts"
+            icon={<SettingsIcon className="size-4" />}
+            label="My prompts"
+            sublabel="Private links & catalog"
           />
           <QuickLink
             href="/submit"

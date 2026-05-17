@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import type { MetadataRoute } from "next";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: prompts.updatedAt,
       })
       .from(prompts)
-      .where(eq(prompts.status, "published")),
+      .where(publicPublishedWhere()),
     db.select({ slug: categories.slug }).from(categories),
   ]);
 

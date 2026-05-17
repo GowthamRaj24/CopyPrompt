@@ -82,6 +82,7 @@ export function SubmitForm({
   const [type, setType] = useState<"image" | "text">("image");
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [submitting, setSubmitting] = useState(false);
+  const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [moreOpen, setMoreOpen] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRequired = isTurnstileEnabled();
@@ -193,15 +194,19 @@ export function SubmitForm({
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, captchaToken }),
-      });
+      const isPrivate = visibility === "private";
+      const res = await fetch(
+        isPrivate ? "/api/prompts/private" : "/api/submit",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, captchaToken }),
+        },
+      );
 
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        toast.error("Submission failed", {
+        toast.error(isPrivate ? "Could not create private prompt" : "Submission failed", {
           description:
             errBody.error ?? "Please check your inputs and try again.",
         });
@@ -209,9 +214,17 @@ export function SubmitForm({
         return;
       }
 
-      const { id } = await res.json();
+      const body = await res.json();
       reset();
-      router.push(`/submit/thank-you?id=${id}`);
+      if (isPrivate && body.shareUrl) {
+        const q = new URLSearchParams({
+          url: body.shareUrl,
+          title: body.title ?? data.title,
+        });
+        router.push(`/submit/shared?${q.toString()}`);
+      } else {
+        router.push(`/submit/thank-you?id=${body.id}`);
+      }
     } catch {
       toast.error("Network error", {
         description: "Couldn't reach the server. Please retry.",
@@ -416,21 +429,28 @@ export function SubmitForm({
         </div>
       </MoreOptions>
 
-      {/* ── Captcha (invisible when keys are unset) ─── */}
+      <VisibilityToggle value={visibility} onChange={setVisibility} />
+
       {captchaRequired && (
         <div className="flex justify-center">
           <Turnstile onVerify={setCaptchaToken} action="submit-prompt" />
         </div>
       )}
 
-      {/* ── Submit ────────────────────────────────────── */}
       <SubmitButton
         submitting={submitting}
         disabled={captchaRequired && !captchaToken}
+        label={
+          visibility === "private"
+            ? "Create private link"
+            : "Submit for review"
+        }
       />
 
       <p className="text-center text-[11px] leading-relaxed text-muted-foreground/70">
-        Reviewed within 24 hours · We&apos;ll email you when it&apos;s live.
+        {visibility === "private"
+          ? "Instant share link · Not listed in search or browse · You can publish later"
+          : "Reviewed within 24 hours · We'll email you when it's live."}
       </p>
     </form>
   );
@@ -774,12 +794,60 @@ function MoreOptions({
    Submit button — single primary CTA, GPU-cheap hover
    ═══════════════════════════════════════════════════════════════ */
 
+function VisibilityToggle({
+  value,
+  onChange,
+}: {
+  value: "public" | "private";
+  onChange: (v: "public" | "private") => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/30 p-1">
+      <p className="px-3 pb-2 pt-2 text-[11px] font-medium text-muted-foreground">
+        Who can see this prompt?
+      </p>
+      <div className="grid grid-cols-2 gap-1">
+        <button
+          type="button"
+          onClick={() => onChange("public")}
+          className={`press rounded-lg px-3 py-2.5 text-left text-[12px] transition-colors ${
+            value === "public"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/50"
+          }`}
+        >
+          <span className="font-semibold">Public</span>
+          <span className="mt-0.5 block text-[10.5px] opacity-80">
+            Reviewed, then in catalog
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange("private")}
+          className={`press rounded-lg px-3 py-2.5 text-left text-[12px] transition-colors ${
+            value === "private"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/50"
+          }`}
+        >
+          <span className="font-semibold">Private</span>
+          <span className="mt-0.5 block text-[10.5px] opacity-80">
+            Share link only
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SubmitButton({
   submitting,
   disabled,
+  label = "Submit prompt",
 }: {
   submitting: boolean;
   disabled?: boolean;
+  label?: string;
 }) {
   return (
     <button
@@ -793,11 +861,11 @@ function SubmitButton({
       {submitting ? (
         <>
           <Loader2Icon className="size-4 animate-spin" />
-          Submitting…
+          {label.includes("private") ? "Creating…" : "Submitting…"}
         </>
       ) : (
         <>
-          Submit prompt
+          {label}
           <ArrowRightIcon
             className="size-4"
             style={{

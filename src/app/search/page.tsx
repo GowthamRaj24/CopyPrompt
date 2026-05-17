@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PromptCard } from "@/components/prompt/PromptCard";
 import { SearchBox } from "@/components/search/SearchBox";
+import { SearchPagination } from "@/components/search/SearchPagination";
+import { PAGINATION } from "@/server/config/constants";
 import {
   type SearchSort,
   type SearchType,
@@ -53,7 +55,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   ) satisfies SearchSort;
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
 
-  const { results, total, hasMore } = await searchPrompts({
+  const { results, total, hasMore, pageSize } = await searchPrompts({
     query,
     type,
     sort,
@@ -96,9 +98,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <p className="mt-1 text-[11px] text-muted-foreground">
               {total === 0
                 ? "No matches"
-                : total != null
-                  ? `${total.toLocaleString()} ${total === 1 ? "result" : "results"}`
-                  : `Page ${page}`}
+                : `${total.toLocaleString()} ${total === 1 ? "result" : "results"}`}
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 >
                   <PromptCard
                     prompt={p}
-                    index={(page - 1) * 24 + idx + 1}
+                    index={(page - 1) * pageSize + idx + 1}
                     unoptimizedImage={
                       p.primaryImage?.cdnUrl.includes("picsum.photos") ??
                       false
@@ -129,24 +129,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               ))}
             </div>
 
-            {/* Pagination */}
-            {(page > 1 || hasMore) && (
-              <div className="mt-10 flex items-center justify-between border-t border-border/40 pt-5">
-                <PageLink
-                  active={page > 1}
-                  href={buildPageHref({ q: query, type, sort, page: page - 1 })}
-                  label="← Previous"
-                />
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  {page}
-                </span>
-                <PageLink
-                  active={hasMore}
-                  href={buildPageHref({ q: query, type, sort, page: page + 1 })}
-                  label="Next →"
-                />
-              </div>
-            )}
+            <SearchPagination
+              page={page}
+              total={total}
+              pageSize={pageSize ?? PAGINATION.SEARCH_PAGE_SIZE}
+              hasMore={hasMore}
+              buildHref={(p) =>
+                buildPageHref({ q: query, type, sort, page: p })
+              }
+            />
           </>
         )}
       </div>
@@ -259,30 +250,6 @@ function EmptyState({ query }: { query: string }) {
         <ArrowRightIcon className="size-3" />
       </Link>
     </div>
-  );
-}
-
-function PageLink({
-  active,
-  href,
-  label,
-}: {
-  active: boolean;
-  href: string;
-  label: string;
-}) {
-  if (!active) {
-    return (
-      <span className="text-[12px] text-muted-foreground/30">{label}</span>
-    );
-  }
-  return (
-    <Link
-      href={href}
-      className="link-underline text-[12px] font-medium text-foreground"
-    >
-      {label}
-    </Link>
   );
 }
 

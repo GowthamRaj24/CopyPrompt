@@ -9,6 +9,7 @@ import {
 import { shouldBlendSemanticSearch } from "@/server/services/embedding.service";
 import { cache } from "react";
 import { clampPage, pageOffset, slicePage } from "@/lib/pagination";
+import { PROMPT_VISIBILITY, publicPublishedWhere } from "@/lib/prompt-visibility";
 import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
@@ -151,7 +152,7 @@ export const getTrendingPrompts = cache(
       .select(listColumns)
       .from(prompts)
       .innerJoin(models, eq(models.id, prompts.modelId))
-      .where(eq(prompts.status, "published"))
+      .where(publicPublishedWhere())
       .orderBy(desc(prompts.copyCount))
       .limit(limit);
 
@@ -181,7 +182,7 @@ async function listPublishedRanked(
     .select(listColumns)
     .from(prompts)
     .innerJoin(models, eq(models.id, prompts.modelId))
-    .where(eq(prompts.status, "published"))
+    .where(publicPublishedWhere())
     .orderBy(orderBy)
     .limit(limit);
 
@@ -234,28 +235,28 @@ export const getHomepageRails = cache(
           .select(listColumns)
           .from(prompts)
           .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(eq(prompts.status, "published"))
+          .where(publicPublishedWhere())
           .orderBy(desc(prompts.copyCount))
           .limit(limit),
         db
           .select(listColumns)
           .from(prompts)
           .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(eq(prompts.status, "published"))
+          .where(publicPublishedWhere())
           .orderBy(desc(prompts.createdAt))
           .limit(limit),
         db
           .select(listColumns)
           .from(prompts)
           .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(eq(prompts.status, "published"))
+          .where(publicPublishedWhere())
           .orderBy(desc(prompts.viewCount))
           .limit(limit),
         db
           .select(listColumns)
           .from(prompts)
           .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(eq(prompts.status, "published"))
+          .where(publicPublishedWhere())
           .orderBy(
             sql`(${prompts.upvotes} - ${prompts.downvotes}) DESC, ${prompts.copyCount} DESC`,
           )
@@ -298,8 +299,8 @@ export interface SearchOptions {
 
 export interface SearchResults {
   results: PromptListItem[];
-  /** Exact count on page 1; null on later pages (avoids full-table COUNT). */
-  total: number | null;
+  /** Total matching rows for the current filters/query. */
+  total: number;
   page: number;
   pageSize: number;
   hasMore: boolean;
@@ -333,7 +334,7 @@ function buildSearchWhere(
   tsDoc: ReturnType<typeof sql>;
   tsQuery: ReturnType<typeof sql> | null;
 } {
-  const whereClauses = [eq(prompts.status, "published")];
+  const whereClauses = [publicPublishedWhere()];
   if (type !== "all") {
     whereClauses.push(eq(models.type, type));
   }
@@ -395,19 +396,17 @@ async function searchPromptsSemanticOnly(
     type === "all" ? undefined : eq(models.type, type as "image" | "text");
 
   const whereCondition = and(
-    eq(prompts.status, "published"),
+    publicPublishedWhere(),
     isNotNull(prompts.embedding),
     typeFilter,
   );
 
   const [countRows, dataRows] = await Promise.all([
-    page === 1
-      ? db
-          .select({ c: sql<number>`count(*)::int` })
-          .from(prompts)
-          .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(whereCondition)
-      : Promise.resolve([] as { c: number }[]),
+    db
+      .select({ c: sql<number>`count(*)::int` })
+      .from(prompts)
+      .innerJoin(models, eq(models.id, prompts.modelId))
+      .where(whereCondition),
     db
       .select(listColumns)
       .from(prompts)
@@ -419,14 +418,15 @@ async function searchPromptsSemanticOnly(
   ]);
 
   const { items: pageRows, hasMore } = slicePage(dataRows, pageSize);
+  const total = countRows[0]?.c ?? 0;
   if (pageRows.length === 0) {
-    return { results: [], total: 0, page, pageSize, hasMore: false };
+    return { results: [], total, page, pageSize, hasMore: false };
   }
 
   const imageMap = await batchFetchPrimaryImages(pageRows);
   return {
     results: toListItems(pageRows, imageMap),
-    total: page === 1 ? (countRows[0]?.c ?? 0) : null,
+    total,
     page,
     pageSize,
     hasMore,
@@ -470,16 +470,12 @@ export async function searchPrompts(
 
   const fetchLimit = pageSize + 1;
 
-  // Page 1: exact total + first page in parallel. Later pages: skip COUNT(*)
-  // (window counts forced Postgres to scan the full match set per page).
   const [countRows, dataRows] = await Promise.all([
-    page === 1
-      ? db
-          .select({ c: sql<number>`count(*)::int` })
-          .from(prompts)
-          .innerJoin(models, eq(models.id, prompts.modelId))
-          .where(whereCondition)
-      : Promise.resolve([] as { c: number }[]),
+    db
+      .select({ c: sql<number>`count(*)::int` })
+      .from(prompts)
+      .innerJoin(models, eq(models.id, prompts.modelId))
+      .where(whereCondition),
     db
       .select(listColumns)
       .from(prompts)
@@ -491,7 +487,7 @@ export async function searchPrompts(
   ]);
 
   const { items: pageRows, hasMore } = slicePage(dataRows, pageSize);
-  const ftsTotal = page === 1 ? (countRows[0]?.c ?? 0) : null;
+  const ftsTotal = countRows[0]?.c ?? 0;
 
   if (pageRows.length === 0 && ftsTotal === 0 && useSemanticBlend) {
     try {
@@ -503,7 +499,7 @@ export async function searchPrompts(
   }
 
   if (pageRows.length === 0) {
-    return { results: [], total: ftsTotal ?? 0, page, pageSize, hasMore: false };
+    return { results: [], total: ftsTotal, page, pageSize, hasMore: false };
   }
 
   const imageMap = await batchFetchPrimaryImages(pageRows);
@@ -566,7 +562,41 @@ export interface PromptDetail {
  */
 export const getPromptBySlug = cache(_getPromptBySlug);
 
+export const getPromptByShareToken = cache(_getPromptByShareToken);
+
+async function _getPromptByShareToken(
+  token: string,
+): Promise<PromptDetail | null> {
+  const [match] = await db
+    .select({ id: prompts.id })
+    .from(prompts)
+    .where(
+      and(
+        eq(prompts.shareToken, token),
+        eq(prompts.visibility, PROMPT_VISIBILITY.PRIVATE),
+        eq(prompts.status, "published"),
+      ),
+    )
+    .limit(1);
+
+  if (!match) return null;
+  return fetchPromptDetailById(match.id);
+}
+
 async function _getPromptBySlug(slug: string): Promise<PromptDetail | null> {
+  const [row] = await db
+    .select({ id: prompts.id })
+    .from(prompts)
+    .where(and(eq(prompts.slug, slug), publicPublishedWhere()))
+    .limit(1);
+
+  if (!row) return null;
+  return fetchPromptDetailById(row.id);
+}
+
+async function fetchPromptDetailById(
+  promptId: string,
+): Promise<PromptDetail | null> {
   const [row] = await db
     .select({
       id: prompts.id,
@@ -594,12 +624,11 @@ async function _getPromptBySlug(slug: string): Promise<PromptDetail | null> {
     .from(prompts)
     .innerJoin(models, eq(models.id, prompts.modelId))
     .innerJoin(categories, eq(categories.id, prompts.categoryId))
-    .where(and(eq(prompts.slug, slug), eq(prompts.status, "published")))
+    .where(eq(prompts.id, promptId))
     .limit(1);
 
   if (!row) return null;
 
-  // Fetch all images for this prompt (image-type only)
   const imageRows =
     row.modelType === "image"
       ? await db
@@ -668,7 +697,7 @@ export async function getRelatedPrompts(
       and(
         eq(prompts.categoryId, categoryId),
         eq(models.type, modelType),
-        eq(prompts.status, "published"),
+        publicPublishedWhere(),
         ne(prompts.id, currentPromptId),
       ),
     )
@@ -747,7 +776,7 @@ async function runFtsSimilarity(
     .innerJoin(models, eq(models.id, prompts.modelId))
     .where(
       and(
-        eq(prompts.status, "published"),
+        publicPublishedWhere(),
         ne(prompts.id, currentPromptId),
         sql`${prompts.searchDoc} @@ ${tsQuery}`,
       ),
@@ -812,7 +841,7 @@ async function getSimilarPromptsViaVector(
     .innerJoin(models, eq(models.id, prompts.modelId))
     .where(
       and(
-        eq(prompts.status, "published"),
+        publicPublishedWhere(),
         ne(prompts.id, currentPromptId),
         isNotNull(prompts.embedding),
       ),

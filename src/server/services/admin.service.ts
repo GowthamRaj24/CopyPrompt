@@ -178,6 +178,8 @@ export async function approveSubmission(
         params: stripUndefined(data.params ?? {}),
         tips: data.tips ?? null,
         status: "published",
+        visibility: "public",
+        shareToken: null,
       })
       .returning({ id: prompts.id });
 

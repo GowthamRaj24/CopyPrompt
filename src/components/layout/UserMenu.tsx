@@ -38,14 +38,14 @@ export function UserMenu({ user }: { user: AppUser }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={`relative grid size-8 place-items-center rounded-full ring-1 ring-inset transition-all ${
+          className={`relative grid size-9 place-items-center rounded-full ring-1 ring-inset transition-all ${
             isAdmin
               ? "ring-primary/60 hover:ring-primary"
               : "ring-border hover:ring-primary/50"
           }`}
           aria-label={isAdmin ? "Open admin user menu" : "Open user menu"}
         >
-          <Avatar className="size-7">
+          <Avatar className="size-8">
             {user.avatarUrl && (
               <AvatarImage src={user.avatarUrl} alt={user.fullName ?? user.email} />
             )}

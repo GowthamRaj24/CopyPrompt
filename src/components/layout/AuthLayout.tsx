@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, BoltIcon, ShieldCheckIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
-import { SITE_BRAND } from "@/lib/site-brand";
+import { LogoLink } from "@/components/layout/Logo";
 
 interface AuthLayoutProps {
   title: string;
@@ -56,33 +56,10 @@ export function AuthLayout({
         <main className="flex items-center justify-center px-4 pt-20 pb-12 sm:px-6 sm:pb-16">
           <div className="w-full max-w-md">
             {/* Brand */}
-            <Link
-              href="/"
-              className="reveal mb-9 inline-flex items-center gap-2 transition-opacity hover:opacity-90"
-              aria-label={`${SITE_BRAND.name} home`}
-            >
-              <span
-                aria-hidden
-                className="grid size-7 place-items-center overflow-hidden rounded-md bg-primary text-primary-foreground"
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="size-3.5"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 3h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className="text-[15px] font-semibold tracking-[-0.01em]">
-                {SITE_BRAND.name}
-              </span>
-            </Link>
+            <LogoLink
+              size="lg"
+              className="reveal mb-9 [&_span:last-child]:text-[15px]"
+            />
 
             {/* Form card */}
             <div className="reveal delay-1 rounded-xl border border-border bg-card p-6 shadow-card sm:p-8">

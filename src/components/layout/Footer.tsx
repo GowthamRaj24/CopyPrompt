@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoLink } from "@/components/layout/Logo";
 import { SITE_BRAND } from "@/lib/site-brand";
 
 /**
@@ -14,32 +15,10 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
           {/* Brand column */}
           <div className="md:col-span-5">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 transition-opacity hover:opacity-85"
-            >
-              <span
-                aria-hidden
-                className="grid size-[22px] place-items-center overflow-hidden rounded-[6px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_0_rgb(255_255_255_/_0.12)]"
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="size-2.5"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 3h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className="text-[13px] font-semibold tracking-[-0.01em]">
-                {SITE_BRAND.name}
-              </span>
-            </Link>
+            <LogoLink
+              size="sm"
+              className="[&_span:last-child]:text-[13px]"
+            />
             <p className="mt-2.5 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
               The fastest way to find, copy and paste prompts for every AI tool.
               Free forever.

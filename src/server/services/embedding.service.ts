@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import { db } from "@/server/lib/db";
 import {
   buildEmbeddingText,
@@ -47,7 +48,7 @@ export async function shouldBlendSemanticSearch(): Promise<boolean> {
       withEmb: sql<number>`count(*) FILTER (WHERE ${prompts.embedding} IS NOT NULL)::int`,
     })
     .from(prompts)
-    .where(eq(prompts.status, "published"));
+    .where(publicPublishedWhere());
   const total = row?.total ?? 0;
   const withEmb = row?.withEmb ?? 0;
   if (total === 0) return false;

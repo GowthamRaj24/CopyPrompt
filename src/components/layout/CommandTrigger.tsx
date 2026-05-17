@@ -25,7 +25,12 @@ import { createPortal } from "react-dom";
  * darkening. Portalling to <body> sidesteps the trap entirely:
  * the overlay becomes a sibling of <header>, free to sit above it.
  */
-export function CommandTrigger() {
+interface CommandTriggerProps {
+  /** Compact icon-only trigger for mobile header */
+  mobile?: boolean;
+}
+
+export function CommandTrigger({ mobile = false }: CommandTriggerProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -139,12 +144,20 @@ export function CommandTrigger() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="press hidden h-8 items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 text-[12px] text-muted-foreground transition-colors hover:border-border hover:bg-muted/50 hover:text-foreground md:inline-flex"
+        className={
+          mobile
+            ? "press grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground md:hidden"
+            : "press hidden h-9 min-w-[200px] items-center gap-2 rounded-lg border-0 bg-transparent px-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground lg:min-w-[240px] md:inline-flex"
+        }
         aria-label="Search (Cmd+K)"
       >
-        <SearchIcon className="size-3.5" strokeWidth={2} />
-        <span className="hidden lg:inline">Search…</span>
-        <kbd className="kbd ml-1">⌘K</kbd>
+        <SearchIcon className="size-3.5 shrink-0" strokeWidth={2} />
+        {!mobile && (
+          <>
+            <span className="flex-1 text-left">Search prompts…</span>
+            <kbd className="kbd hidden shrink-0 sm:inline">⌘K</kbd>
+          </>
+        )}
       </button>
 
       {/* Overlay portaled to <body> so it escapes the header's

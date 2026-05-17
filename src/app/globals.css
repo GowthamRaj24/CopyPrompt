@@ -830,6 +830,70 @@ summary {
   animation: hero-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Hero headline — animated indigo → blue → violet gradient fill */
+@keyframes text-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.text-gradient-flow {
+  display: inline-block;
+  background-image: linear-gradient(
+    105deg,
+    oklch(0.54 0.225 270) 0%,
+    oklch(0.58 0.22 262) 18%,
+    #3b82f6 38%,
+    #6366f1 52%,
+    #8b5cf6 72%,
+    oklch(0.54 0.225 270) 88%,
+    oklch(0.62 0.2 255) 100%
+  );
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: text-gradient-flow 5s ease-in-out infinite;
+}
+
+/* Hero search — soft back-glow pulse */
+@keyframes search-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.015);
+  }
+}
+
+.search-hero-glow-wrap > span:first-of-type {
+  animation: search-glow-breathe 4.5s ease-in-out infinite;
+}
+
+.search-hero-glow-wrap:focus-within > span:first-of-type {
+  animation: none;
+  opacity: 1;
+}
+
+.dark .text-gradient-flow {
+  background-image: linear-gradient(
+    105deg,
+    oklch(0.66 0.21 270) 0%,
+    oklch(0.7 0.2 262) 18%,
+    #60a5fa 38%,
+    #818cf8 52%,
+    #a78bfa 72%,
+    oklch(0.66 0.21 270) 88%,
+    oklch(0.72 0.19 255) 100%
+  );
+}
+
 /* Stagger delays */
 .delay-1 { animation-delay: 60ms; }
 .delay-2 { animation-delay: 120ms; }
@@ -839,6 +903,131 @@ summary {
 .delay-6 { animation-delay: 360ms; }
 .delay-7 { animation-delay: 420ms; }
 .delay-8 { animation-delay: 480ms; }
+
+/* ── Homepage FAQ section ───────────────────────────────────── */
+@keyframes faq-header-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes faq-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes faq-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-8px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes faq-answer-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes faq-icon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+.faq-section .faq-header-item,
+.faq-section .faq-panel,
+.faq-section .faq-item,
+.faq-section .faq-footer {
+  opacity: 0;
+}
+
+.faq-section--in .faq-header-item {
+  animation: faq-header-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.faq-section--in .faq-header-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.faq-section--in .faq-header-item:nth-child(2) {
+  animation-delay: 80ms;
+}
+.faq-section--in .faq-header-item:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.faq-section--in .faq-panel {
+  animation: faq-panel-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) 220ms forwards;
+}
+
+.faq-section--in .faq-item {
+  animation: faq-item-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(320ms + (var(--faq-i, 0) * 70ms));
+}
+
+.faq-section--in .faq-footer {
+  animation: faq-header-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 680ms forwards;
+}
+
+.faq-icon-pulse {
+  animation: faq-icon-pulse 2.8s ease-in-out infinite;
+}
+
+.faq-section--in .faq-icon-pulse {
+  animation:
+    faq-header-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    faq-icon-pulse 2.8s ease-in-out 0.8s infinite;
+}
+
+.faq-chevron {
+  transform: rotate(0deg);
+}
+
+.group\/faq[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-answer-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group\/faq[open] .faq-answer-grid {
+  grid-template-rows: 1fr;
+}
+
+.group\/faq[open] .faq-answer-inner p {
+  animation: faq-answer-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
 
 /* Skeleton shimmer — refined timing */
 @keyframes skeleton-shimmer {
@@ -1237,10 +1426,27 @@ select:focus-visible,
   }
   .reveal,
   .hero-enter,
-  .fade-in-blur {
+  .fade-in-blur,
+  .faq-section .faq-header-item,
+  .faq-section .faq-panel,
+  .faq-section .faq-item,
+  .faq-section .faq-footer {
     opacity: 1;
     transform: none;
     filter: none;
+    animation: none;
+  }
+  .faq-answer-grid {
+    transition: none;
+  }
+  .text-gradient-flow {
+    animation: none;
+    background-position: 0% 50%;
+  }
+  .search-hero-glow-wrap > span:first-of-type {
+    animation: none;
+    opacity: 0.7;
+    transform: none;
   }
   .lift:hover,
   .magnetic:hover,

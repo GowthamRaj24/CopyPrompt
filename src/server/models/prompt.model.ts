@@ -80,6 +80,11 @@ export const prompts = pgTable(
     status: text("status", { enum: ["draft", "published", "hidden"] })
       .notNull()
       .default("published"),
+    visibility: text("visibility", { enum: ["public", "private"] })
+      .notNull()
+      .default("public"),
+    /** Unguessable token for private share URLs — null when public. */
+    shareToken: text("share_token"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -89,6 +94,7 @@ export const prompts = pgTable(
   },
   (t) => [
     index("idx_prompts_status_created").on(t.status, t.createdAt),
+    index("idx_prompts_visibility_status").on(t.visibility, t.status),
     index("idx_prompts_model_status").on(t.modelId, t.status),
     index("idx_prompts_category_status").on(t.categoryId, t.status),
     index("idx_prompts_copy_count").on(t.copyCount),

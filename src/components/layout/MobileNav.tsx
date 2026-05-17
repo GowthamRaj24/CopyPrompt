@@ -2,6 +2,7 @@
 
 import { MenuIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/layout/Logo";
 import { SITE_BRAND } from "@/lib/site-brand";
 import { useState } from "react";
 import {
@@ -52,27 +53,7 @@ export function MobileNav({ user }: MobileNavProps) {
               onClick={close}
               className="flex items-center gap-2 text-left"
             >
-              <span
-                aria-hidden
-                className="grid size-[22px] place-items-center overflow-hidden rounded-[6px] bg-primary text-primary-foreground"
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="size-2.5"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 3h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className="text-[14px] font-semibold tracking-[-0.01em]">
-                mycopyprompt
-              </span>
+              <Logo size="sm" />
             </Link>
           </SheetTitle>
         </SheetHeader>
