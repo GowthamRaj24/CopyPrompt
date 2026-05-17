@@ -1,5 +1,15 @@
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, cosineDistance, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import {
+  buildEmbeddingText,
+  embedDocument,
+  embedQuery,
+  isEmbeddingConfigured,
+  parseStoredEmbedding,
+} from "@/server/lib/embeddings";
+import { shouldBlendSemanticSearch } from "@/server/services/embedding.service";
 import { cache } from "react";
+import { clampPage, pageOffset, slicePage } from "@/lib/pagination";
+import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { images } from "@/server/models/image.model";
@@ -203,6 +213,71 @@ export const getTopRatedPrompts = cache((limit = 8) =>
   ),
 );
 
+export interface HomepageRails {
+  trending: PromptListItem[];
+  recent: PromptListItem[];
+  mostViewed: PromptListItem[];
+  topRated: PromptListItem[];
+}
+
+/**
+ * Homepage prompt rails in one pass — 4 ranked SELECTs in parallel, then a
+ * single batch image fetch (was 4 separate image queries).
+ */
+export const getHomepageRails = cache(
+  async (
+    limit = PAGINATION.HOMEPAGE_RAIL_SIZE,
+  ): Promise<HomepageRails> => {
+    const [trendingRows, recentRows, viewedRows, ratedRows] =
+      await Promise.all([
+        db
+          .select(listColumns)
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(eq(prompts.status, "published"))
+          .orderBy(desc(prompts.copyCount))
+          .limit(limit),
+        db
+          .select(listColumns)
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(eq(prompts.status, "published"))
+          .orderBy(desc(prompts.createdAt))
+          .limit(limit),
+        db
+          .select(listColumns)
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(eq(prompts.status, "published"))
+          .orderBy(desc(prompts.viewCount))
+          .limit(limit),
+        db
+          .select(listColumns)
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(eq(prompts.status, "published"))
+          .orderBy(
+            sql`(${prompts.upvotes} - ${prompts.downvotes}) DESC, ${prompts.copyCount} DESC`,
+          )
+          .limit(limit),
+      ]);
+
+    const imageMap = await batchFetchPrimaryImages([
+      ...trendingRows,
+      ...recentRows,
+      ...viewedRows,
+      ...ratedRows,
+    ]);
+
+    return {
+      trending: toListItems(trendingRows, imageMap),
+      recent: toListItems(recentRows, imageMap),
+      mostViewed: toListItems(viewedRows, imageMap),
+      topRated: toListItems(ratedRows, imageMap),
+    };
+  },
+);
+
 /* ── Search ──────────────────────────────────────────────── */
 
 export type SearchSort =
@@ -223,7 +298,8 @@ export interface SearchOptions {
 
 export interface SearchResults {
   results: PromptListItem[];
-  total: number;
+  /** Exact count on page 1; null on later pages (avoids full-table COUNT). */
+  total: number | null;
   page: number;
   pageSize: number;
   hasMore: boolean;
@@ -245,85 +321,200 @@ export interface SearchResults {
  *   - `websearch_to_tsquery` parses Google-style input ("exact phrase",
  *     -negation, OR) so users don't have to learn a query DSL.
  *   - `ts_rank` orders by the same A>B>C weights baked into the column.
- *   - Single query with `COUNT(*) OVER()` window function — no separate
- *     count round-trip (cuts search latency by ~50%).
+ *   - Page 1: parallel COUNT + data. Page 2+: data only (`limit+1` for hasMore).
  *   - 280-char preview of prompt_text via SQL LEFT() to keep payload small.
  *   - Images batch-fetched in one IN() query to avoid N+1.
  */
-export async function searchPrompts(
-  options: SearchOptions,
-): Promise<SearchResults> {
-  const { query, type = "all", sort = "relevance", page = 1 } = options;
-  const pageSize = options.pageSize ?? 24;
-  const offset = (page - 1) * pageSize;
-  const trimmed = query.trim();
-
+function buildSearchWhere(
+  trimmed: string,
+  type: SearchType,
+): {
+  whereCondition: ReturnType<typeof and>;
+  tsDoc: ReturnType<typeof sql>;
+  tsQuery: ReturnType<typeof sql> | null;
+} {
   const whereClauses = [eq(prompts.status, "published")];
-
   if (type !== "all") {
     whereClauses.push(eq(models.type, type));
   }
 
-  // Reference the stored generated column — the planner picks the GIN
-  // index (idx_prompts_search_doc) automatically once the table has
-  // enough rows for an index scan to beat a seq scan.
-  const tsQuery = sql`websearch_to_tsquery('english', ${trimmed})`;
   const tsDoc = sql`${prompts.searchDoc}`;
+  const tsQuery =
+    trimmed.length > 0
+      ? sql`websearch_to_tsquery('english', ${trimmed})`
+      : null;
 
-  if (trimmed.length > 0) {
+  if (tsQuery) {
     whereClauses.push(sql`${tsDoc} @@ ${tsQuery}`);
   }
 
-  const whereCondition = and(...whereClauses);
+  return { whereCondition: and(...whereClauses), tsDoc, tsQuery };
+}
 
-  let orderBy: ReturnType<typeof desc> | ReturnType<typeof sql>;
-  if (sort === "latest") {
-    orderBy = desc(prompts.createdAt);
-  } else if (sort === "popular") {
-    orderBy = desc(prompts.copyCount);
-  } else if (sort === "views") {
-    orderBy = desc(prompts.viewCount);
-  } else if (sort === "rated") {
-    // Tie-break on copyCount so the long tail of un-rated prompts
-    // doesn't all surface at rank 0.
-    orderBy = sql`(${prompts.upvotes} - ${prompts.downvotes}) DESC, ${prompts.copyCount} DESC`;
-  } else {
-    orderBy =
-      trimmed.length > 0
-        ? sql`ts_rank(${tsDoc}, ${tsQuery}) DESC, ${prompts.copyCount} DESC`
-        : desc(prompts.copyCount);
+function buildSearchOrderBy(
+  trimmed: string,
+  tsDoc: ReturnType<typeof sql>,
+  tsQuery: ReturnType<typeof sql> | null,
+  sort: SearchSort = "relevance",
+  queryVec: number[] | null = null,
+): ReturnType<typeof desc> | ReturnType<typeof sql> {
+  if (sort === "latest") return desc(prompts.createdAt);
+  if (sort === "popular") return desc(prompts.copyCount);
+  if (sort === "views") return desc(prompts.viewCount);
+  if (sort === "rated") {
+    return sql`(${prompts.upvotes} - ${prompts.downvotes}) DESC, ${prompts.copyCount} DESC`;
   }
+  if (sort === "relevance" && tsQuery && queryVec) {
+    const dist = cosineDistance(prompts.embedding, queryVec);
+    return sql`(
+      0.4 * ts_rank(${tsDoc}, ${tsQuery})
+      + 0.6 * CASE WHEN ${prompts.embedding} IS NOT NULL
+          THEN GREATEST(0::float, 1 - (${dist}))
+          ELSE 0::float
+        END
+    ) DESC, ${prompts.copyCount} DESC`;
+  }
+  return tsQuery
+    ? sql`ts_rank(${tsDoc}, ${tsQuery}) DESC, ${prompts.copyCount} DESC`
+    : desc(prompts.copyCount);
+}
 
-  // Single query: data + total count via window function
-  const rows = await db
-    .select({
-      ...listColumns,
-      // Window function — COUNT over the full result set (before LIMIT/OFFSET)
-      totalCount: sql<number>`COUNT(*) OVER()`.as("total_count"),
-    })
-    .from(prompts)
-    .innerJoin(models, eq(models.id, prompts.modelId))
-    .where(whereCondition)
-    .orderBy(orderBy)
-    .limit(pageSize)
-    .offset(offset);
+async function searchPromptsSemanticOnly(
+  options: SearchOptions,
+): Promise<SearchResults> {
+  const { query, type = "all" } = options;
+  const pageSize = options.pageSize ?? PAGINATION.SEARCH_PAGE_SIZE;
+  const page = clampPage(options.page ?? 1, PAGINATION.SEARCH_MAX_PAGE);
+  const offset = pageOffset(page, pageSize);
+  const trimmed = query.trim();
+  const queryVec = await embedQuery(trimmed);
+  const dist = cosineDistance(prompts.embedding, queryVec);
+  const fetchLimit = pageSize + 1;
 
-  // Extract total from first row (all rows have the same window count)
-  const total = rows.length > 0 ? (rows[0] as { totalCount: number }).totalCount : 0;
+  const typeFilter =
+    type === "all" ? undefined : eq(models.type, type as "image" | "text");
 
-  if (rows.length === 0) {
+  const whereCondition = and(
+    eq(prompts.status, "published"),
+    isNotNull(prompts.embedding),
+    typeFilter,
+  );
+
+  const [countRows, dataRows] = await Promise.all([
+    page === 1
+      ? db
+          .select({ c: sql<number>`count(*)::int` })
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(whereCondition)
+      : Promise.resolve([] as { c: number }[]),
+    db
+      .select(listColumns)
+      .from(prompts)
+      .innerJoin(models, eq(models.id, prompts.modelId))
+      .where(whereCondition)
+      .orderBy(asc(dist), desc(prompts.copyCount))
+      .limit(fetchLimit)
+      .offset(offset),
+  ]);
+
+  const { items: pageRows, hasMore } = slicePage(dataRows, pageSize);
+  if (pageRows.length === 0) {
     return { results: [], total: 0, page, pageSize, hasMore: false };
   }
 
-  const imageMap = await batchFetchPrimaryImages(rows);
-  const results = toListItems(rows, imageMap);
+  const imageMap = await batchFetchPrimaryImages(pageRows);
+  return {
+    results: toListItems(pageRows, imageMap),
+    total: page === 1 ? (countRows[0]?.c ?? 0) : null,
+    page,
+    pageSize,
+    hasMore,
+  };
+}
+
+export async function searchPrompts(
+  options: SearchOptions,
+): Promise<SearchResults> {
+  const { query, type = "all", sort = "relevance" } = options;
+  const pageSize = options.pageSize ?? PAGINATION.SEARCH_PAGE_SIZE;
+  const page = clampPage(
+    options.page ?? 1,
+    PAGINATION.SEARCH_MAX_PAGE,
+  );
+  const offset = pageOffset(page, pageSize);
+  const trimmed = query.trim();
+
+  const useSemanticBlend =
+    sort === "relevance" &&
+    trimmed.length > 0 &&
+    (await shouldBlendSemanticSearch());
+
+  let queryVec: number[] | null = null;
+  if (useSemanticBlend) {
+    try {
+      queryVec = await embedQuery(trimmed);
+    } catch (err) {
+      console.warn("[search] query embedding failed, FTS only:", err);
+    }
+  }
+
+  const { whereCondition, tsDoc, tsQuery } = buildSearchWhere(trimmed, type);
+  const orderBy = buildSearchOrderBy(
+    trimmed,
+    tsDoc,
+    tsQuery,
+    sort,
+    queryVec,
+  );
+
+  const fetchLimit = pageSize + 1;
+
+  // Page 1: exact total + first page in parallel. Later pages: skip COUNT(*)
+  // (window counts forced Postgres to scan the full match set per page).
+  const [countRows, dataRows] = await Promise.all([
+    page === 1
+      ? db
+          .select({ c: sql<number>`count(*)::int` })
+          .from(prompts)
+          .innerJoin(models, eq(models.id, prompts.modelId))
+          .where(whereCondition)
+      : Promise.resolve([] as { c: number }[]),
+    db
+      .select(listColumns)
+      .from(prompts)
+      .innerJoin(models, eq(models.id, prompts.modelId))
+      .where(whereCondition)
+      .orderBy(orderBy)
+      .limit(fetchLimit)
+      .offset(offset),
+  ]);
+
+  const { items: pageRows, hasMore } = slicePage(dataRows, pageSize);
+  const ftsTotal = page === 1 ? (countRows[0]?.c ?? 0) : null;
+
+  if (pageRows.length === 0 && ftsTotal === 0 && useSemanticBlend) {
+    try {
+      return await searchPromptsSemanticOnly(options);
+    } catch (err) {
+      console.warn("[search] semantic-only fallback failed:", err);
+      return { results: [], total: 0, page, pageSize, hasMore: false };
+    }
+  }
+
+  if (pageRows.length === 0) {
+    return { results: [], total: ftsTotal ?? 0, page, pageSize, hasMore: false };
+  }
+
+  const imageMap = await batchFetchPrimaryImages(pageRows);
+  const results = toListItems(pageRows, imageMap);
 
   return {
     results,
-    total,
+    total: ftsTotal,
     page,
     pageSize,
-    hasMore: offset + pageSize < total,
+    hasMore,
   };
 }
 
@@ -577,6 +768,64 @@ async function runFtsSimilarity(
  * Detail page is the only caller; placing the orchestration in the
  * service keeps the page component thin.
  */
+async function getSimilarPromptsViaVector(
+  currentPromptId: string,
+  limit: number,
+): Promise<PromptListItem[]> {
+  if (!(await shouldBlendSemanticSearch())) return [];
+
+  const [source] = await db
+    .select({
+      embedding: prompts.embedding,
+      title: prompts.title,
+      promptText: prompts.promptText,
+      tips: prompts.tips,
+      expectedOutcome: prompts.expectedOutcome,
+    })
+    .from(prompts)
+    .where(eq(prompts.id, currentPromptId))
+    .limit(1);
+
+  if (!source) return [];
+
+  let queryVec = parseStoredEmbedding(source.embedding);
+  if (!queryVec) {
+    if (!isEmbeddingConfigured()) return [];
+    try {
+      queryVec = await embedDocument(
+        buildEmbeddingText({
+          title: source.title,
+          promptText: source.promptText,
+          tips: source.tips,
+          expectedOutcome: source.expectedOutcome,
+        }),
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  const dist = cosineDistance(prompts.embedding, queryVec);
+  const rows = await db
+    .select(listColumns)
+    .from(prompts)
+    .innerJoin(models, eq(models.id, prompts.modelId))
+    .where(
+      and(
+        eq(prompts.status, "published"),
+        ne(prompts.id, currentPromptId),
+        isNotNull(prompts.embedding),
+      ),
+    )
+    .orderBy(asc(dist), desc(prompts.copyCount))
+    .limit(limit);
+
+  if (rows.length === 0) return [];
+
+  const imageMap = await batchFetchPrimaryImages(rows);
+  return toListItems(rows, imageMap);
+}
+
 export async function getSimilarPrompts(
   currentPromptId: string,
   query: string,
@@ -584,11 +833,31 @@ export async function getSimilarPrompts(
   modelType: "image" | "text",
   limit = 6,
 ): Promise<PromptListItem[]> {
-  const fts = await getSimilarPromptsViaFts(currentPromptId, query, limit);
-  if (fts.length >= limit) return fts;
+  const merged: PromptListItem[] = [];
+  const seen = new Set<string>();
 
-  // Top up from same-category, excluding anything we already returned.
-  const seen = new Set(fts.map((p) => p.id));
+  const vector = await getSimilarPromptsViaVector(currentPromptId, limit);
+  for (const p of vector) {
+    if (seen.has(p.id)) continue;
+    merged.push(p);
+    seen.add(p.id);
+  }
+
+  if (merged.length < limit) {
+    const fts = await getSimilarPromptsViaFts(
+      currentPromptId,
+      query,
+      limit,
+    );
+    for (const p of fts) {
+      if (seen.has(p.id) || merged.length >= limit) break;
+      merged.push(p);
+      seen.add(p.id);
+    }
+  }
+
+  if (merged.length >= limit) return merged.slice(0, limit);
+
   const fallback = await getRelatedPrompts(
     currentPromptId,
     categoryId,
@@ -596,11 +865,11 @@ export async function getSimilarPrompts(
     limit,
   );
   for (const p of fallback) {
-    if (seen.has(p.id) || fts.length >= limit) break;
-    fts.push(p);
+    if (seen.has(p.id) || merged.length >= limit) break;
+    merged.push(p);
     seen.add(p.id);
   }
-  return fts;
+  return merged;
 }
 
 /**

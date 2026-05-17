@@ -83,9 +83,9 @@ export async function listMyFavoritesController(_req: NextRequest) {
       { headers: { "Cache-Control": "no-store" } },
     );
   }
-  const ids = await getAllUserFavoriteIds(user.id);
+  const { ids, truncated } = await getAllUserFavoriteIds(user.id);
   return NextResponse.json(
-    { ids },
+    { ids, truncated },
     { headers: { "Cache-Control": "private, no-store" } },
   );
 }

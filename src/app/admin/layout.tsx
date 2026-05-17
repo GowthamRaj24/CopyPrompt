@@ -1,21 +1,21 @@
 import { ShieldIcon } from "lucide-react";
 import Link from "next/link";
-import { requireAdmin } from "@/server/lib/auth";
+import { Suspense } from "react";
+import { AdminAuthLoading } from "@/components/admin/AdminLoading";
+import { AdminAuthGate } from "./AdminAuthGate";
 
 // Admin is auth-gated and must not be statically prerendered at build time.
 export const dynamic = "force-dynamic";
 
 /**
- * Admin layout - gates all routes under /admin/*.
- * `requireAdmin()` redirects to /signin (or / with error) if not admin.
+ * Admin layout — sub-nav renders immediately; auth + page data stream in
+ * behind Suspense with route-level loading.tsx skeletons.
  */
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireAdmin();
-
   return (
     <div className="min-h-screen">
       {/* Sub-nav */}
@@ -31,7 +31,9 @@ export default async function AdminLayout({
         </div>
       </div>
 
-      {children}
+      <Suspense fallback={<AdminAuthLoading />}>
+        <AdminAuthGate>{children}</AdminAuthGate>
+      </Suspense>
     </div>
   );
 }

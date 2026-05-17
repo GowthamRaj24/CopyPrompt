@@ -1,5 +1,7 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { pageOffset, slicePage } from "@/lib/pagination";
+import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { probeImageDimensions } from "@/server/lib/image-dimensions";
 import { categories } from "@/server/models/category.model";
@@ -37,10 +39,21 @@ export interface PendingSubmissionListItem {
 /**
  * List submissions filtered by status, sorted oldest-first (FIFO queue).
  */
-export async function listSubmissionsByStatus(
+export interface SubmissionsPage {
+  items: PendingSubmissionListItem[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export async function listSubmissionsPage(
   status: "pending" | "approved" | "rejected" = "pending",
-  limit = 50,
-): Promise<PendingSubmissionListItem[]> {
+  page = 1,
+  pageSize: number = PAGINATION.ADMIN_QUEUE_PAGE_SIZE,
+): Promise<SubmissionsPage> {
+  const offset = pageOffset(page, pageSize);
+  const fetchLimit = pageSize + 1;
+
   const rows = await db
     .select({
       id: submissions.id,
@@ -51,14 +64,27 @@ export async function listSubmissionsByStatus(
     .from(submissions)
     .where(eq(submissions.status, status))
     .orderBy(asc(submissions.createdAt))
-    .limit(limit);
+    .limit(fetchLimit)
+    .offset(offset);
 
-  return rows.map((r) => ({
+  const { items: slice, hasMore } = slicePage(rows, pageSize);
+  const items = slice.map((r) => ({
     id: r.id,
     promptData: r.promptData as PendingSubmissionListItem["promptData"],
     email: r.email,
     createdAt: r.createdAt,
   }));
+
+  return { items, page, pageSize, hasMore };
+}
+
+/** @deprecated Use listSubmissionsPage */
+export async function listSubmissionsByStatus(
+  status: "pending" | "approved" | "rejected" = "pending",
+  limit = 50,
+): Promise<PendingSubmissionListItem[]> {
+  const { items } = await listSubmissionsPage(status, 1, limit);
+  return items;
 }
 
 export async function getSubmissionCounts(): Promise<{
@@ -134,6 +160,8 @@ export async function approveSubmission(
       ? await Promise.all(data.imageUrls.map((url) => probeImageDimensions(url)))
       : [];
 
+  let approvedPromptId: string | undefined;
+
   // Transaction: insert prompt + images + tags atomically
   await db.transaction(async (tx) => {
     // 1. Insert prompt
@@ -154,6 +182,7 @@ export async function approveSubmission(
       .returning({ id: prompts.id });
 
     if (!newPrompt) throw new Error("Failed to insert prompt");
+    approvedPromptId = newPrompt.id;
 
     // 2. Insert images (only for image-type submissions)
     if (data.type === "image" && data.imageUrls && data.imageUrls.length > 0) {
@@ -175,29 +204,34 @@ export async function approveSubmission(
       );
     }
 
-    // 3. Upsert tags + insert junctions
-    if (data.tags && data.tags.length > 0) {
-      for (const tagSlug of data.tags) {
-        // Upsert tag, increment usage_count
-        const [tag] = await tx
-          .insert(tags)
-          .values({
+    // 3. Upsert tags + junctions in batch (was N sequential round-trips)
+    const tagSlugs = [...new Set(data.tags ?? [])];
+    if (tagSlugs.length > 0) {
+      const upserted = await tx
+        .insert(tags)
+        .values(
+          tagSlugs.map((tagSlug) => ({
             slug: tagSlug,
             name: tagSlug.replace(/-/g, " "),
             usageCount: 1,
-          })
-          .onConflictDoUpdate({
-            target: tags.slug,
-            set: { usageCount: sql`${tags.usageCount} + 1` },
-          })
-          .returning({ id: tags.id });
+          })),
+        )
+        .onConflictDoUpdate({
+          target: tags.slug,
+          set: { usageCount: sql`${tags.usageCount} + 1` },
+        })
+        .returning({ id: tags.id });
 
-        if (tag) {
-          await tx
-            .insert(promptTags)
-            .values({ promptId: newPrompt.id, tagId: tag.id })
-            .onConflictDoNothing();
-        }
+      if (upserted.length > 0) {
+        await tx
+          .insert(promptTags)
+          .values(
+            upserted.map((tag) => ({
+              promptId: newPrompt.id,
+              tagId: tag.id,
+            })),
+          )
+          .onConflictDoNothing();
       }
     }
 
@@ -222,6 +256,15 @@ export async function approveSubmission(
   revalidatePath("/");
   revalidatePath(`/category/${data.categorySlug}`);
   revalidatePath(`/model/${data.modelSlug}`);
+
+  if (approvedPromptId) {
+    const { refreshPromptEmbedding } = await import(
+      "@/server/services/embedding.service"
+    );
+    void refreshPromptEmbedding(approvedPromptId).catch((err) => {
+      console.error("[embedding] approve:", err);
+    });
+  }
 
   return { slug };
 }

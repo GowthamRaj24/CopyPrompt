@@ -37,7 +37,8 @@ const client =
   postgres(env.DATABASE_URL, {
     max: poolSize,
     idle_timeout: 20,
-    connect_timeout: 10,
+    // Admin analytics runs several queries; cross-region Supabase can be slow.
+    connect_timeout: 20,
     // PgBouncer transaction-mode (Supabase pooler port 6543) does not
     // support prepared statements — keeping this off is the safe default.
     prepare: false,

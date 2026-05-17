@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getSubmissionCounts,
-  listSubmissionsByStatus,
+  listSubmissionsPage,
 } from "@/server/services/admin.service";
-import { SubmissionCard } from "./components/SubmissionCard";
+import { QueueLoadMore } from "./components/QueueLoadMore";
 
 export const metadata: Metadata = {
   title: "Admin · Queue",
@@ -29,8 +29,8 @@ export default async function AdminQueuePage({ searchParams }: PageProps) {
       ? sp.status
       : "pending";
 
-  const [submissions, counts] = await Promise.all([
-    listSubmissionsByStatus(status),
+  const [{ items: submissions, hasMore }, counts] = await Promise.all([
+    listSubmissionsPage(status, 1),
     getSubmissionCounts(),
   ]);
 
@@ -94,18 +94,12 @@ export default async function AdminQueuePage({ searchParams }: PageProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {submissions.map((s) => (
-            <SubmissionCard
-              key={s.id}
-              id={s.id}
-              promptData={s.promptData}
-              email={s.email}
-              createdAt={s.createdAt}
-              showActions={status === "pending"}
-            />
-          ))}
-        </div>
+        <QueueLoadMore
+          initialItems={submissions}
+          initialHasMore={hasMore}
+          status={status}
+          showActions={status === "pending"}
+        />
       )}
     </section>
   );

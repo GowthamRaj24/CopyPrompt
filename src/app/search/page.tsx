@@ -96,7 +96,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <p className="mt-1 text-[11px] text-muted-foreground">
               {total === 0
                 ? "No matches"
-                : `${total.toLocaleString()} ${total === 1 ? "result" : "results"}`}
+                : total != null
+                  ? `${total.toLocaleString()} ${total === 1 ? "result" : "results"}`
+                  : `Page ${page}`}
             </p>
           </div>
 

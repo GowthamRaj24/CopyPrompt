@@ -15,29 +15,18 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkline } from "@/components/charts/Sparkline";
-import {
-  getAdminTotals,
-  getDailyFavorites,
-  getDailyPulse,
-  getDailySignups,
-  getDailySubmissions,
-  getTopCategories,
-  getTopModels,
-  getTopPromptsByCopies,
-  getTopTags,
-} from "@/server/services/analytics.service";
+import { loadAdminAnalyticsDashboard } from "@/server/services/analytics.service";
 
 export const metadata: Metadata = {
   title: "Admin · Analytics",
   robots: { index: false, follow: false },
 };
 
-// Cache the dashboard for a short window so reload spam doesn't hammer
-// the DB. 60 s is short enough to feel live, long enough to absorb tabs.
-export const revalidate = 60;
+// Must stay dynamic (auth + live DB). Do not ISR-cache admin metrics.
+export const dynamic = "force-dynamic";
 
 export default async function AdminAnalyticsPage() {
-  const [
+  const {
     totals,
     pulse,
     signupsSeries,
@@ -47,17 +36,7 @@ export default async function AdminAnalyticsPage() {
     topCategories,
     topTags,
     topModels,
-  ] = await Promise.all([
-    getAdminTotals(),
-    getDailyPulse(),
-    getDailySignups(30),
-    getDailySubmissions(30),
-    getDailyFavorites(30),
-    getTopPromptsByCopies(10),
-    getTopCategories(8),
-    getTopTags(12),
-    getTopModels(8),
-  ]);
+  } = await loadAdminAnalyticsDashboard();
 
   return (
     <section className="container mx-auto px-4 py-10 sm:px-6 md:py-14">

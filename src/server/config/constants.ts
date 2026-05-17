@@ -9,6 +9,17 @@ export const APP = {
   MAX_PAGE_SIZE: 60,
 } as const;
 
+/** Shared pagination limits — tune here, not scattered across services. */
+export const PAGINATION = {
+  SEARCH_PAGE_SIZE: 24,
+  SEARCH_MAX_PAGE: 100,
+  CATEGORY_PAGE_SIZE: 24,
+  FAVORITES_PAGE_SIZE: 24,
+  ADMIN_QUEUE_PAGE_SIZE: 20,
+  FAVORITES_PROVIDER_MAX_IDS: 2_000,
+  HOMEPAGE_RAIL_SIZE: 8,
+};
+
 export const PROMPT_STATUS = {
   DRAFT: "draft",
   PUBLISHED: "published",

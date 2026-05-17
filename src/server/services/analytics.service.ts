@@ -348,3 +348,62 @@ export const getDailyPulse = cache(async (): Promise<DailyPulse> => {
     newRatings24h: Number(newRatings[0]?.c ?? 0),
   };
 });
+
+/* ────────────────────────────────────────────────────────────
+   Dashboard loader — batched for production pool limits
+   ──────────────────────────────────────────────────────────── */
+
+export interface AdminAnalyticsDashboard {
+  totals: AdminTotals;
+  pulse: DailyPulse;
+  signupsSeries: TimeSeriesPoint[];
+  submissionsSeries: TimeSeriesPoint[];
+  favoritesSeries: TimeSeriesPoint[];
+  topPrompts: PromptLeaderboardItem[];
+  topCategories: CategoryLeaderboardItem[];
+  topTags: TagLeaderboardItem[];
+  topModels: ModelLeaderboardItem[];
+}
+
+/**
+ * Loads the full admin analytics page in small parallel waves.
+ *
+ * The page used to fire 10 queries at once. On Vercel + Supabase that
+ * exhausts a small pool (especially when DB_POOL_SIZE=1) and the route
+ * returns 500. Three waves keeps peak concurrency at 4.
+ */
+export const loadAdminAnalyticsDashboard = cache(
+  async (): Promise<AdminAnalyticsDashboard> => {
+    const [totals, pulse] = await Promise.all([
+      getAdminTotals(),
+      getDailyPulse(),
+    ]);
+
+    const [signupsSeries, submissionsSeries, favoritesSeries] =
+      await Promise.all([
+        getDailySignups(30),
+        getDailySubmissions(30),
+        getDailyFavorites(30),
+      ]);
+
+    const [topPrompts, topCategories, topTags, topModels] =
+      await Promise.all([
+        getTopPromptsByCopies(10),
+        getTopCategories(8),
+        getTopTags(12),
+        getTopModels(8),
+      ]);
+
+    return {
+      totals,
+      pulse,
+      signupsSeries,
+      submissionsSeries,
+      favoritesSeries,
+      topPrompts,
+      topCategories,
+      topTags,
+      topModels,
+    };
+  },
+);

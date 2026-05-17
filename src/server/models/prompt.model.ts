@@ -63,7 +63,7 @@ export const prompts = pgTable(
     /**
      * Embedding for semantic search.
      * Generated from `title + prompt_text + tips + expected_outcome` via
-     * BAAI/bge-base-en-v1.5 (768 dimensions) on Together AI.
+     * BAAI/bge-base-en-v1.5 (768 dimensions) via Together AI or Hugging Face.
      */
     embedding: vector("embedding", { dimensions: 768 }),
     /**

@@ -41,8 +41,16 @@ const envSchema = z.object({
   R2_BUCKET_NAME: optionalString,
   R2_PUBLIC_URL: optionalString,
 
-  // ── OPTIONAL: Together AI (set up in seeding step) ──────────
+  // ── OPTIONAL: Together AI (Flux images + BGE embeddings) ───
   TOGETHER_API_KEY: optionalString,
+
+  // ── OPTIONAL: Hugging Face (free BGE embeddings fallback) ───
+  // Fine-grained token with Inference Providers — see .env.example
+  HF_TOKEN: optionalString,
+
+  // ── OPTIONAL: Jina AI (free embeddings fallback) ────────────
+  // https://jina.ai/?sui=apikey — jina-embeddings-v2-base-en (768-dim)
+  JINA_API_KEY: optionalString,
 
   // ── OPTIONAL: SMTP (Nodemailer for OTP / transactional emails) ──
   SMTP_HOST: optionalString,

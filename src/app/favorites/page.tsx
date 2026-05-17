@@ -1,9 +1,10 @@
 import { ArrowRightIcon, HeartIcon, SearchIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PromptCard } from "@/components/prompt/PromptCard";
+import { LoadMorePromptGrid } from "@/components/prompt/LoadMorePromptGrid";
+import { PAGINATION } from "@/server/config/constants";
 import { requireUser } from "@/server/lib/auth";
-import { getUserFavorites } from "@/server/services/favorite.service";
+import { getUserFavoritesPage } from "@/server/services/favorite.service";
 
 export const metadata: Metadata = {
   title: "Your favorites",
@@ -11,14 +12,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Always fetch fresh on every request — favorites change frequently
 export const dynamic = "force-dynamic";
 
 export default async function FavoritesPage() {
-  // Redirects to /signin?next=/favorites if not signed-in
   const user = await requireUser();
 
-  const favorites = await getUserFavorites(user.id, 200);
+  const { results: favorites, hasMore } = await getUserFavoritesPage(
+    user.id,
+    1,
+    PAGINATION.FAVORITES_PAGE_SIZE,
+  );
 
   return (
     <section className="relative">
@@ -28,7 +31,6 @@ export default async function FavoritesPage() {
       />
 
       <div className="container relative mx-auto px-4 py-10 sm:px-6 md:py-14">
-        {/* Header — same shape as search / category */}
         <header className="reveal delay-1 mb-10 flex flex-col gap-4 border-b border-border pb-6 md:mb-14 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow mb-2">Your library</p>
@@ -44,7 +46,9 @@ export default async function FavoritesPage() {
             <p className="mt-2 text-[12px] text-muted-foreground">
               {favorites.length === 0
                 ? "Nothing saved yet"
-                : `${favorites.length.toLocaleString()} saved ${favorites.length === 1 ? "prompt" : "prompts"}`}
+                : hasMore
+                  ? `${favorites.length}+ saved prompts`
+                  : `${favorites.length.toLocaleString()} saved ${favorites.length === 1 ? "prompt" : "prompts"}`}
             </p>
           </div>
           <Link
@@ -59,24 +63,12 @@ export default async function FavoritesPage() {
         {favorites.length === 0 ? (
           <EmptyFavorites />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {favorites.map((prompt, idx) => (
-              <div
-                key={prompt.id}
-                className="reveal"
-                style={{ animationDelay: `${idx * 30}ms` }}
-              >
-                <PromptCard
-                  prompt={prompt}
-                  initialFavorited
-                  unoptimizedImage={
-                    prompt.primaryImage?.cdnUrl.includes("picsum.photos") ??
-                    false
-                  }
-                />
-              </div>
-            ))}
-          </div>
+          <LoadMorePromptGrid
+            initialItems={favorites}
+            initialHasMore={hasMore}
+            fetchUrl="/api/favorites/list"
+            allFavorited
+          />
         )}
       </div>
     </section>

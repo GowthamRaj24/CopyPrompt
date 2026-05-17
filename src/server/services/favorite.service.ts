@@ -1,5 +1,7 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { cache } from "react";
+import { pageOffset, slicePage } from "@/lib/pagination";
+import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { favorites } from "@/server/models/favorite.model";
 import { images } from "@/server/models/image.model";
@@ -71,15 +73,28 @@ export const getUserFavoriteIds = cache(
  * (uuid strings + JSON overhead) and this fetch happens at most once
  * per browser tab — vastly cheaper than N per-card lookups.
  */
+export interface UserFavoriteIdsResult {
+  ids: string[];
+  /** True when user has more favorites than we load into the client provider. */
+  truncated: boolean;
+}
+
 export async function getAllUserFavoriteIds(
   userId: string,
-): Promise<string[]> {
+): Promise<UserFavoriteIdsResult> {
+  const cap = PAGINATION.FAVORITES_PROVIDER_MAX_IDS;
   const rows = await db
     .select({ promptId: favorites.promptId })
     .from(favorites)
-    .where(eq(favorites.userId, userId));
+    .where(eq(favorites.userId, userId))
+    .orderBy(desc(favorites.createdAt))
+    .limit(cap + 1);
 
-  return rows.map((r) => r.promptId);
+  const truncated = rows.length > cap;
+  return {
+    ids: rows.slice(0, cap).map((r) => r.promptId),
+    truncated,
+  };
 }
 
 /**
@@ -115,16 +130,29 @@ export async function removeFavorite(
  *   - Truncated prompt_text (280 chars) via SQL LEFT()
  *   - Batch image fetch (1 extra query)
  */
-export async function getUserFavorites(
+export interface FavoritesPage {
+  results: PromptListItem[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export async function getUserFavoritesPage(
   userId: string,
-  limit = 100,
-): Promise<PromptListItem[]> {
+  page = 1,
+  pageSize: number = PAGINATION.FAVORITES_PAGE_SIZE,
+): Promise<FavoritesPage> {
+  const offset = pageOffset(page, pageSize);
+  const fetchLimit = pageSize + 1;
+
   const rows = await db
     .select({
       id: prompts.id,
       slug: prompts.slug,
       title: prompts.title,
-      promptText: sql<string>`LEFT(${prompts.promptText}, 280)`.as("prompt_text_preview"),
+      promptText: sql<string>`LEFT(${prompts.promptText}, 280)`.as(
+        "prompt_text_preview",
+      ),
       expectedOutcome: prompts.expectedOutcome,
       copyCount: prompts.copyCount,
       upvotes: prompts.upvotes,
@@ -138,12 +166,15 @@ export async function getUserFavorites(
     .innerJoin(models, eq(models.id, prompts.modelId))
     .where(eq(favorites.userId, userId))
     .orderBy(desc(favorites.createdAt))
-    .limit(limit);
+    .limit(fetchLimit)
+    .offset(offset);
 
-  if (rows.length === 0) return [];
+  const { items: slice, hasMore } = slicePage(rows, pageSize);
+  if (slice.length === 0) {
+    return { results: [], page, pageSize, hasMore: false };
+  }
 
-  // Batch-fetch primary image for image-type prompts only
-  const imagePromptIds = rows
+  const imagePromptIds = slice
     .filter((r) => r.modelType === "image")
     .map((r) => r.id);
 
@@ -170,7 +201,7 @@ export async function getUserFavorites(
     primaryImages.map((img) => [img.promptId, img]),
   );
 
-  return rows.map((r) => ({
+  const results = slice.map((r) => ({
     id: r.id,
     slug: r.slug,
     title: r.title,
@@ -183,4 +214,15 @@ export async function getUserFavorites(
     upvotes: r.upvotes,
     primaryImage: imageByPromptId.get(r.id) ?? null,
   }));
+
+  return { results, page, pageSize, hasMore };
+}
+
+/** @deprecated Use getUserFavoritesPage */
+export async function getUserFavorites(
+  userId: string,
+  limit = 100,
+): Promise<PromptListItem[]> {
+  const { results } = await getUserFavoritesPage(userId, 1, limit);
+  return results;
 }

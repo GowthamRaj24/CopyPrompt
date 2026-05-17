@@ -18,10 +18,7 @@ import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { prompts } from "@/server/models/prompt.model";
 import {
-  getMostViewedPrompts,
-  getRecentPrompts,
-  getTopRatedPrompts,
-  getTrendingPrompts,
+  getHomepageRails,
   type PromptListItem,
 } from "@/server/services/prompt.service";
 
@@ -113,29 +110,21 @@ const HOMEPAGE_FAQS = [
 export default async function HomePage() {
   // Five parallel queries — each indexed and capped at 8 rows so total
   // dominant time is the slowest one (~25-40ms on Supabase free tier).
-  const [
-    topCategories,
-    trending,
-    recent,
-    mostViewed,
-    topRated,
-    publishedCountRows,
-  ] = await Promise.all([
+  const [topCategories, rails, publishedCountRows] = await Promise.all([
     db
       .select()
       .from(categories)
       .where(isNull(categories.parentId))
       .orderBy(asc(categories.name))
       .limit(12),
-    getTrendingPrompts(8),
-    getRecentPrompts(8),
-    getMostViewedPrompts(8),
-    getTopRatedPrompts(8),
+    getHomepageRails(),
     db
       .select({ c: count() })
       .from(prompts)
       .where(eq(prompts.status, "published")),
   ]);
+
+  const { trending, recent, mostViewed, topRated } = rails;
 
   const promptCount = Number(publishedCountRows[0]?.c ?? 0);
 

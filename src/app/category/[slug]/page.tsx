@@ -7,7 +7,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PromptCard } from "@/components/prompt/PromptCard";
+import { LoadMorePromptGrid } from "@/components/prompt/LoadMorePromptGrid";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   breadcrumbListJsonLd,
@@ -16,8 +16,9 @@ import {
 } from "@/lib/seo/jsonld";
 import {
   getCategoryBySlug,
-  getPromptsByCategory,
+  getPromptsByCategoryPage,
 } from "@/server/services/category.service";
+import { PAGINATION } from "@/server/config/constants";
 
 /**
  * Caching strategy
@@ -82,11 +83,13 @@ export default async function CategoryPage({
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const results = await getPromptsByCategory({
+  const { results, hasMore } = await getPromptsByCategoryPage({
     categoryId: category.id,
     sort,
-    limit: 60,
+    page: 1,
+    pageSize: PAGINATION.CATEGORY_PAGE_SIZE,
   });
+  const promptsApiUrl = `/api/categories/${category.slug}/prompts?sort=${sort}`;
 
   // ── Structured data ────────────────────────────────────────
   // Breadcrumb tells engines where this page sits in the taxonomy.
@@ -211,23 +214,11 @@ export default async function CategoryPage({
         {results.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {results.map((p, idx) => (
-              <div
-                key={p.id}
-                className="reveal"
-                style={{ animationDelay: `${idx * 30}ms` }}
-              >
-                <PromptCard
-                  prompt={p}
-                  index={idx + 1}
-                  unoptimizedImage={
-                    p.primaryImage?.cdnUrl.includes("picsum.photos") ?? false
-                  }
-                />
-              </div>
-            ))}
-          </div>
+          <LoadMorePromptGrid
+            initialItems={results}
+            initialHasMore={hasMore}
+            fetchUrl={promptsApiUrl}
+          />
         )}
       </div>
     </section>

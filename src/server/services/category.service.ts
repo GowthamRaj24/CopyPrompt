@@ -1,6 +1,8 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
+import { pageOffset, slicePage } from "@/lib/pagination";
+import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { images } from "@/server/models/image.model";
@@ -72,43 +74,37 @@ export const getCategoryBySlug = cache(
  *   - Truncated prompt_text (280 chars) via SQL LEFT()
  *   - Batch image fetch (1 extra query)
  */
-export async function getPromptsByCategory(options: {
-  categoryId: string;
-  sort?: "popular" | "latest";
-  limit?: number;
-}): Promise<PromptListItem[]> {
-  const { categoryId, sort = "popular", limit = 60 } = options;
+const categoryListColumns = {
+  id: prompts.id,
+  slug: prompts.slug,
+  title: prompts.title,
+  promptText: sql<string>`LEFT(${prompts.promptText}, 280)`.as(
+    "prompt_text_preview",
+  ),
+  expectedOutcome: prompts.expectedOutcome,
+  copyCount: prompts.copyCount,
+  upvotes: prompts.upvotes,
+  modelName: models.name,
+  modelSlug: models.slug,
+  modelType: models.type,
+} as const;
 
-  const orderBy =
-    sort === "latest" ? desc(prompts.createdAt) : desc(prompts.copyCount);
-
-  const rows = await db
-    .select({
-      id: prompts.id,
-      slug: prompts.slug,
-      title: prompts.title,
-      promptText: sql<string>`LEFT(${prompts.promptText}, 280)`.as("prompt_text_preview"),
-      expectedOutcome: prompts.expectedOutcome,
-      copyCount: prompts.copyCount,
-      upvotes: prompts.upvotes,
-      modelName: models.name,
-      modelSlug: models.slug,
-      modelType: models.type,
-    })
-    .from(prompts)
-    .innerJoin(models, eq(models.id, prompts.modelId))
-    .where(
-      and(
-        eq(prompts.categoryId, categoryId),
-        eq(prompts.status, "published"),
-      ),
-    )
-    .orderBy(orderBy)
-    .limit(limit);
-
+async function mapCategoryRows(
+  rows: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    promptText: string;
+    expectedOutcome: string | null;
+    copyCount: number;
+    upvotes: number;
+    modelName: string;
+    modelSlug: string;
+    modelType: string;
+  }>,
+): Promise<PromptListItem[]> {
   if (rows.length === 0) return [];
 
-  // Batch-fetch primary images for image-type prompts
   const imagePromptIds = rows
     .filter((r) => r.modelType === "image")
     .map((r) => r.id);
@@ -149,6 +145,69 @@ export async function getPromptsByCategory(options: {
     upvotes: r.upvotes,
     primaryImage: imageByPromptId.get(r.id) ?? null,
   }));
+}
+
+export interface CategoryPromptsPage {
+  results: PromptListItem[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+/**
+ * Paginated category listing — uses `limit+1` to detect hasMore without COUNT.
+ */
+export async function getPromptsByCategoryPage(options: {
+  categoryId: string;
+  sort?: "popular" | "latest";
+  page?: number;
+  pageSize?: number;
+}): Promise<CategoryPromptsPage> {
+  const {
+    categoryId,
+    sort = "popular",
+    page = 1,
+    pageSize = PAGINATION.CATEGORY_PAGE_SIZE,
+  } = options;
+
+  const orderBy =
+    sort === "latest" ? desc(prompts.createdAt) : desc(prompts.copyCount);
+  const offset = pageOffset(page, pageSize);
+  const fetchLimit = pageSize + 1;
+
+  const rows = await db
+    .select(categoryListColumns)
+    .from(prompts)
+    .innerJoin(models, eq(models.id, prompts.modelId))
+    .where(
+      and(
+        eq(prompts.categoryId, categoryId),
+        eq(prompts.status, "published"),
+      ),
+    )
+    .orderBy(orderBy)
+    .limit(fetchLimit)
+    .offset(offset);
+
+  const { items, hasMore } = slicePage(rows, pageSize);
+  const results = await mapCategoryRows(items);
+
+  return { results, page, pageSize, hasMore };
+}
+
+/** @deprecated Use getPromptsByCategoryPage — kept for callers that need a fixed cap. */
+export async function getPromptsByCategory(options: {
+  categoryId: string;
+  sort?: "popular" | "latest";
+  limit?: number;
+}): Promise<PromptListItem[]> {
+  const { results } = await getPromptsByCategoryPage({
+    categoryId: options.categoryId,
+    sort: options.sort,
+    page: 1,
+    pageSize: options.limit ?? 60,
+  });
+  return results;
 }
 
 /**
