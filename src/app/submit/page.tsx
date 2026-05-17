@@ -55,7 +55,7 @@ export default async function SubmitPage() {
 
       {/* Cinematic hero */}
       <header className="relative border-b border-border/40">
-        <div className="container relative mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14">
+        <div className="container relative mx-auto max-w-[1240px] px-4 py-10 sm:px-6 md:py-14">
           <Link
             href="/"
             className="press mb-6 inline-flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -90,7 +90,7 @@ export default async function SubmitPage() {
       </header>
 
       {/* Studio workspace */}
-      <div className="container relative mx-auto max-w-6xl px-4 py-8 sm:px-6 md:py-12">
+      <div className="container relative mx-auto max-w-[1240px] px-4 py-8 sm:px-6 md:py-12">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12 xl:gap-16">
           <SubmitStepNav />
           <SubmitForm

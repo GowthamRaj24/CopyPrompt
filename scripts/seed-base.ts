@@ -26,17 +26,31 @@ const MODELS_TO_SEED = [
   { slug: "flux-dev", name: "Flux Dev", type: "image" as const },
   { slug: "flux-schnell", name: "Flux Schnell", type: "image" as const },
   { slug: "flux-pro", name: "Flux Pro", type: "image" as const },
+  { slug: "flux-kontext", name: "Flux Kontext", type: "image" as const },
   { slug: "midjourney", name: "Midjourney", type: "image" as const },
   { slug: "stable-diffusion-xl", name: "Stable Diffusion XL", type: "image" as const },
+  { slug: "stable-diffusion-3", name: "Stable Diffusion 3", type: "image" as const },
   { slug: "dall-e-3", name: "DALL-E 3", type: "image" as const },
+  { slug: "ideogram", name: "Ideogram", type: "image" as const },
+  { slug: "leonardo-ai", name: "Leonardo AI", type: "image" as const },
+  { slug: "adobe-firefly", name: "Adobe Firefly", type: "image" as const },
+  { slug: "imagen", name: "Google Imagen", type: "image" as const },
+  { slug: "recraft", name: "Recraft", type: "image" as const },
 
   // ── Text models ─────────────────────────────────────────────
-  { slug: "chatgpt", name: "ChatGPT (GPT-4)", type: "text" as const },
+  { slug: "chatgpt", name: "ChatGPT (GPT-4o)", type: "text" as const },
   { slug: "chatgpt-5", name: "ChatGPT 5", type: "text" as const },
   { slug: "claude-sonnet", name: "Claude Sonnet", type: "text" as const },
   { slug: "claude-opus", name: "Claude Opus", type: "text" as const },
   { slug: "gemini", name: "Google Gemini", type: "text" as const },
-  { slug: "any-llm", name: "Any LLM", type: "text" as const },
+  { slug: "grok", name: "Grok (xAI)", type: "text" as const },
+  { slug: "deepseek", name: "DeepSeek", type: "text" as const },
+  { slug: "llama", name: "Meta Llama", type: "text" as const },
+  { slug: "mistral", name: "Mistral", type: "text" as const },
+  { slug: "perplexity", name: "Perplexity", type: "text" as const },
+  { slug: "copilot", name: "Microsoft Copilot", type: "text" as const },
+  { slug: "pi", name: "Pi", type: "text" as const },
+  { slug: "any-llm", name: "Any LLM / Other", type: "text" as const },
 ];
 
 const CATEGORIES_TO_SEED = [

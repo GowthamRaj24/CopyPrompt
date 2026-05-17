@@ -18,12 +18,18 @@ import type { z } from "zod";
 import { isTurnstileEnabled, Turnstile } from "@/components/captcha/Turnstile";
 import { Input } from "@/components/ui/input";
 import { ImageUploader } from "@/components/upload/ImageUploader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   type SubmissionInput,
   submissionSchema,
 } from "@/server/validators/submission.validator";
-import { ModelPicker } from "./ModelPicker";
 import { StudioPanel } from "./StudioPanel";
 import { TagInput } from "./TagInput";
 import { VisibilityChoice } from "./VisibilityChoice";
@@ -216,7 +222,7 @@ export function SubmitForm({
               {...register("title")}
               maxLength={80}
               autoComplete="off"
-              className="h-12 border-border/50 bg-background/50 text-[15px] font-medium"
+              className="h-12 border-border/60 bg-card text-[15px] font-medium shadow-sm"
               placeholder={
                 type === "image"
                   ? "Cinematic cyberpunk portrait"
@@ -329,15 +335,29 @@ export function SubmitForm({
           title="Discover"
           subtitle="Tell us which AI tool and how people should find this."
         >
-          <Field label="AI model" required>
-            <ModelPicker
-              models={modelsForType}
-              value={modelSlug}
-              onChange={(slug) =>
-                setValue("modelSlug", slug, { shouldValidate: true })
+          <Field
+            label="AI model"
+            required
+            hint="Which tool is this prompt built for?"
+            error={errors.modelSlug?.message}
+          >
+            <Select
+              onValueChange={(v) =>
+                setValue("modelSlug", v, { shouldValidate: true })
               }
-              error={errors.modelSlug?.message}
-            />
+              value={modelSlug || undefined}
+            >
+              <SelectTrigger className="!h-12 !w-full border-border/60 bg-card text-[14px] shadow-sm">
+                <SelectValue placeholder="Choose the AI tool this prompt is for" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[min(320px,50vh)]">
+                {modelsForType.map((m) => (
+                  <SelectItem key={m.slug} value={m.slug}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
 
           <Field label="Category" error={errors.categorySlug?.message}>
@@ -608,7 +628,7 @@ function ImageSource({
   }, [hasValidUrl]);
 
   return (
-    <div className="rounded-xl border border-border/40 bg-background/30 p-4">
+    <div className="rounded-xl border border-border/60 bg-card/80 p-4">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Slot {index + 1}
@@ -658,7 +678,7 @@ function ImageSource({
             value={url}
             onChange={(e) => onChange(e.target.value)}
             placeholder="https://…"
-            className="h-11 flex-1"
+            className="h-11 flex-1 bg-card"
           />
         </div>
       )}
