@@ -85,12 +85,21 @@ export const metadata: Metadata = {
       "The fastest way to find, copy and paste prompts for every AI tool. Free forever.",
     locale: "en_US",
     url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "CopyPrompt — free AI prompts for every tool",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "CopyPrompt — The fastest way to find AI prompts",
     description:
       "Search, copy, paste. Prompts for every AI tool. Free forever.",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
