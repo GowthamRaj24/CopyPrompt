@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { requireAdmin } from "@/server/lib/auth";
+import { requireAdminApi } from "@/server/lib/auth";
 import { rejectSubmission } from "@/server/services/admin.service";
 import { rejectSubmissionSchema } from "@/server/validators/admin.validator";
 
@@ -11,7 +11,8 @@ export async function rejectSubmissionController(
   submissionId: string,
   req: Request,
 ): Promise<Response> {
-  const admin = await requireAdmin();
+  const admin = await requireAdminApi();
+  if (admin instanceof Response) return admin;
 
   if (!isValidUuid(submissionId)) {
     return jsonError("Invalid submission id", 400);

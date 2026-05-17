@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/server/lib/auth";
+import { requireAdminApi } from "@/server/lib/auth";
 import { approveSubmission } from "@/server/services/admin.service";
 
 /**
@@ -10,7 +10,8 @@ import { approveSubmission } from "@/server/services/admin.service";
 export async function approveSubmissionController(
   submissionId: string,
 ): Promise<Response> {
-  const admin = await requireAdmin();
+  const admin = await requireAdminApi();
+  if (admin instanceof Response) return admin;
 
   if (!isValidUuid(submissionId)) {
     return jsonError("Invalid submission id", 400);

@@ -48,6 +48,7 @@ export function SubmissionCard({
     try {
       const res = await fetch(`/api/admin/submissions/${id}/approve`, {
         method: "POST",
+        credentials: "include",
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -71,6 +72,7 @@ export function SubmissionCard({
     try {
       const res = await fetch(`/api/admin/submissions/${id}/reject`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
       });

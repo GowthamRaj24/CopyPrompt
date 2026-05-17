@@ -103,11 +103,35 @@ export async function requireUser(): Promise<AppUser> {
 /**
  * Require an admin user. Redirects to /signin if not signed in,
  * or to home with a flash if not an admin.
+ *
+ * For Route Handlers (fetch from the client), use `requireAdminApi()` —
+ * `redirect()` breaks JSON responses and approve/reject look "broken".
  */
 export async function requireAdmin(): Promise<AppUser> {
   const user = await requireUser();
   if (user.plan !== "admin") {
     redirect("/?error=admin-required");
+  }
+  return user;
+}
+
+function jsonAuthError(status: 401 | 403, message: string): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+/**
+ * Admin guard for API routes. Returns JSON 401/403 instead of redirecting.
+ */
+export async function requireAdminApi(): Promise<AppUser | Response> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return jsonAuthError(401, "Sign in required");
+  }
+  if (user.plan !== "admin") {
+    return jsonAuthError(403, "Admin access required");
   }
   return user;
 }
