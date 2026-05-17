@@ -7,7 +7,7 @@ import { getUserFavorites } from "@/server/services/favorite.service";
 
 export const metadata: Metadata = {
   title: "Your favorites",
-  description: "Prompts you've saved to your CopyPrompt favorites.",
+  description: "Prompts you've saved to your mycopyprompt favorites.",
   robots: { index: false, follow: false },
 };
 

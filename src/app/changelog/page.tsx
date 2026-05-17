@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "What's new in CopyPrompt — every release, in plain English.",
+  description: "What's new in mycopyprompt — every release, in plain English.",
 };
 
 interface Release {

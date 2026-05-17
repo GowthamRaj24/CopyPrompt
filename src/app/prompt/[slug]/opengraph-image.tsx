@@ -51,7 +51,7 @@ export default async function Image({ params }: RouteContext) {
             letterSpacing: -1.5,
           }}
         >
-          CopyPrompt
+          mycopyprompt
         </div>
       ),
       { ...size },
@@ -192,7 +192,7 @@ export default async function Image({ params }: RouteContext) {
             >
               C
             </div>
-            CopyPrompt
+            mycopyprompt
           </div>
           <div style={{ display: "flex", gap: 18 }}>
             <span>{prompt.copyCount.toLocaleString()} copies</span>

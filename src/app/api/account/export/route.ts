@@ -22,7 +22,7 @@ export async function GET() {
 
   try {
     const data = await exportUserData(user.id);
-    const filename = `copyprompt-export-${user.id}-${Date.now()}.json`;
+    const filename = `mycopyprompt-export-${user.id}-${Date.now()}.json`;
 
     return new NextResponse(JSON.stringify(data, null, 2), {
       status: 200,

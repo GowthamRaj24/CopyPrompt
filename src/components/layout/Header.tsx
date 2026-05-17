@@ -1,6 +1,7 @@
 import { HeartIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SITE_BRAND } from "@/lib/site-brand";
 import { type AppUser, getCurrentUser } from "@/server/lib/auth";
 import { CommandTrigger } from "./CommandTrigger";
 import { MobileNav } from "./MobileNav";
@@ -34,7 +35,7 @@ export async function Header() {
         >
           <Logomark />
           <span className="text-[14px] font-semibold tracking-[-0.02em]">
-            CopyPrompt
+            {SITE_BRAND.name}
           </span>
         </Link>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_BRAND } from "@/lib/site-brand";
 
 /**
  * Minimal modern footer — restrained, elegant.
@@ -36,7 +37,7 @@ export function Footer() {
                 </svg>
               </span>
               <span className="text-[13px] font-semibold tracking-[-0.01em]">
-                CopyPrompt
+                {SITE_BRAND.name}
               </span>
             </Link>
             <p className="mt-2.5 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
@@ -76,7 +77,7 @@ export function Footer() {
 
         {/* Bottom strip */}
         <div className="mt-10 flex flex-col items-start justify-between gap-2 border-t border-border/40 pt-5 text-[11px] text-muted-foreground sm:flex-row sm:items-center">
-          <p>© {year} CopyPrompt</p>
+          <p>© {year} {SITE_BRAND.name}</p>
           <div className="flex items-center gap-3">
             <Link
               href="/privacy"

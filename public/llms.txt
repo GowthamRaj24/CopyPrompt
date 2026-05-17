@@ -1,8 +1,8 @@
-# CopyPrompt
+# mycopyprompt
 
-> The fastest way to find AI prompts. CopyPrompt is a curated, free library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested.
+> The fastest way to find AI prompts. mycopyprompt is a curated, free library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested.
 
-CopyPrompt helps users discover working prompts they can paste directly into AI tools without modification. Each prompt is categorized by use case (writing, coding, business, image generation, etc.), tagged for searchability, and labeled with the AI model it was designed for.
+mycopyprompt helps users discover working prompts they can paste directly into AI tools without modification. Each prompt is categorized by use case (writing, coding, business, image generation, etc.), tagged for searchability, and labeled with the AI model it was designed for.
 
 ## Key sections
 

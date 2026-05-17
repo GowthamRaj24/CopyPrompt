@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
@@ -8,6 +10,7 @@ import { HiddenOnAuth } from "@/components/layout/HiddenOnAuth";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_BRAND } from "@/lib/site-brand";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
 
@@ -42,15 +45,14 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "CopyPrompt — The fastest way to find AI prompts",
-    template: "%s · CopyPrompt",
+    default: SITE_BRAND.defaultTitle,
+    template: SITE_BRAND.titleTemplate,
   },
-  description:
-    "Search, copy and paste the best free prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every AI tool. No signup. No paywall.",
+  description: SITE_BRAND.description,
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ),
-  applicationName: "CopyPrompt",
+  applicationName: SITE_BRAND.name,
   referrer: "origin-when-cross-origin",
   keywords: [
     "AI prompts",
@@ -68,9 +70,9 @@ export const metadata: Metadata = {
     "AI prompt examples",
     "prompt templates",
   ],
-  authors: [{ name: "CopyPrompt" }],
-  creator: "CopyPrompt",
-  publisher: "CopyPrompt",
+  authors: [{ name: SITE_BRAND.name }],
+  creator: SITE_BRAND.name,
+  publisher: SITE_BRAND.name,
   category: "technology",
   formatDetection: {
     email: false,
@@ -79,8 +81,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "CopyPrompt",
-    title: "CopyPrompt — The fastest way to find AI prompts",
+    siteName: SITE_BRAND.name,
+    title: SITE_BRAND.defaultTitle,
     description:
       "The fastest way to find, copy and paste prompts for every AI tool. Free forever.",
     locale: "en_US",
@@ -90,13 +92,13 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "CopyPrompt — free AI prompts for every tool",
+        alt: SITE_BRAND.ogImageAlt,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CopyPrompt — The fastest way to find AI prompts",
+    title: SITE_BRAND.defaultTitle,
     description:
       "Search, copy, paste. Prompts for every AI tool. Free forever.",
     images: ["/opengraph-image"],
@@ -173,6 +175,8 @@ export default function RootLayout({
             />
           </FavoritesProvider>
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

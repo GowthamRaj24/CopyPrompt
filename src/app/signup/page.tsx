@@ -8,7 +8,7 @@ import { SignUpForm } from "./components/SignUpForm";
 export const metadata: Metadata = {
   title: "Create your account",
   description:
-    "Create a free CopyPrompt account to save favorites and submit prompts.",
+    "Create a free mycopyprompt account to save favorites and submit prompts.",
 };
 
 interface PageProps {

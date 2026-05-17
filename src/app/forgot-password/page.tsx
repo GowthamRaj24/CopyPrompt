@@ -5,7 +5,7 @@ import { ForgotPasswordForm } from "./components/ForgotPasswordForm";
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Reset your CopyPrompt password.",
+  description: "Reset your mycopyprompt password.",
 };
 
 export default function ForgotPasswordPage() {

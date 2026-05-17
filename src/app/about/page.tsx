@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "CopyPrompt is the fastest way to find, copy and paste the best free AI prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every AI tool.",
+    "mycopyprompt is the fastest way to find, copy and paste the best free AI prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every AI tool.",
 };
 
 export default function AboutPage() {
@@ -29,13 +29,13 @@ export default function AboutPage() {
 
         <div className="space-y-8 text-[15px] leading-[1.75] text-foreground/90">
           <p>
-            CopyPrompt is a hand-picked archive of prompts that actually
+            mycopyprompt is a hand-picked archive of prompts that actually
             work — for ChatGPT, Claude, Midjourney, Flux, Gemini, and every
             AI tool worth using. Free forever. No signup. No paywall.
           </p>
 
           <p>
-            We built CopyPrompt because the best prompts shouldn&apos;t live
+            We built mycopyprompt because the best prompts shouldn&apos;t live
             in scattered Discord servers, locked behind paid bundles, or
             buried in random notebooks. They should be searchable,
             copy-paste ready, and one click away.

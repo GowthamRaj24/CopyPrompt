@@ -84,19 +84,19 @@ const TRY_SUGGESTIONS = [
  */
 const HOMEPAGE_FAQS = [
   {
-    question: "What is CopyPrompt?",
+    question: "What is mycopyprompt?",
     answer:
-      "CopyPrompt is a free, curated library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested before publication.",
+      "mycopyprompt is a free, curated library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested before publication.",
   },
   {
-    question: "Is CopyPrompt free?",
+    question: "Is mycopyprompt free?",
     answer:
-      "Yes — CopyPrompt is free forever. No paywall, no signup wall for browsing or copying prompts. You only need an account to save favorites or submit your own prompts.",
+      "Yes — mycopyprompt is free forever. No paywall, no signup wall for browsing or copying prompts. You only need an account to save favorites or submit your own prompts.",
   },
   {
     question: "Which AI tools are supported?",
     answer:
-      "CopyPrompt covers every major AI tool — ChatGPT, Claude, Gemini, GPT-4, Midjourney, DALL-E, Flux, Stable Diffusion, and more. Each prompt is labeled with the model it was designed for.",
+      "mycopyprompt covers every major AI tool — ChatGPT, Claude, Gemini, GPT-4, Midjourney, DALL-E, Flux, Stable Diffusion, and more. Each prompt is labeled with the model it was designed for.",
   },
   {
     question: "How do I find the right prompt?",
@@ -149,7 +149,7 @@ export default async function HomePage() {
       {
         name: "Trending AI prompts",
         description:
-          "The most-copied prompts on CopyPrompt this week, curated across image and text AI tools.",
+          "The most-copied prompts on mycopyprompt this week, curated across image and text AI tools.",
       },
     ),
     faqJsonLd(HOMEPAGE_FAQS),

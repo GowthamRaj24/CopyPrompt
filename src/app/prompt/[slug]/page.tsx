@@ -69,7 +69,7 @@ export async function generateMetadata({
       "free AI prompt",
       "copy paste prompt",
     ],
-    authors: [{ name: "CopyPrompt" }],
+    authors: [{ name: "mycopyprompt" }],
     openGraph: {
       title,
       description: desc,
@@ -603,7 +603,7 @@ function buildPromptFaqs(opts: {
     {
       question: `What is the "${prompt.title}" prompt?`,
       answer: prompt.tips
-        ? `${prompt.tips} The prompt targets ${modelName} and lives in the ${categoryName} category on CopyPrompt.`
+        ? `${prompt.tips} The prompt targets ${modelName} and lives in the ${categoryName} category on mycopyprompt.`
         : `A ${categoryName.toLowerCase()} ${isImage ? "image" : "text"} prompt designed for ${modelName}. ${wordCount.toLocaleString()} words long, free to copy and use.${popularity}`,
     },
     {
@@ -620,7 +620,7 @@ function buildPromptFaqs(opts: {
     },
     {
       question: "Is this prompt free to use?",
-      answer: `Yes — every prompt on CopyPrompt is free forever. No paywall, no signup wall for browsing or copying. You can use it for personal or commercial work, just don't redistribute the entire CopyPrompt library.`,
+      answer: `Yes — every prompt on mycopyprompt is free forever. No paywall, no signup wall for browsing or copying. You can use it for personal or commercial work, just don't redistribute the entire mycopyprompt library.`,
     },
     {
       question: "Can I modify the prompt?",

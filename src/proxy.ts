@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { SITE_BRAND } from "@/lib/site-brand";
 
 /**
  * Next.js 16 proxy (was "middleware" in Next.js 15 and earlier).
@@ -21,9 +22,8 @@ const META_CRAWLER_UA =
 const CRAWLER_UA =
   /Twitterbot|LinkedInBot|WhatsApp|Slackbot|Discordbot|Googlebot|bingbot|Applebot/i;
 
-const OG_TITLE = "CopyPrompt — The fastest way to find AI prompts";
-const OG_DESCRIPTION =
-  "The fastest way to find, copy and paste prompts for every AI tool. Free forever.";
+const OG_TITLE = SITE_BRAND.defaultTitle;
+const OG_DESCRIPTION = SITE_BRAND.description;
 
 function metaCrawlerHtml(origin: string): string {
   const pageUrl = `${origin}/`;
@@ -36,13 +36,13 @@ function metaCrawlerHtml(origin: string): string {
 <meta name="description" content="${OG_DESCRIPTION}"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="${pageUrl}"/>
-<meta property="og:site_name" content="CopyPrompt"/>
+<meta property="og:site_name" content="${SITE_BRAND.name}"/>
 <meta property="og:title" content="${OG_TITLE}"/>
 <meta property="og:description" content="${OG_DESCRIPTION}"/>
 <meta property="og:image" content="${ogImage}"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
-<meta property="og:image:alt" content="CopyPrompt — free AI prompts for every tool"/>
+<meta property="og:image:alt" content="${SITE_BRAND.ogImageAlt}"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${OG_TITLE}"/>
 <meta name="twitter:description" content="Search, copy, paste. Prompts for every AI tool. Free forever."/>

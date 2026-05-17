@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_BRAND } from "@/lib/site-brand";
 
 /**
  * Web app manifest.
@@ -10,8 +11,8 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CopyPrompt — The fastest way to find AI prompts",
-    short_name: "CopyPrompt",
+    name: SITE_BRAND.defaultTitle,
+    short_name: SITE_BRAND.name,
     description:
       "Search, copy, paste. Free curated prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every AI tool.",
     start_url: "/",

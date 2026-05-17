@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getSiteHostname, SITE_BRAND } from "@/lib/site-brand";
 
 /**
  * Default Open Graph / WhatsApp / social preview for the homepage and
@@ -7,7 +8,7 @@ import { ImageResponse } from "next/og";
  * Served at `/opengraph-image` (1200×630). WhatsApp, iMessage, Slack,
  * X, and LinkedIn all read `og:image` from this.
  */
-export const alt = "CopyPrompt — free AI prompts for every tool";
+export const alt = SITE_BRAND.ogImageAlt;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -84,7 +85,7 @@ export default function Image() {
               fontWeight: 800,
             }}
           >
-            C
+            m
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div
@@ -94,7 +95,7 @@ export default function Image() {
                 letterSpacing: -1,
               }}
             >
-              CopyPrompt
+              {SITE_BRAND.name}
             </div>
             <div
               style={{
@@ -200,7 +201,7 @@ export default function Image() {
               color: "#7E5BEF",
             }}
           >
-            copy-prompt.vercel.app
+            {getSiteHostname()}
           </div>
         </div>
       </div>

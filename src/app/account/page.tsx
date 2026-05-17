@@ -17,7 +17,7 @@ import { requireUser } from "@/server/lib/auth";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Manage your CopyPrompt account.",
+  description: "Manage your mycopyprompt account.",
   robots: { index: false, follow: false },
 };
 

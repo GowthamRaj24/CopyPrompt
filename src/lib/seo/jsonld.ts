@@ -22,8 +22,10 @@
  *   - URLs are absolutized with `abs()` so they're crawlable
  */
 
-const SITE_NAME = "CopyPrompt";
-const SITE_LEGAL_NAME = "CopyPrompt";
+import { SITE_BRAND } from "@/lib/site-brand";
+
+const SITE_NAME = SITE_BRAND.name;
+const SITE_LEGAL_NAME = SITE_BRAND.name;
 const SITE_TAGLINE =
   "The fastest way to find AI prompts. Free, curated, copy-paste ready.";
 

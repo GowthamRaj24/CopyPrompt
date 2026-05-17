@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy",
   description:
-    "How CopyPrompt collects, uses, and stores your data. Short version: we collect almost nothing.",
+    "How mycopyprompt collects, uses, and stores your data. Short version: we collect almost nothing.",
 };
 
 const LAST_UPDATED = "May 11, 2026";
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <div className="prose space-y-6 text-[15px] leading-[1.75] text-foreground/90">
           <Section title="The short version">
             <p>
-              CopyPrompt is free and ad-free. We don&apos;t sell your data.
+              mycopyprompt is free and ad-free. We don&apos;t sell your data.
               We don&apos;t track you across the web. We collect the bare
               minimum needed to run the service.
             </p>
@@ -96,10 +96,10 @@ export default function PrivacyPage() {
             <p>
               Questions? Email{" "}
               <a
-                href="mailto:hello@copyprompt.dev"
+                href="mailto:hello@mycopyprompt.in"
                 className="link-underline text-primary"
               >
-                hello@copyprompt.dev
+                hello@mycopyprompt.in
               </a>
               .
             </p>

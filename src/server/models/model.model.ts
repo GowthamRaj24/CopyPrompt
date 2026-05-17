@@ -1,7 +1,7 @@
 import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
- * AI models supported on CopyPrompt.
+ * AI models supported on mycopyprompt.
  * Examples: flux-dev, flux-schnell, flux-pro, midjourney, sdxl, dall-e-3, chatgpt, claude
  */
 export const models = pgTable("models", {

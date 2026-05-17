@@ -3,7 +3,7 @@
  */
 
 export const APP = {
-  NAME: "CopyPrompt",
+  NAME: "mycopyprompt",
   TAGLINE: "Find the perfect Flux prompt in seconds.",
   DEFAULT_PAGE_SIZE: 24,
   MAX_PAGE_SIZE: 60,

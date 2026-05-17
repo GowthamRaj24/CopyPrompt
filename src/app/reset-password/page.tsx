@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "./components/ResetPasswordForm";
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Set a new password for your CopyPrompt account.",
+  description: "Set a new password for your mycopyprompt account.",
 };
 
 interface PageProps {

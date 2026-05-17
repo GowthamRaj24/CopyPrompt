@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Terms",
   description:
-    "The terms governing your use of CopyPrompt — short, fair, and written in plain English.",
+    "The terms governing your use of mycopyprompt — short, fair, and written in plain English.",
 };
 
 const LAST_UPDATED = "May 11, 2026";
@@ -31,7 +31,7 @@ export default function TermsPage() {
         <div className="space-y-6 text-[15px] leading-[1.75] text-foreground/90">
           <Section title="Use of the service">
             <p>
-              CopyPrompt is free to use. You can search, copy, and paste
+              mycopyprompt is free to use. You can search, copy, and paste
               any prompt without an account. With an account, you can save
               favorites and submit prompts.
             </p>
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
           <Section title="Content you submit">
             <p>
-              By submitting a prompt, you grant CopyPrompt a non-exclusive,
+              By submitting a prompt, you grant mycopyprompt a non-exclusive,
               royalty-free license to display, distribute, and share it on
               the platform. You keep the copyright. You can request
               removal at any time.
@@ -55,7 +55,7 @@ export default function TermsPage() {
 
           <Section title="Content we display">
             <p>
-              Prompts on CopyPrompt come from the community. We review
+              Prompts on mycopyprompt come from the community. We review
               every submission, but we&apos;re not perfect. If you find a
               prompt that violates our rules, email us and we&apos;ll
               remove it.
@@ -64,7 +64,7 @@ export default function TermsPage() {
 
           <Section title="No warranties">
             <p>
-              CopyPrompt is provided &ldquo;as is.&rdquo; We don&apos;t
+              mycopyprompt is provided &ldquo;as is.&rdquo; We don&apos;t
               guarantee specific results from any prompt. Outputs from AI
               tools may be inaccurate, offensive, or copyrighted by third
               parties — that&apos;s on you to verify.
@@ -90,10 +90,10 @@ export default function TermsPage() {
             <p>
               Questions? Email{" "}
               <a
-                href="mailto:hello@copyprompt.dev"
+                href="mailto:hello@mycopyprompt.in"
                 className="link-underline text-primary"
               >
-                hello@copyprompt.dev
+                hello@mycopyprompt.in
               </a>
               .
             </p>

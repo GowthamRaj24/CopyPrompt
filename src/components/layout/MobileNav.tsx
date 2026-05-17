@@ -2,6 +2,7 @@
 
 import { MenuIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
+import { SITE_BRAND } from "@/lib/site-brand";
 import { useState } from "react";
 import {
   Sheet,
@@ -70,7 +71,7 @@ export function MobileNav({ user }: MobileNavProps) {
                 </svg>
               </span>
               <span className="text-[14px] font-semibold tracking-[-0.01em]">
-                CopyPrompt
+                mycopyprompt
               </span>
             </Link>
           </SheetTitle>

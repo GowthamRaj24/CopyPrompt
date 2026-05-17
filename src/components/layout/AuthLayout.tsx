@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, BoltIcon, ShieldCheckIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
+import { SITE_BRAND } from "@/lib/site-brand";
 
 interface AuthLayoutProps {
   title: string;
@@ -58,7 +59,7 @@ export function AuthLayout({
             <Link
               href="/"
               className="reveal mb-9 inline-flex items-center gap-2 transition-opacity hover:opacity-90"
-              aria-label="CopyPrompt home"
+              aria-label={`${SITE_BRAND.name} home`}
             >
               <span
                 aria-hidden
@@ -79,7 +80,7 @@ export function AuthLayout({
                 </svg>
               </span>
               <span className="text-[15px] font-semibold tracking-[-0.01em]">
-                CopyPrompt
+                {SITE_BRAND.name}
               </span>
             </Link>
 

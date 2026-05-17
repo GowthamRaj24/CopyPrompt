@@ -53,7 +53,7 @@ export function DangerZoneForms({ isAdmin, email }: Props) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `copyprompt-export-${Date.now()}.json`;
+      a.download = `mycopyprompt-export-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

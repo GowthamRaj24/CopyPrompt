@@ -8,7 +8,7 @@ import { SignInForm } from "./components/SignInForm";
 export const metadata: Metadata = {
   title: "Sign in",
   description:
-    "Sign in to CopyPrompt to save favorites, submit prompts, and unlock premium features.",
+    "Sign in to mycopyprompt to save favorites, submit prompts, and unlock premium features.",
 };
 
 interface PageProps {

@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import { SITE_BRAND } from "@/lib/site-brand";
 import { env } from "@/server/config/env";
 
 /**
@@ -49,7 +50,7 @@ interface SendEmailOptions {
 
 async function sendEmail(opts: SendEmailOptions): Promise<void> {
   const transporter = getTransporter();
-  const fromName = env.SMTP_FROM_NAME ?? "CopyPrompt";
+  const fromName = env.SMTP_FROM_NAME ?? SITE_BRAND.name;
   const fromEmail = env.SMTP_FROM ?? env.SMTP_USER ?? "noreply@example.com";
   const from = `"${fromName}" <${fromEmail}>`;
 
@@ -102,14 +103,14 @@ const buttonStyle = `display: inline-block; background: ${COLOR_PRIMARY}; color:
 
 function brandHeader(): string {
   return `<div style="text-align: center; margin-bottom: 24px;">
-    <span style="display: inline-block; vertical-align: middle; width: 24px; height: 24px; line-height: 24px; background: ${COLOR_PRIMARY}; color: ${COLOR_PRIMARY_FG}; border-radius: 6px; font-size: 14px; font-weight: 700; text-align: center;">C</span>
-    <span style="display: inline-block; vertical-align: middle; font-weight: 600; font-size: 16px; margin-left: 8px; letter-spacing: -0.01em;">CopyPrompt</span>
+    <span style="display: inline-block; vertical-align: middle; width: 24px; height: 24px; line-height: 24px; background: ${COLOR_PRIMARY}; color: ${COLOR_PRIMARY_FG}; border-radius: 6px; font-size: 14px; font-weight: 700; text-align: center;">m</span>
+    <span style="display: inline-block; vertical-align: middle; font-weight: 600; font-size: 16px; margin-left: 8px; letter-spacing: -0.01em;">${SITE_BRAND.name}</span>
   </div>`;
 }
 
 function footer(): string {
   return `<p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; text-align: center; margin-top: 24px;">
-    CopyPrompt — The best free prompts for every AI tool.
+    ${SITE_BRAND.name} — The best free prompts for every AI tool.
   </p>`;
 }
 
@@ -122,11 +123,11 @@ export async function sendVerificationEmail(
   name?: string,
 ): Promise<void> {
   const greeting = name ? `Hi ${name},` : "Welcome!";
-  const subject = "Confirm your CopyPrompt email";
+  const subject = `Confirm your ${SITE_BRAND.name} email`;
 
   const text = `${greeting}
 
-Thanks for signing up for CopyPrompt. To finish creating your account, please verify your email by clicking this link:
+Thanks for signing up for ${SITE_BRAND.name}. To finish creating your account, please verify your email by clicking this link:
 
 ${verificationUrl}
 
@@ -177,9 +178,9 @@ export async function sendPasswordResetEmail(
   email: string,
   resetUrl: string,
 ): Promise<void> {
-  const subject = "Reset your CopyPrompt password";
+  const subject = `Reset your ${SITE_BRAND.name} password`;
 
-  const text = `Someone requested a password reset for your CopyPrompt account.
+  const text = `Someone requested a password reset for your ${SITE_BRAND.name} account.
 
 Click this link to set a new password:
 ${resetUrl}
@@ -200,7 +201,7 @@ If you didn't request this, you can safely ignore this email - your password wil
     </h1>
 
     <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-      Someone requested a password reset for your CopyPrompt account. Click the button below to set a new password.
+      Someone requested a password reset for your ${SITE_BRAND.name} account. Click the button below to set a new password.
     </p>
 
     <div style="text-align: center; margin: 32px 0;">

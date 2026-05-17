@@ -59,7 +59,7 @@ const SUBMISSION_STEPS = [
   {
     icon: SparklesIcon,
     title: "It goes live",
-    body: "Public on CopyPrompt with your attribution. Email confirms.",
+    body: "Public on mycopyprompt with your attribution. Email confirms.",
     accent: false,
   },
 ] as const;
