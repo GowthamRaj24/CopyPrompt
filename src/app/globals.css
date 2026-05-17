@@ -1,0 +1,1263 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Modern, premium SaaS — Linear / Vercel / Raycast aesthetic.
+   ═══════════════════════════════════════════════════════════════ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono), "Geist Mono", ui-monospace, "SF Mono", Menlo,
+    monospace;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Modern radii */
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 3);
+  --radius-4xl: calc(var(--radius) * 4);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COLOR SYSTEM
+   - Dark: deep cool slate (#0A0A0F-ish) with bright Indigo primary
+   - Light: clean off-white with the same Indigo
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Light mode — "Stratus" premium ──────────────────────────
+     Two-layer surface system:
+       background  : oklch 0.985 (soft cool off-white)
+       card/popover: oklch 1 (pure white) — pops against bg
+     Borders and shadows carry a faint indigo undertone so depth
+     reads as a cohesive material, not a flat gray gradient.
+     ─────────────────────────────────────────────────────────── */
+  --background: oklch(0.985 0.003 264);
+  --foreground: oklch(0.18 0.012 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.012 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.012 264);
+  --primary: oklch(0.54 0.225 270);            /* slightly deeper for white-bg contrast */
+  --primary-foreground: oklch(0.99 0.002 264);
+  --secondary: oklch(0.965 0.005 264);
+  --secondary-foreground: oklch(0.18 0.012 264);
+  --muted: oklch(0.965 0.005 264);
+  --muted-foreground: oklch(0.46 0.014 264);
+  --accent: oklch(0.96 0.006 264);
+  --accent-foreground: oklch(0.18 0.012 264);
+  --destructive: oklch(0.58 0.225 25);
+  --border: oklch(0.915 0.006 264);            /* visible, refined, slight indigo cast */
+  --input: oklch(0.94 0.005 264);
+  --ring: oklch(0.54 0.225 270);
+  --chart-1: oklch(0.54 0.225 270);
+  --chart-2: oklch(0.6 0.18 220);
+  --chart-3: oklch(0.62 0.18 180);
+  --chart-4: oklch(0.65 0.18 140);
+  --chart-5: oklch(0.62 0.2 30);
+  --radius: 0.625rem;                          /* 10px — modern soft */
+  --sidebar: oklch(0.985 0.003 264);
+  --sidebar-foreground: oklch(0.18 0.012 264);
+  --sidebar-primary: oklch(0.54 0.225 270);
+  --sidebar-primary-foreground: oklch(0.99 0.002 264);
+  --sidebar-accent: oklch(0.96 0.006 264);
+  --sidebar-accent-foreground: oklch(0.18 0.012 264);
+  --sidebar-border: oklch(0.915 0.006 264);
+  --sidebar-ring: oklch(0.54 0.225 270);
+
+  /* Premium effect tokens — indigo-tinted shadows = cohesive depth */
+  --glow: oklch(0.54 0.225 270 / 0.22);
+  --gradient-hero:
+    radial-gradient(ellipse 80% 50% at 50% 0%, oklch(0.54 0.225 270 / 0.10), transparent 70%);
+  --shadow-soft: 0 1px 2px 0 oklch(0.25 0.05 264 / 0.06);
+  --shadow-card:
+    0 2px 4px -1px oklch(0.25 0.05 264 / 0.04),
+    0 12px 28px -6px oklch(0.25 0.05 264 / 0.10);
+  --shadow-pop:
+    0 4px 12px -2px oklch(0.25 0.05 264 / 0.08),
+    0 28px 64px -16px oklch(0.25 0.05 264 / 0.20);
+}
+
+.dark {
+  /* Dark mode — premium SaaS */
+  --background: oklch(0.115 0.008 264);    /* near-black, slight cool */
+  --foreground: oklch(0.96 0.003 264);
+  --card: oklch(0.155 0.008 264);          /* lifted card surface */
+  --card-foreground: oklch(0.96 0.003 264);
+  --popover: oklch(0.18 0.008 264);
+  --popover-foreground: oklch(0.96 0.003 264);
+  --primary: oklch(0.66 0.21 270);         /* indigo-500-ish, vibrant */
+  --primary-foreground: oklch(0.99 0.003 264);
+  --secondary: oklch(0.20 0.008 264);
+  --secondary-foreground: oklch(0.96 0.003 264);
+  --muted: oklch(0.18 0.008 264);
+  --muted-foreground: oklch(0.66 0.013 264);
+  --accent: oklch(0.20 0.008 264);
+  --accent-foreground: oklch(0.96 0.003 264);
+  --destructive: oklch(0.64 0.22 25);
+  --border: oklch(1 0 0 / 0.08);            /* low-opacity white border */
+  --input: oklch(1 0 0 / 0.06);
+  --ring: oklch(0.66 0.21 270);
+  --chart-1: oklch(0.66 0.21 270);
+  --chart-2: oklch(0.68 0.18 220);
+  --chart-3: oklch(0.7 0.18 180);
+  --chart-4: oklch(0.74 0.18 140);
+  --chart-5: oklch(0.7 0.20 30);
+  --sidebar: oklch(0.155 0.008 264);
+  --sidebar-foreground: oklch(0.96 0.003 264);
+  --sidebar-primary: oklch(0.66 0.21 270);
+  --sidebar-primary-foreground: oklch(0.99 0.003 264);
+  --sidebar-accent: oklch(0.20 0.008 264);
+  --sidebar-accent-foreground: oklch(0.96 0.003 264);
+  --sidebar-border: oklch(1 0 0 / 0.08);
+  --sidebar-ring: oklch(0.66 0.21 270);
+
+  --glow: oklch(0.66 0.21 270 / 0.32);
+  --gradient-hero:
+    radial-gradient(ellipse 80% 50% at 50% 0%, oklch(0.66 0.21 270 / 0.12), transparent 70%);
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.30);
+  --shadow-card: 0 8px 24px -8px rgb(0 0 0 / 0.50);
+  --shadow-pop: 0 24px 64px -16px rgb(0 0 0 / 0.65);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "ss02", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Solid base color lives on <html> so the layered atmosphere on
+       <body>'s pseudo-elements (z-index < 0) has a canvas to paint
+       against. Without this, negative-z elements can fall through. */
+    background-color: var(--background);
+  }
+  body {
+    @apply text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv11";
+    /* body itself is transparent — every visual atmosphere layer
+       below is painted by body::before (mesh) and body::after
+       (constellation + drifting wisps). Keeps the stacking clean
+       and lets us animate without hitting the document content. */
+    background-color: transparent;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ATMOSPHERE — Layer 1 of 2 (back)
+     Aurora mesh: 8 soft color anchors give the canvas a rich,
+     iridescent feel without distracting from reading area.
+
+       · top-left   violet bloom         (edge)
+       · top-right  cyan whisper         (edge)
+       · mid-left   rose haze            (edge)
+       · mid-right  warm peach           (edge)
+       · bottom     deep indigo wash     (edge)
+       · upper inner violet (new)        (interior, low opacity)
+       · lower inner teal   (new)        (interior, low opacity)
+       · center halo        (new)        (interior, ultra low)
+
+     position: fixed → atmosphere stays put while page scrolls.
+     z-index: -2 → behind everything except the html bg-color.
+     pointer-events: none → never blocks clicks.
+     ═══════════════════════════════════════════════════════════════ */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -2;
+    /* Opacity bumped ~2x vs the original so the atmosphere is
+       actually felt on bright displays. Each anchor is still
+       below 25% so reading area never competes with the canvas. */
+    background-image:
+      radial-gradient(ellipse 65% 40% at 12% -8%, oklch(0.68 0.18 295 / 0.22), transparent 60%),
+      radial-gradient(ellipse 55% 38% at 92% -3%, oklch(0.7 0.16 220 / 0.18), transparent 62%),
+      radial-gradient(ellipse 40% 55% at -8% 45%, oklch(0.76 0.16 340 / 0.13), transparent 65%),
+      radial-gradient(ellipse 40% 50% at 108% 55%, oklch(0.78 0.14 65 / 0.11), transparent 65%),
+      radial-gradient(ellipse 75% 30% at 50% 108%, oklch(0.6 0.225 275 / 0.15), transparent 70%),
+      radial-gradient(ellipse 30% 25% at 28% 22%, oklch(0.72 0.16 285 / 0.10), transparent 65%),
+      radial-gradient(ellipse 30% 25% at 72% 70%, oklch(0.72 0.15 205 / 0.09), transparent 65%),
+      radial-gradient(ellipse 40% 30% at 50% 45%, oklch(0.78 0.10 295 / 0.06), transparent 75%);
+  }
+
+  .dark body::before {
+    background-image:
+      radial-gradient(ellipse 65% 40% at 12% -8%, oklch(0.66 0.21 290 / 0.14), transparent 65%),
+      radial-gradient(ellipse 55% 38% at 92% -3%, oklch(0.65 0.18 220 / 0.11), transparent 65%),
+      radial-gradient(ellipse 40% 55% at -8% 45%, oklch(0.66 0.21 320 / 0.07), transparent 70%),
+      radial-gradient(ellipse 40% 50% at 108% 55%, oklch(0.7 0.18 40 / 0.05), transparent 70%),
+      radial-gradient(ellipse 75% 30% at 50% 108%, oklch(0.66 0.21 270 / 0.10), transparent 70%),
+      radial-gradient(ellipse 30% 25% at 28% 22%, oklch(0.68 0.2 290 / 0.07), transparent 70%),
+      radial-gradient(ellipse 30% 25% at 72% 70%, oklch(0.65 0.16 210 / 0.06), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 50% 45%, oklch(0.72 0.1 280 / 0.04), transparent 75%);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ATMOSPHERE — Layer 2 of 2 (front)
+     Three pieces on a single pseudo-element to keep paint cost flat:
+       (a) faint grid lattice — structural backbone (NEW)
+       (b) tactile dot constellation — fine pattern at lattice
+           intersections (now boosted to be actually visible)
+       (c) drifting iridescent wisps — animated translate3d only
+
+     A vignette mask fades all three at the edges so copy near
+     the page borders is never disturbed.
+     ═══════════════════════════════════════════════════════════════ */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+      /* Drifting wisps */
+      radial-gradient(ellipse 30% 28% at 35% 30%, oklch(0.68 0.18 295 / 0.14), transparent 65%) no-repeat,
+      radial-gradient(ellipse 28% 26% at 70% 72%, oklch(0.70 0.15 220 / 0.12), transparent 65%) no-repeat,
+      /* Constellation — 28px pitch with a clearly visible 0.22 opacity */
+      radial-gradient(circle at 1px 1px, oklch(0.20 0.04 264 / 0.22) 1px, transparent 0) 0 0 / 28px 28px repeat,
+      /* Lattice — vertical and horizontal hairlines at 56px (2× dot pitch) */
+      linear-gradient(to right, oklch(0.20 0.04 264 / 0.05) 1px, transparent 1px) 0 0 / 56px 56px repeat,
+      linear-gradient(to bottom, oklch(0.20 0.04 264 / 0.05) 1px, transparent 1px) 0 0 / 56px 56px repeat;
+    -webkit-mask-image:
+      radial-gradient(ellipse 80% 70% at center, black 25%, transparent 95%);
+            mask-image:
+      radial-gradient(ellipse 80% 70% at center, black 25%, transparent 95%);
+    animation: atmosphere-drift 60s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .dark body::after {
+    background:
+      radial-gradient(ellipse 30% 28% at 35% 30%, oklch(0.66 0.21 290 / 0.10), transparent 65%) no-repeat,
+      radial-gradient(ellipse 28% 26% at 70% 72%, oklch(0.65 0.18 220 / 0.08), transparent 65%) no-repeat,
+      radial-gradient(circle at 1px 1px, oklch(1 0 0 / 0.10) 1px, transparent 0) 0 0 / 28px 28px repeat,
+      linear-gradient(to right, oklch(1 0 0 / 0.025) 1px, transparent 1px) 0 0 / 56px 56px repeat,
+      linear-gradient(to bottom, oklch(1 0 0 / 0.025) 1px, transparent 1px) 0 0 / 56px 56px repeat;
+  }
+
+  @keyframes atmosphere-drift {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(1.2%, -0.8%, 0); }
+  }
+
+  /* Cap animation cost on mobile / coarse pointers — the visual
+     delta over a 60s loop is imperceptible there but the
+     compositor work is real. */
+  @media (max-width: 768px), (pointer: coarse) {
+    body::after { animation: none; }
+    .ambient-orbs .orb { animation: none; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     AMBIENT ORBS — five colored blobs floating slowly
+     Sits between body::before (mesh) and body::after (texture).
+     Each orb's animation has a different period + path so the
+     composition never looks synchronized.
+     ═══════════════════════════════════════════════════════════════ */
+  .ambient-orbs {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    /* Above body::before (-2) but below body::after (-1)... wait, both
+       are -1/-2 inside body's stacking. Since AmbientOrbs is a flow
+       child of body with `position: fixed; z-index: -1`, it lands on
+       the same layer as body::after. The orbs are then absolutely
+       positioned children, so they paint on top of body::before but
+       below positioned content. */
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    will-change: transform;
+    /* Hint the compositor — promotes each orb to its own layer */
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ─ Indigo (the "blue" the user asked to improve) ─────────
+     Now noticeably saturated — sits top-left, drifts diagonally. */
+  .orb-indigo {
+    width: 520px; height: 520px;
+    top: -12%; left: -8%;
+    background: radial-gradient(circle at center,
+      oklch(0.66 0.21 270 / 0.55) 0%,
+      oklch(0.66 0.21 270 / 0.10) 60%,
+      transparent 75%);
+    animation: orb-drift-a 38s ease-in-out infinite;
+  }
+
+  /* ─ Cyan ─ top-right, drifts in a tight loop */
+  .orb-cyan {
+    width: 460px; height: 460px;
+    top: -8%; right: -10%;
+    background: radial-gradient(circle at center,
+      oklch(0.72 0.16 220 / 0.42) 0%,
+      oklch(0.72 0.16 220 / 0.08) 60%,
+      transparent 75%);
+    animation: orb-drift-b 32s ease-in-out infinite;
+  }
+
+  /* ─ Violet ─ middle of the page, slow figure-8 */
+  .orb-violet {
+    width: 540px; height: 540px;
+    top: 35%; left: 30%;
+    background: radial-gradient(circle at center,
+      oklch(0.68 0.22 300 / 0.38) 0%,
+      oklch(0.68 0.22 300 / 0.08) 60%,
+      transparent 75%);
+    animation: orb-drift-c 44s ease-in-out infinite;
+  }
+
+  /* ─ Teal ─ bottom-left, gentle sway */
+  .orb-teal {
+    width: 480px; height: 480px;
+    bottom: -8%; left: 15%;
+    background: radial-gradient(circle at center,
+      oklch(0.72 0.15 180 / 0.36) 0%,
+      oklch(0.72 0.15 180 / 0.08) 60%,
+      transparent 75%);
+    animation: orb-drift-d 28s ease-in-out infinite;
+  }
+
+  /* ─ Rose ─ bottom-right, drifts up-and-left */
+  .orb-rose {
+    width: 440px; height: 440px;
+    bottom: -10%; right: -6%;
+    background: radial-gradient(circle at center,
+      oklch(0.74 0.17 340 / 0.34) 0%,
+      oklch(0.74 0.17 340 / 0.08) 60%,
+      transparent 75%);
+    animation: orb-drift-e 36s ease-in-out infinite;
+  }
+
+  /* ─ Dark mode — same composition, knocked back a touch ────
+     Avoids overwhelming the deeper canvas while keeping the
+     colored "glow" character intact. */
+  .dark .orb-indigo {
+    background: radial-gradient(circle at center,
+      oklch(0.66 0.21 270 / 0.38) 0%,
+      oklch(0.66 0.21 270 / 0.06) 60%,
+      transparent 75%);
+  }
+  .dark .orb-cyan {
+    background: radial-gradient(circle at center,
+      oklch(0.72 0.16 220 / 0.28) 0%,
+      oklch(0.72 0.16 220 / 0.05) 60%,
+      transparent 75%);
+  }
+  .dark .orb-violet {
+    background: radial-gradient(circle at center,
+      oklch(0.68 0.22 300 / 0.26) 0%,
+      oklch(0.68 0.22 300 / 0.05) 60%,
+      transparent 75%);
+  }
+  .dark .orb-teal {
+    background: radial-gradient(circle at center,
+      oklch(0.72 0.15 180 / 0.24) 0%,
+      oklch(0.72 0.15 180 / 0.05) 60%,
+      transparent 75%);
+  }
+  .dark .orb-rose {
+    background: radial-gradient(circle at center,
+      oklch(0.74 0.17 340 / 0.22) 0%,
+      oklch(0.74 0.17 340 / 0.05) 60%,
+      transparent 75%);
+  }
+
+  /* ─ Five independent keyframe tracks ─────────────────────
+     Each describes a different translate path; the variety
+     prevents the eye from spotting a loop. All transforms
+     stay under ±10% of viewport so orbs never leave their
+     general "home" quadrant — atmosphere, not chaos. */
+  @keyframes orb-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33%      { transform: translate3d(7%, 4%, 0) scale(1.06); }
+    66%      { transform: translate3d(-3%, 8%, 0) scale(0.96); }
+  }
+  @keyframes orb-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50%      { transform: translate3d(-6%, 7%, 0) scale(1.08); }
+  }
+  @keyframes orb-drift-c {
+    0%   { transform: translate3d(0, 0, 0); }
+    25%  { transform: translate3d(5%, 4%, 0); }
+    50%  { transform: translate3d(8%, -4%, 0); }
+    75%  { transform: translate3d(-4%, -7%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+  @keyframes orb-drift-d {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50%      { transform: translate3d(6%, -8%, 0) scale(1.05); }
+  }
+  @keyframes orb-drift-e {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    40%      { transform: translate3d(-7%, -5%, 0); }
+    80%      { transform: translate3d(4%, -8%, 0); }
+  }
+  /* Tighter, more confident headings */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+  h1 { letter-spacing: -0.04em; font-weight: 700; }
+  h2 { letter-spacing: -0.03em; }
+
+  /* Code/mono w/ ligatures */
+  code, pre, kbd, samp {
+    font-feature-settings: "calt", "ss01";
+  }
+
+  /* Selection */
+  ::selection {
+    background: oklch(0.66 0.21 270 / 0.30);
+    color: var(--foreground);
+  }
+
+  /* Scrollbar — ultra-refined, theme-aware */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.25 0.05 264 / 0.14);
+    border-radius: 100px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.25 0.05 264 / 0.26);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: oklch(1 0 0 / 0.06);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: oklch(1 0 0 / 0.12);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Glass morphism — used sparingly on key surfaces */
+.glass {
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.glass-strong {
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+/* Soft shadows tied to tokens */
+.shadow-soft   { box-shadow: var(--shadow-soft); }
+.shadow-card   { box-shadow: var(--shadow-card); }
+.shadow-pop    { box-shadow: var(--shadow-pop); }
+
+/* Subtle indigo glow — for focus, hero, primary CTA */
+.glow-primary {
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 0 0 4px oklch(0.66 0.21 270 / 0.14),
+    0 24px 64px -24px var(--glow);
+}
+
+/* Hero atmosphere — radial gradient that stays subtle */
+.bg-hero {
+  background-image: var(--gradient-hero);
+}
+
+/* Fine grid pattern — Linear-style */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black, transparent);
+}
+
+/* Smaller, denser grid — for cards / surfaces */
+.bg-grid-fine {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse 70% 70% at center, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at center, black, transparent);
+}
+
+/* Dot pattern — softer alternative to grid */
+.bg-dots {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 70% 60% at center, black, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at center, black, transparent);
+}
+
+/* Aurora — slow drifting gradient ribbon (restrained) */
+@keyframes aurora-drift {
+  0%   { transform: translate3d(-10%, 0, 0) rotate(0deg);  opacity: 0.5; }
+  50%  { transform: translate3d(10%, 5%, 0) rotate(2deg);   opacity: 0.7; }
+  100% { transform: translate3d(-10%, 0, 0) rotate(0deg);  opacity: 0.5; }
+}
+
+.bg-aurora {
+  position: absolute;
+  top: -30%;
+  left: -10%;
+  right: -10%;
+  height: 60%;
+  /* Three drifting clouds — indigo + cyan + violet — give the
+     hero a layered atmospheric quality, not a single flat wash. */
+  background:
+    radial-gradient(ellipse 50% 70% at 25% 50%, oklch(0.66 0.21 270 / 0.18), transparent 60%),
+    radial-gradient(ellipse 45% 65% at 70% 45%, oklch(0.65 0.18 220 / 0.12), transparent 60%),
+    radial-gradient(ellipse 35% 55% at 50% 80%, oklch(0.7 0.18 320 / 0.08), transparent 65%);
+  filter: blur(64px);
+  animation: aurora-drift 28s ease-in-out infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Soft glowing orb — for hero / CTA backgrounds */
+.bg-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.bg-orb-primary { background: oklch(0.66 0.21 270 / 0.28); }
+.bg-orb-violet  { background: oklch(0.6 0.22 300 / 0.18); }
+.bg-orb-cyan    { background: oklch(0.7 0.18 220 / 0.14); }
+
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.04); }
+}
+
+.animate-orb-pulse {
+  animation: orb-pulse 9s ease-in-out infinite;
+}
+
+/* Spotlight wash — radial gradient anchored to a section corner */
+.bg-spotlight-top {
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    oklch(0.66 0.21 270 / 0.07),
+    transparent 70%
+  );
+}
+
+.bg-spotlight-bottom {
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 100%,
+    oklch(0.66 0.21 270 / 0.07),
+    transparent 70%
+  );
+}
+
+/* Mesh gradient — multi-color wash for CTA sections.
+   Four anchor points (indigo / cyan / violet / soft rose) blended
+   smoothly, so the surface reads as a single iridescent material
+   rather than overlapping spotlights. */
+.bg-mesh {
+  background:
+    radial-gradient(ellipse 45% 55% at 15% 20%, oklch(0.6 0.225 275 / 0.12), transparent 60%),
+    radial-gradient(ellipse 40% 50% at 85% 30%, oklch(0.68 0.16 220 / 0.09), transparent 62%),
+    radial-gradient(ellipse 35% 45% at 30% 90%, oklch(0.7 0.18 325 / 0.07), transparent 65%),
+    radial-gradient(ellipse 40% 50% at 80% 85%, oklch(0.74 0.16 350 / 0.05), transparent 65%);
+}
+
+/* Aurora mesh — full-bleed section background. Same DNA as the
+   body atmosphere but stronger; use behind hero sections that
+   want their OWN ambient lighting on top of the page's.
+   Eight anchors total — five at the edges (the originals) plus
+   three interior whispers for added iridescence. */
+.bg-aurora-mesh {
+  background:
+    radial-gradient(ellipse 65% 40% at 12% 0%, oklch(0.68 0.18 295 / 0.16), transparent 60%),
+    radial-gradient(ellipse 55% 38% at 92% 5%, oklch(0.7 0.16 220 / 0.12), transparent 62%),
+    radial-gradient(ellipse 40% 55% at 0% 50%, oklch(0.76 0.16 340 / 0.08), transparent 65%),
+    radial-gradient(ellipse 40% 50% at 100% 55%, oklch(0.78 0.14 65 / 0.06), transparent 65%),
+    radial-gradient(ellipse 75% 30% at 50% 100%, oklch(0.6 0.225 275 / 0.10), transparent 70%),
+    radial-gradient(ellipse 28% 22% at 30% 25%, oklch(0.72 0.16 285 / 0.07), transparent 65%),
+    radial-gradient(ellipse 28% 22% at 72% 68%, oklch(0.72 0.15 205 / 0.06), transparent 65%),
+    radial-gradient(ellipse 35% 25% at 50% 50%, oklch(0.78 0.10 295 / 0.04), transparent 70%);
+}
+
+/* Atmosphere rich — even denser layer used behind premium hero
+   surfaces (e.g. the homepage hero, /submit). Drops a constellation
+   on top of the aurora mesh; combine with `relative isolate` on the
+   parent to keep dots from crossing into adjacent sections. */
+.bg-atmosphere-rich {
+  background:
+    /* Mesh */
+    radial-gradient(ellipse 65% 40% at 12% 0%, oklch(0.68 0.18 295 / 0.18), transparent 60%),
+    radial-gradient(ellipse 55% 38% at 92% 5%, oklch(0.7 0.16 220 / 0.14), transparent 62%),
+    radial-gradient(ellipse 40% 55% at 0% 50%, oklch(0.76 0.16 340 / 0.09), transparent 65%),
+    radial-gradient(ellipse 40% 50% at 100% 55%, oklch(0.78 0.14 65 / 0.07), transparent 65%),
+    radial-gradient(ellipse 75% 30% at 50% 100%, oklch(0.6 0.225 275 / 0.12), transparent 70%),
+    radial-gradient(ellipse 28% 22% at 30% 25%, oklch(0.72 0.16 285 / 0.08), transparent 65%),
+    radial-gradient(ellipse 28% 22% at 72% 68%, oklch(0.72 0.15 205 / 0.07), transparent 65%),
+    /* Constellation — finer pitch so it reads as texture, not pattern */
+    radial-gradient(circle at 1px 1px, oklch(0.25 0.05 264 / 0.10) 1px, transparent 0) 0 0 / 24px 24px repeat;
+}
+.dark .bg-atmosphere-rich {
+  background:
+    radial-gradient(ellipse 65% 40% at 12% 0%, oklch(0.66 0.21 290 / 0.09), transparent 65%),
+    radial-gradient(ellipse 55% 38% at 92% 5%, oklch(0.65 0.18 220 / 0.07), transparent 65%),
+    radial-gradient(ellipse 40% 55% at 0% 50%, oklch(0.66 0.21 320 / 0.045), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 100% 55%, oklch(0.7 0.18 40 / 0.035), transparent 70%),
+    radial-gradient(ellipse 75% 30% at 50% 100%, oklch(0.66 0.21 270 / 0.06), transparent 70%),
+    radial-gradient(ellipse 28% 22% at 30% 25%, oklch(0.68 0.2 290 / 0.05), transparent 70%),
+    radial-gradient(ellipse 28% 22% at 72% 68%, oklch(0.65 0.16 210 / 0.04), transparent 70%),
+    radial-gradient(circle at 1px 1px, oklch(1 0 0 / 0.05) 1px, transparent 0) 0 0 / 24px 24px repeat;
+}
+
+/* Subtle film grain — tactile texture that elevates flat surfaces.
+   Apply to a fixed/absolute overlay sibling so it doesn't intercept
+   pointer events. Opacity intentionally tiny — meant to be felt,
+   not seen. */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.025;
+}
+.dark .bg-noise {
+  opacity: 0.04;
+}
+
+/* Hide the scrollbar but keep scrolling. Used by horizontal prompt
+   carousels on the homepage — the fade gradients + arrow buttons are
+   the affordance, the scrollbar would clutter the design. */
+.scrollbar-hide {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* legacy IE / old Edge */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari / Opera */
+}
+
+/* Hide the default disclosure triangle on <summary> across browsers
+   so our custom chevron icon is the only visual cue. Tailwind's
+   `list-none` covers Firefox/Chrome but Safari ships an additional
+   `::-webkit-details-marker` that needs a separate rule. */
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  list-style: none;
+}
+
+/* Eyebrow label — small caps mono */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+/* Animated underline link */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Magnetic-feel card lift */
+.lift {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease;
+  will-change: transform;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+/* Tactile press */
+.press {
+  transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Magnetic — for primary CTA buttons */
+.magnetic {
+  transition:
+    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 0.15s ease;
+}
+.magnetic:hover {
+  transform: translateY(-1px);
+}
+.magnetic:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — buttery smooth, 60fps, GPU-friendly
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Reveal up — generic entry */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  animation: reveal-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade in blur — for modal/overlay content */
+@keyframes fade-in-blur {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+.fade-in-blur {
+  animation: fade-in-blur 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero headline entrance — refined blur dissolve */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+.hero-enter {
+  animation: hero-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger delays */
+.delay-1 { animation-delay: 60ms; }
+.delay-2 { animation-delay: 120ms; }
+.delay-3 { animation-delay: 180ms; }
+.delay-4 { animation-delay: 240ms; }
+.delay-5 { animation-delay: 300ms; }
+.delay-6 { animation-delay: 360ms; }
+.delay-7 { animation-delay: 420ms; }
+.delay-8 { animation-delay: 480ms; }
+
+/* Skeleton shimmer — refined timing */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    color-mix(in oklab, var(--muted) 70%, white 4%) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Copy success — refined pulse + glow */
+@keyframes copy-success {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 oklch(0.66 0.21 270 / 0.35);
+  }
+  40% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 10px oklch(0.66 0.21 270 / 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 oklch(0.66 0.21 270 / 0);
+  }
+}
+
+.animate-copy-success {
+  animation: copy-success 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Heart pop */
+@keyframes heart-pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.3); }
+  60%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+.animate-heart-pop {
+  animation: heart-pop 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Spinner */
+@keyframes spin-smooth {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-smooth {
+  animation: spin-smooth 0.9s linear infinite;
+}
+
+/* Glow ring — subtle breathing glow for primary elements */
+@keyframes glow-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.66 0.21 270 / 0); }
+  50%      { box-shadow: 0 0 0 6px oklch(0.66 0.21 270 / 0.08); }
+}
+
+.animate-glow-breathe {
+  animation: glow-breathe 3s ease-in-out infinite;
+}
+
+/* ─── Submit page — section attention pulse ─────────────────── */
+@keyframes section-glow {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.66 0.21 270 / 0); }
+  50%      { box-shadow: 0 0 0 4px oklch(0.66 0.21 270 / 0.06); }
+}
+.section-active {
+  animation: section-glow 2.6s ease-in-out infinite;
+}
+
+/* ─── Submit page — chip pop animation ─────────────────────── */
+@keyframes chip-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.chip-pop {
+  animation: chip-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Submit page — content-fit textarea (60fps autoresize) ───
+   Uses the modern `field-sizing: content` property where supported
+   (Chromium 123+, Safari 17.4+). Falls back to a min height in older
+   browsers — the textarea then scrolls instead of growing, which is
+   acceptable for a small audience.
+
+   Why CSS instead of JS: any JS-driven autosize that listens to `input`
+   events triggers layout on every keystroke and easily blows the
+   16.7ms frame budget on long prompts. `field-sizing` lets the browser
+   do the resize on the compositor thread. */
+.autosize {
+  field-sizing: content;
+  min-height: 6.5rem;
+  max-height: 32rem;
+}
+
+/* ─── Global motion accessibility ───────────────────────────────
+   Honor users who opt out of motion. Disables decorative animations
+   (orb pulse, chip pop, confetti, sliding indicators) while keeping
+   essential transforms instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Thank-you page — confetti particles ──────────────────── */
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -30vh, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--cx, 0px), 110vh, 0) rotate(720deg);
+    opacity: 0;
+  }
+}
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: confetti-fall var(--dur, 3.6s) cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s) forwards;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* Sparkle wink — used at the top of the live preview when fields update */
+@keyframes sparkle-wink {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
+  50%      { transform: scale(1.15) rotate(15deg); opacity: 1; }
+}
+.animate-sparkle-wink {
+  animation: sparkle-wink 1.8s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROMPT CARD — Premium Interaction System
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Card shine sweep — diagonal light that sweeps across on hover */
+@keyframes card-shine-sweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(250%) skewX(-15deg); }
+}
+
+.card-shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.card-shine::after {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: -30%;
+  width: 50%;
+  height: 120%;
+  /* Light mode: a soft indigo glint, since a white sweep would vanish on
+     white cards. The dark variant below restores the classic white sheen. */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.54 0.225 270 / 0.04) 45%,
+    oklch(0.54 0.225 270 / 0.08) 50%,
+    oklch(0.54 0.225 270 / 0.04) 55%,
+    transparent 100%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.dark .card-shine::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.04) 45%,
+    oklch(1 0 0 / 0.08) 50%,
+    oklch(1 0 0 / 0.04) 55%,
+    transparent 100%
+  );
+}
+
+.group:hover .card-shine::after {
+  animation: card-shine-sweep 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 1;
+}
+
+/* Card inner glow — soft ambient light on card edges during hover */
+.card-inner-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, oklch(0.66 0.21 270 / 0.10), transparent 60%);
+}
+.group:hover .card-inner-glow {
+  opacity: 1;
+}
+
+/* Card image overlay — gradient for legibility over images */
+.card-image-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    oklch(0 0 0 / 0.30) 0%,
+    oklch(0 0 0 / 0.05) 30%,
+    oklch(0 0 0 / 0) 50%,
+    oklch(0 0 0 / 0.03) 80%,
+    oklch(0 0 0 / 0.18) 100%
+  );
+}
+
+/* Copy button ripple — extends outward when clicked */
+@keyframes copy-ripple {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 oklch(0.66 0.21 270 / 0.40),
+      inset 0 0 0 0 oklch(0.66 0.21 270 / 0.15);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 8px oklch(0.66 0.21 270 / 0),
+      inset 0 0 6px 0 oklch(0.66 0.21 270 / 0.05);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 oklch(0.66 0.21 270 / 0),
+      inset 0 0 0 0 oklch(0.66 0.21 270 / 0);
+  }
+}
+
+.animate-copy-ripple {
+  animation: copy-ripple 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Card badge pulse — subtle attention-drawing pulse for "Hot" badge */
+@keyframes badge-glow {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.66 0.21 270 / 0); }
+  50%      { box-shadow: 0 0 8px 2px oklch(0.66 0.21 270 / 0.18); }
+}
+
+.animate-badge-glow {
+  animation: badge-glow 2.5s ease-in-out infinite;
+}
+
+/* Card number index — monospaced numbering */
+.card-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--muted-foreground);
+  opacity: 0.5;
+}
+
+/* Text card — line numbers styling */
+.line-numbers {
+  counter-reset: line;
+}
+.line-numbers > span {
+  display: block;
+}
+.line-numbers > span::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 0.75rem;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  color: var(--muted-foreground);
+  opacity: 0.3;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMAND PALETTE OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.cmd-overlay {
+  position: fixed;
+  inset: 0;
+  /* High enough to clear the sticky header (z-50), every dropdown
+     (radix sets z-50-ish), the skip-to-content link (z-100), and
+     any future overlay we forget about. The portal also sidesteps
+     stacking-context traps so this z-index isn't strictly required,
+     but it's a useful safety net. */
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+  background: oklch(0 0 0 / 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.cmd-panel {
+  width: 100%;
+  max-width: 580px;
+  margin-inline: 1rem;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.04),
+    0 24px 80px -16px oklch(0 0 0 / 0.60),
+    0 0 1px 0 oklch(0.66 0.21 270 / 0.20);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KBD STYLING
+   ═══════════════════════════════════════════════════════════════ */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.375rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  line-height: 1;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOCUS — premium ring
+   Inputs/textareas opt out — their parent containers handle focus.
+   ═══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[contenteditable]:focus-visible {
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY — reduced motion
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .hero-enter,
+  .fade-in-blur {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .lift:hover,
+  .magnetic:hover,
+  .press:active {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOUCH — coarse-pointer affordance
+   ═══════════════════════════════════════════════════════════════ */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a[role="button"],
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 40px;
+  }
+}

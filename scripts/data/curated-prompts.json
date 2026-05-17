@@ -1,0 +1,1792 @@
+[
+  {
+    "type": "text",
+    "slug": "startup-idea-validation-harsh",
+    "title": "Brutally Honest Startup Idea Validation",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "You are a senior product strategist with 10 years of B2B SaaS experience. Validate this startup idea using the framework below. Be harsh — kill it if it doesn't survive.\n\nTHE IDEA:\n{your_idea}\n\nEVALUATE ON:\n1. Problem severity (vitamin or painkiller?)\n2. Market size (TAM/SAM/SOM rough estimates)\n3. Competitive moat (what stops a copycat in 6 months?)\n4. Founder-market fit (why YOU?)\n5. Initial GTM (who are your first 10 paying customers?)\n\nFor each dimension, score 1-10 and give one specific concern.\nEnd with a verdict: PURSUE / PIVOT / KILL and 2-3 sentence reasoning.\nDo not sugarcoat.",
+    "expectedOutcome": "**1. Problem Severity — 6/10**\nThe target user pays for solutions to *adjacent* problems but not this one. Concern: you may be solving a problem people complain about but don't budget for.\n\n**2. Market Size — 4/10**\nTAM looks large but SAM is dominated by 2 incumbents with 90% share. Concern: you'd need to displace, not greenfield.\n\n**3. Competitive Moat — 3/10**\nNo proprietary data, no network effects, no switching cost. Concern: AWS or a YC-backed startup could clone this in a quarter.\n\n**4. Founder-Market Fit — 7/10**\nStrong domain. Concern: you've never sold to this buyer.\n\n**5. Initial GTM — 5/10**\nVague. \"Content marketing\" isn't a plan when CAC is $400.\n\n**VERDICT: PIVOT.** The problem is real but your wedge is wrong. Find the 50-person team that bleeds money on this exact pain weekly, sell them the v1 manually, then productize.",
+    "tips": "Replace {your_idea} with 2-3 sentences. Use Claude Opus or GPT-4 for the most nuanced critique. Lower temperature (0.3-0.5) for harsher analysis.",
+    "tags": ["validation", "startup", "strategy", "advisor"],
+    "params": { "temperature": 0.4, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "mvp-scope-cutter",
+    "title": "Aggressive MVP Scope Cutter",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "validation-strategy",
+    "promptText": "You are a YC partner reviewing an MVP scope. Your job: cut it in half.\n\nMY PROPOSED MVP FEATURES:\n{feature_list}\n\nFor each feature, output:\n- KEEP (core to the core hypothesis) / CUT (post-launch) / FAKE (Wizard-of-Oz it)\n- One sentence why\n\nThen propose the smallest possible v1 that still tests the core hypothesis. Assume 4 weeks of build time max.",
+    "expectedOutcome": "**Feature audit:**\n- User dashboard → **CUT** — first 50 users will be onboarded by you personally\n- AI-powered insights → **FAKE** — manually email 3 insights weekly from a spreadsheet\n- Stripe billing → **KEEP** — proof of willingness to pay is the whole point\n- Mobile app → **CUT** — responsive web for now\n- Team workspaces → **CUT** — solo accounts only\n- Slack integration → **FAKE** — a Zapier webhook works for 10 users\n\n**v1 in 4 weeks:** A Notion-like form where users submit their data, Stripe Checkout for payment, you manually deliver insights via email. No app. No login. No dashboard. Test whether 10 strangers will pay $99 for a result. That's the only thing that matters in v1.",
+    "tips": "Paste your feature list as bullets. The 'FAKE' category is the trick — most teams over-build instead of doing things manually.",
+    "tags": ["mvp", "product", "validation", "scoping"],
+    "params": { "temperature": 0.5, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "competitor-deep-dive",
+    "title": "Competitor Deep-Dive in 6 Dimensions",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Act as a competitive intelligence analyst.\n\nI'm building: {my_product}\nTop 3 competitors I know: {competitor_list}\n\nFor each competitor, give me:\n1. **Pricing model** (and how it locks users in)\n2. **Strongest moat** (data, network effects, brand, distribution)\n3. **Weakest flank** (where they're vulnerable)\n4. **Recent moves** (the past 6 months)\n5. **Their dream customer** (who do they wake up wanting to win?)\n6. **One thing I should steal**\n\nFinish with a 3-sentence positioning statement that makes my product the obvious choice for a specific buyer who's frustrated with all three.",
+    "tips": "More specific competitor list = sharper analysis. Pair with a web-search-enabled model for fresh data.",
+    "tags": ["competitive-analysis", "strategy", "positioning"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "customer-interview-script",
+    "title": "Mom-Test Customer Interview Script",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "You're an expert in customer discovery, trained on Rob Fitzpatrick's Mom Test methodology.\n\nGenerate a 20-minute customer interview script for someone evaluating: {your_idea}\n\nRULES:\n- Never ask 'would you use this?' or 'would you pay?'\n- Only ask about past behavior, not hypothetical future\n- Every question should reveal whether the problem is real and acute\n- Include 3 questions that test for budget without mentioning your product\n- Include 1 'killer question' that exposes a deal-breaker\n\nOutput: 12-15 questions in interview order, plus a 2-line note for each on what answer would invalidate your idea.",
+    "tips": "The Mom Test is the gold standard for problem interviews. Treat invalidating answers as a gift — better now than after you've built.",
+    "tags": ["customer-discovery", "interviews", "validation"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "pricing-model-options",
+    "title": "5 Pricing Models for Your Product",
+    "modelSlug": "chatgpt",
+    "categorySlug": "validation-strategy",
+    "promptText": "You are a SaaS pricing strategist.\n\nMY PRODUCT: {what_you_sell}\nMY ICP: {who_buys}\nWHAT I'M CURRENTLY THINKING: {current_pricing}\n\nPropose 5 alternative pricing models — at least one should make you uncomfortable. For each:\n- **The model** (per-seat, per-usage, outcome-based, freemium, annual prepay, etc.)\n- **Why it could work** for my ICP\n- **What it requires you to track** to bill it\n- **What 12-month ARR looks like** if I hit 100 paying customers\n- **Risk** (one specific way this fails)\n\nEnd with a recommendation ranked by 12-month revenue potential vs. operational complexity.",
+    "tips": "The 'uncomfortable' option is where the alpha is — most teams price like their competitors, leaving money on the table.",
+    "tags": ["pricing", "saas", "strategy", "revenue"],
+    "params": { "temperature": 0.7, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "swot-analysis-honest",
+    "title": "SWOT Analysis That Doesn't Lie",
+    "modelSlug": "chatgpt",
+    "categorySlug": "validation-strategy",
+    "promptText": "You are a McKinsey senior associate. Conduct a SWOT analysis for: {your_business_or_idea}\n\nRules:\n- 4 items per quadrant — no more, no less\n- Each item must be specific and falsifiable (not 'good team' — 'CTO previously sold company to Salesforce')\n- Weaknesses must include 2 items the founder won't want to hear\n- Threats must include the boring ones (regulation, hiring, churn) not just 'competitors'\n\nEnd with a 'TL;DR for the board' — 3 sentences, no jargon.",
+    "tips": "Tell the model 'you are not a cheerleader' if it gets too positive. Repeat with temperature 0.8 for divergent thinking.",
+    "tags": ["swot", "strategy", "analysis", "advisor"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "go-to-market-plan",
+    "title": "First 90 Days Go-To-Market Plan",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Act as a GTM leader who has launched 4 SaaS products from 0 → $1M ARR.\n\nMY PRODUCT: {what_it_does}\nICP: {who_buys_and_why}\nBUDGET FOR FIRST 90 DAYS: {budget}\n\nGive me a 90-day GTM plan with:\n- **Week 1-2**: Setup (channels, tracking, lead capture)\n- **Week 3-6**: Top-of-funnel experiments (3 specific channels with hypotheses and KPIs)\n- **Week 7-10**: What to double down on (decision criteria)\n- **Week 11-13**: First contract close OR pivot trigger\n\nAlso: 3 things I will be tempted to do that you forbid (and why).",
+    "tips": "Specify your budget precisely. The 'forbidden moves' section is where 90% of founders waste their first quarter.",
+    "tags": ["gtm", "marketing", "launch", "strategy"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "pre-mortem-failure-analysis",
+    "title": "Pre-Mortem: How Will This Fail?",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "It is one year from today. My project has failed. I'm explaining why to my team.\n\nMY PROJECT: {project_description}\nMY ASSUMPTIONS: {key_assumptions}\n\nWrite the 'how it failed' post-mortem in narrative form, as if it already happened. 4-6 paragraphs.\n\nThen translate that into:\n- 5 EARLY WARNING SIGNS I should track from week 1\n- 3 BETS that would have saved the project if I'd made them upfront\n- 1 RULE I'll set for myself today to avoid this fate",
+    "tips": "Daniel Kahneman invented the pre-mortem because we're terrible at imagining our own failures. This forces the brain into the failure-state.",
+    "tags": ["pre-mortem", "risk", "strategy", "planning"],
+    "params": { "temperature": 0.8, "max_tokens": 2000 }
+  },
+
+  {
+    "type": "text",
+    "slug": "code-review-senior-engineer",
+    "title": "Code Review by a Senior Engineer",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "You are a staff engineer with 15 years of experience reviewing code at FAANG. Review the {language} code below as if it were a real PR from a junior teammate. Be specific, kind, and actionable.\n\n```{language}\n{paste_your_code_here}\n```\n\nProvide your review in this exact format:\n\n**🟢 Strengths**\n- (2-3 specific things done well)\n\n**🟡 Should fix before merge**\n- (Each item: file:line, what's wrong, suggested fix in code)\n\n**🔴 Blocking issues**\n- (Bugs, security holes, perf foot-guns — with reproducible failure scenario)\n\n**💡 Style / future-proofing**\n- (Nits — clearly marked as taste)\n\nEnd with: APPROVE / REQUEST CHANGES / BLOCK and one-sentence verdict.",
+    "expectedOutcome": "**🟢 Strengths**\n- Clean separation of concerns between the validator and the controller — easy to test.\n- Good use of early returns to keep nesting shallow.\n\n**🟡 Should fix before merge**\n- `controller.ts:42` — you're catching `error` as `any`; narrow with `error instanceof ZodError` before assuming the shape.\n- `service.ts:78` — N+1 query inside the `.map()`. Batch the lookup with `db.select().from(items).where(inArray(items.id, ids))`.\n\n**🔴 Blocking issues**\n- `auth.ts:15` — comparing `user.role === \"admin\"` with `==` (loose) will pass for `\"admin\" == \"admin\"` but also coerce weird values; switch to `===`. More importantly, the route never `await`s the role check, so the response is sent before auth completes.\n- Reproducer: `curl /admin/destroy -d '{}'` and the function continues past the check.\n\n**💡 Style / future-proofing**\n- Consider hoisting the regex on line 9 to module scope — it's compiled per request right now.\n\n**REQUEST CHANGES.** Auth issue is critical; the rest is solid. Ship after the two-line fix.",
+    "tips": "Replace {language} with 'typescript', 'python', 'go', etc. For best results use Claude Opus or GPT-4 Turbo — they catch security issues that Sonnet/Mini miss.",
+    "tags": ["code-review", "engineering", "best-practices"],
+    "params": { "temperature": 0.3, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "refactor-with-tests",
+    "title": "Refactor This Function (and Keep It Tested)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "You are an expert {language} engineer who refuses to refactor without tests.\n\nMY FUNCTION:\n```{language}\n{paste_function}\n```\n\nDO THE FOLLOWING IN ORDER:\n1. Write 5-8 characterization tests that pin the CURRENT behavior (including edge cases & errors). Use the most popular {language} test framework.\n2. Refactor the function for readability and performance. Justify each change.\n3. Show that all your tests still pass on the refactored version.\n4. Identify any behaviors that were ambiguous in the original and explicitly call out the decision you made.\n\nDo not change behavior. Tests first, refactor second.",
+    "tips": "Working in TypeScript? Tell it to use Vitest. Python? Pytest. Go? testing + testify. Naming the framework keeps the model from inventing.",
+    "tags": ["refactoring", "testing", "engineering"],
+    "params": { "temperature": 0.3, "max_tokens": 3000 }
+  },
+  {
+    "type": "text",
+    "slug": "debug-with-binary-search",
+    "title": "Debug This Bug Like a Binary Search",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "You are a senior debugging engineer. Help me find a bug using a binary-search methodology, not vibes.\n\n**THE BUG:**\n{what_breaks}\n\n**EXPECTED BEHAVIOR:**\n{what_should_happen}\n\n**WHAT I'VE TRIED:**\n{what_youve_tried}\n\n**THE RELEVANT CODE:**\n```\n{paste_code}\n```\n\nDo this:\n1. List the 4-6 most likely root causes, ranked by probability.\n2. Propose the FASTEST experiment to bisect the suspect space (e.g. 'add a log here, if X you've ruled out half the tree').\n3. Wait for my answer to that experiment before proposing the next.\n4. Never speculate past one step ahead.",
+    "tips": "The model will want to guess everything at once. The discipline of 'one experiment at a time' is what makes this prompt work.",
+    "tags": ["debugging", "troubleshooting", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "sql-query-builder",
+    "title": "Build the Right SQL Query, Explained",
+    "modelSlug": "chatgpt",
+    "categorySlug": "coding-development",
+    "promptText": "You are a senior data engineer who teaches SQL. I'll describe what I want; you write the query, explain it, and warn me about gotchas.\n\nMY DATABASE: {postgres / mysql / sqlite / bigquery / snowflake}\n\nMY TABLES:\n```sql\n{paste_schema_or_describe}\n```\n\nWHAT I NEED:\n{plain_english_question}\n\nOUTPUT FORMAT:\n1. The final query (copy-pasteable)\n2. Plain-English walk-through of each clause\n3. Performance notes: indexes that would help, partitions if relevant, expected complexity\n4. 1-2 ways this query could return surprising results (NULLs, time zones, duplicates) and how to defend against them",
+    "tips": "Paste your schema as CREATE TABLE statements for best precision. Tell it the dialect — Postgres and Snowflake have different functions.",
+    "tags": ["sql", "data", "database", "engineering"],
+    "params": { "temperature": 0.3, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "system-design-interview",
+    "title": "Mock System Design Interview",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Conduct a 45-minute system design interview with me. You are a staff engineer at a FAANG company. I am the candidate.\n\nTHE PROBLEM TO DESIGN: {system_to_design}\n\nRULES:\n- Start by asking me 3-4 clarifying questions. Wait for my answers.\n- Then guide me through: requirements → estimates → high-level design → deep-dive into one component → trade-offs → bottlenecks.\n- After each section, ask me a probing follow-up question, then pause for my answer.\n- At the end, score me 1-5 on: requirements gathering, breadth, depth, trade-off articulation, communication.\n- Be tough but fair. Mention specific industry references where relevant (e.g. 'this is how Twitter's timeline service works').",
+    "tips": "Treat this like a real interview — answer the model's questions before scrolling. Common topics: URL shortener, news feed, ride-share matching, chat system, search.",
+    "tags": ["system-design", "interview", "engineering"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "api-design-rest-vs-rpc",
+    "title": "Design This API (REST vs RPC vs GraphQL)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Act as an API design reviewer. I'm building an API for: {what_the_api_does}\n\nClients I need to support: {web / mobile / 3rd-party / internal microservice}\n\nFor my use case, design THREE versions of the same API:\n1. **REST** (resource-oriented, hypermedia-friendly)\n2. **RPC** (action-oriented, e.g. tRPC/gRPC style)\n3. **GraphQL** (query-driven)\n\nFor each, give:\n- The 6-10 most important endpoints/types with example payloads\n- Auth model (cookie / bearer / api-key)\n- Pagination, error-shape, versioning strategy\n- One scenario this style handles BEST, one where it'd be a poor fit\n\nFinish with a recommendation tailored to my specific use case + clients.",
+    "tags": ["api", "design", "engineering", "architecture"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "regex-decoder",
+    "title": "Decode This Regex in English",
+    "modelSlug": "chatgpt",
+    "categorySlug": "coding-development",
+    "promptText": "Decode this regular expression. Translate it into plain English, then show 3 strings that match and 3 that don't (with why).\n\n```\n{paste_regex}\n```\n\nFLAVOR: {javascript / python / pcre / pcre2}\n\nThen propose a clearer alternative if the regex could be simplified, and call out any common bugs (unanchored, greedy, unicode gotchas, catastrophic backtracking).",
+    "tips": "Especially useful when inheriting legacy code with cryptic regex.",
+    "tags": ["regex", "engineering", "decode"],
+    "params": { "temperature": 0.3, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "explain-this-error",
+    "title": "Explain This Cryptic Error",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "I got this error and I don't understand it. Explain it like you're walking a junior dev through it.\n\nLANGUAGE/RUNTIME: {language_or_framework}\n\nERROR:\n```\n{paste_full_error_with_stack_trace}\n```\n\nCONTEXT (what I was doing): {short_context}\n\nGIVE ME:\n1. What this error actually means (one sentence)\n2. The 3 most likely causes for MY context, ranked by probability\n3. For each cause: a 1-line test to confirm + the fix\n4. One 'gotcha' specific to this language/framework that often triggers this",
+    "tags": ["debugging", "errors", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 1200 }
+  },
+
+  {
+    "type": "text",
+    "slug": "blog-post-outline-seo",
+    "title": "SEO-Driven Blog Post Outline",
+    "modelSlug": "chatgpt",
+    "categorySlug": "writing-content",
+    "promptText": "You are an SEO content strategist. Write a blog-post outline targeting this query:\n\nTARGET KEYWORD: {target_keyword}\nINTENT: {informational / transactional / navigational / commercial}\nMY ANGLE / UNIQUE POV: {your_unique_take}\nWORD COUNT TARGET: {1200 / 1800 / 2500}\n\nOUTPUT:\n- **Title** (Yoast-ready, 50-60 chars, with keyword near front)\n- **Slug** (kebab-case)\n- **Meta description** (155 chars, ends with CTA hook)\n- **H1 + 6-8 H2s** with semantic clustering\n- For each H2: 2-3 bullet H3s with 1-line scope notes\n- **People-Also-Ask block**: 4 question-format H3s you'll naturally answer\n- **Internal-link opportunities**: 3 placeholder anchors (with rationale)\n- **Closing CTA paragraph** (50 words)\n\nLeave room for E-E-A-T signals (real examples, real data, real author quote).",
+    "expectedOutcome": "**Title:** Async vs Defer in Script Tags: Which One You Actually Need (2025 Guide)\n\n**Slug:** async-vs-defer-script-tags\n\n**Meta:** Async runs scripts the moment they download; defer waits for parsing. Here's exactly when to pick each — with the one-line rule every senior dev uses.\n\n**H1:** Async vs Defer in Script Tags: Which One You Actually Need\n\n**H2: The 60-Second Rule (Skip Everything Else)**\n- The one-line decision tree\n- Why the default is wrong for 80% of teams\n\n**H2: How `async` Actually Behaves in the Browser**\n- The download → execute pipeline (with timeline diagram)\n- Why two async scripts can run in any order\n\n**H2: How `defer` Actually Behaves**\n- Why defer preserves execution order\n- The DOMContentLoaded trick\n\n**H2: 5 Real-World Scenarios**\n- Analytics script → async\n- Framework bootstrapper → defer\n- 3rd-party widget → async + sandbox\n- Polyfill → no async/defer (head-blocking on purpose)\n- Inline scripts → not applicable, here's why\n\n**H2: Common Mistakes I've Caught in Code Review**\n…\n\n**People Also Ask:**\n- Is async faster than defer?\n- Does defer block rendering?\n- What happens without async or defer?\n- Can I use both?\n\n**Internal links:**\n- /performance/core-web-vitals (anchor: \"impact on LCP\")\n- /performance/script-loading (anchor: \"script loading patterns\")\n- /seo/page-speed-2025 (anchor: \"page-speed audit\")\n\n**CTA:** Want a 5-minute audit of your script tags? Run them through our free analyzer — it flags every async/defer/blocking call in your HTML in one click.",
+    "tags": ["seo", "blog", "outline", "content"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "newsletter-3-section-template",
+    "title": "3-Section Newsletter Template",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "writing-content",
+    "promptText": "Write a personal newsletter issue using the 3-1-1 format.\n\nAUTHOR VOICE: {first_person, casual but smart, no buzzwords}\nAUDIENCE: {who_reads_it}\nTHIS WEEK'S TOPIC: {topic_or_event}\n\nSTRUCTURE:\n1. **3 things I noticed this week** — 80 words each, each ending with a quotable line\n2. **1 thing worth your time** — a tool, article, or video you'd genuinely recommend (50 words)\n3. **1 question for you** — open-ended, invites reply\n\nRules:\n- No \"Hope this email finds you well\"\n- One vulnerable / personal moment\n- Subject line that doesn't sound like marketing — write it last",
+    "tips": "Iterate the subject line 5 times — it's 80% of open-rate work.",
+    "tags": ["newsletter", "email", "writing"],
+    "params": { "temperature": 0.8, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "linkedin-post-thought-leader",
+    "title": "LinkedIn Post That Doesn't Feel Like LinkedIn",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "writing-content",
+    "promptText": "Write a LinkedIn post about: {what_you_want_to_say}\n\nMY ROLE: {your_role}\nMY VOICE: {sharp, dry, no emojis, no \"agree?\"}\n\nFORMAT:\n- Hook (1 line — controversial, counter-intuitive, or oddly specific)\n- Short paragraphs, line breaks for rhythm\n- A real moment, not a parable\n- One concrete number or detail\n- End with an open question OR a clean punchline (NOT \"thoughts?\")\n\nLength: 800-1100 characters.\n\nDo NOT:\n- Use \"I've been thinking about...\"\n- Use \"Here's the thing:\"\n- Open with a question\n- End with a hashtag spam",
+    "tags": ["linkedin", "social", "writing", "personal-brand"],
+    "params": { "temperature": 0.8, "max_tokens": 800 }
+  },
+  {
+    "type": "text",
+    "slug": "twitter-thread-architecture",
+    "title": "Twitter Thread That Earns the Scroll",
+    "modelSlug": "chatgpt",
+    "categorySlug": "writing-content",
+    "promptText": "Write a Twitter/X thread on: {topic}\n\nVOICE: {sharp, dry, expert but accessible}\nLENGTH: {7 / 10 / 13 tweets}\n\nRULES:\n- Tweet 1: hook with a number, a contradiction, or a story opening. Must work standalone.\n- Tweets 2-N: each is a self-contained insight. Read top-to-bottom OR pick any one — both should reward.\n- Use line breaks inside tweets, not 280-char walls.\n- One tweet must include a specific number or stat.\n- One tweet must include a 1-line story or example.\n- Last tweet: clean summary + soft CTA (no \"like and retweet\").\n\nNo emojis. No \"Thread 🧵\". No hashtag spam.",
+    "tags": ["twitter", "social", "writing", "thread"],
+    "params": { "temperature": 0.7, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "product-launch-announcement",
+    "title": "Product Launch Email That Converts",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "writing-content",
+    "promptText": "Write a product launch email.\n\nWHAT WE LAUNCHED: {product_name_and_description}\nWHY NOW: {timing_reason}\nWHO IT'S FOR: {ICP}\nKEY BENEFIT: {one_outcome}\nCALL TO ACTION: {what_clicking_does}\n\nFORMAT:\n- Subject line: 5-7 words, no emojis, sounds like a person wrote it\n- Preview text: 80 chars, complements the subject (doesn't repeat it)\n- Body: 150-200 words, 3 paragraphs max\n  - Para 1: A specific problem your reader has TODAY\n  - Para 2: How the product addresses it (1 concrete proof point, no marketing)\n  - Para 3: Single, plain CTA (button text + one-line reassurance)\n\nDo NOT use: \"thrilled\", \"excited\", \"revolutionary\", \"game-changer\", \"unleash\".",
+    "tags": ["product-launch", "email", "marketing", "writing"],
+    "params": { "temperature": 0.7, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "case-study-from-data",
+    "title": "Case Study From Raw Data",
+    "modelSlug": "claude-opus",
+    "categorySlug": "writing-content",
+    "promptText": "Write a customer case study that doesn't read like marketing.\n\nCUSTOMER: {customer_name_or_anonymized}\nINDUSTRY: {industry}\nBEFORE (the pain): {1-2_lines}\nWHAT WE DID: {what_was_implemented}\nAFTER (results, with numbers): {metrics}\nA QUOTE FROM THE CUSTOMER: {paste_quote_or_describe}\n\nSTRUCTURE:\n- Hook: a 2-line scene from a specific moment (not 'For years, X struggled with...')\n- The before state — concrete, with one detail nobody would invent\n- The decision moment — what tipped them to act\n- The implementation — 3 specific things that happened, with friction included\n- The result — lead with the most surprising number, not the biggest\n- A short quote, embedded mid-flow, not at the end\n- The why-it-matters paragraph for the reader\n\n700-900 words. No bold callout boxes. No emojis. Read aloud-able.",
+    "tags": ["case-study", "writing", "marketing", "long-form"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+
+  {
+    "type": "text",
+    "slug": "cold-email-outbound-b2b",
+    "title": "Cold Email That Gets a Reply",
+    "modelSlug": "chatgpt",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write a cold outbound email.\n\nFROM: {your_role_and_company}\nTO: {their_role_and_company}\nWHY THEM, SPECIFICALLY: {your_research_hook}\nWHAT YOU SELL (one line): {value_prop}\nMY ASK: {15-min_call / try_demo / intro_to_someone}\n\nRULES:\n- Subject line: 4-6 words, no caps, no emojis, looks like an internal email\n- Total length: 65-90 words. NOT 200.\n- First line: specific to them, NOT 'I came across your profile'\n- Middle: one specific reason this might be useful for them (no feature list)\n- CTA: a yes/no question, not 'open to a quick chat?'\n- P.S. line: optional, tiny social proof or pattern interrupt\n\nWrite 3 variations:\nA) Lead with a question\nB) Lead with a specific observation\nC) Lead with a peer reference",
+    "expectedOutcome": "**Subject:** quick question about your migration\n\nHi Sarah,\n\nSaw on your engineering blog that you migrated from Heroku → Render last quarter — and that the Postgres rebuild took 3 weekends.\n\nWe built a tool that mirrors the same kind of migration in roughly 2 hours, with rollback. Three teams that switched off Heroku last year saved 40+ engineering hours each.\n\nWorth a 15-min look? Yes or no — I'll send a calendar link if yes.\n\n— Mark\nfounder @ shiplane.dev\n\nP.S. Happy to skip the call entirely and just send the 90-second demo if you'd prefer.\n\n---\n\n**Variation B (specific observation):**\n\n**Subject:** the OAuth issue from your blog\n\nHi Sarah, your post on the Heroku → Render migration mentioned the OAuth callback URLs broke for 11 minutes during cutover. We built tooling that prevents that exact scenario — keeps both stacks live until you flip the DNS.\n\nWorth a 15-min look?\n\n— Mark\n\n---\n\n**Variation C (peer reference):**\n\n**Subject:** Vercel's eng lead said you'd care\n\nHi Sarah, James at Vercel mentioned you ran a Heroku migration in October. We built the cutover tooling his team now uses — saves 30+ engineering hours on the Postgres step.\n\nWorth 15 minutes?",
+    "tips": "The single most important thing in cold email: the first line. It must prove you did 30 seconds of research. AI cannot do that for you — replace {your_research_hook} with a real fact about them.",
+    "tags": ["cold-email", "outbound", "sales"],
+    "params": { "temperature": 0.7, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "landing-page-copy-block",
+    "title": "Landing Page Above-the-Fold Block",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write 5 versions of a landing-page above-the-fold block.\n\nPRODUCT: {what_it_does_in_one_line}\nFOR WHOM: {ICP}\nKEY OUTCOME: {what_changes_for_them}\nBIGGEST OBJECTION: {what_makes_them_hesitate}\nTRUST SIGNAL I HAVE: {social_proof_or_metric}\n\nFOR EACH VERSION, OUTPUT:\n- **Eyebrow** (3-5 words — category cue or social proof)\n- **Headline** (8-12 words, outcome-led)\n- **Subhead** (15-25 words, addresses the objection)\n- **CTA button text** (2-4 words, action verb, never \"learn more\")\n- **Trust line** (one line directly below the CTA)\n\nStyle each version differently:\n1. **Outcome-focused** (what they'll have)\n2. **Pain-focused** (what they'll stop suffering)\n3. **Time-focused** (how fast they'll get the result)\n4. **Proof-focused** (social proof or numbers)\n5. **Curiosity-focused** (provoking, makes them want to know more)",
+    "tags": ["landing-page", "copy", "marketing", "conversion"],
+    "params": { "temperature": 0.8, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "ad-copy-google-3-variants",
+    "title": "Google Ad Copy — 3 Angle Variants",
+    "modelSlug": "chatgpt",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write Google search ads for: {what_you_sell}\n\nTARGET QUERY: {keyword_phrase}\nINTENT: {commercial / transactional}\nUSP: {one_sentence}\nLANDING PAGE PROMISE: {what_they_see_after_click}\n\nGIVE ME 3 AD GROUPS, each with:\n- 3 headlines (30 chars max each)\n- 2 descriptions (90 chars max each)\n- 4 sitelinks (25 chars max each)\n- 4 callouts (25 chars each)\n\nMake the 3 variants use these angles:\nA) Outcome / aspiration\nB) Risk reversal / guarantee\nC) Comparison / 'unlike alternatives'\n\nObey character counts strictly. Show character count after each line.",
+    "tags": ["google-ads", "ppc", "marketing", "ad-copy"],
+    "params": { "temperature": 0.7, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "sales-call-discovery-script",
+    "title": "Discovery Call Script (15 questions)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write a 30-minute discovery-call script for a sales rep.\n\nWHAT WE SELL: {one_line_product}\nIDEAL CUSTOMER: {ICP_with_role_and_company_size}\nQUALIFICATION FRAMEWORK: {MEDDIC / BANT / CHAMP}\n\nFORMAT:\n- Opening (2 mins): rapport + agenda setting (verbatim script)\n- Discovery (20 mins): 15 questions grouped by framework category, with a fallback if the prospect dodges\n- Closing (5 mins): summarize, propose mutual next step, gauge urgency\n- 3 'red flag' phrases that mean DON'T PURSUE this prospect\n- 1 'green flag' phrase that means MOVE FAST",
+    "tags": ["sales", "discovery", "meddic", "outbound"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "objection-handling-cheat-sheet",
+    "title": "Objection Handling Cheat Sheet",
+    "modelSlug": "chatgpt",
+    "categorySlug": "marketing-sales",
+    "promptText": "I'm selling: {product}\nThe top objections I hear:\n1. {objection_1}\n2. {objection_2}\n3. {objection_3}\n4. {objection_4}\n5. {objection_5}\n\nFor each, give me:\n- **What it really means** (the unspoken concern underneath)\n- **The acknowledge line** (validate without agreeing)\n- **The reframe** (1-2 sentences that flip the frame)\n- **The proof** (one piece of evidence — a customer story, number, or guarantee)\n- **The advance question** (your next sentence, moves the deal forward)\n\nKeep each section under 40 words. This is a cheat sheet, not an essay.",
+    "tags": ["sales", "objections", "closing"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "pitch-deck-narrative",
+    "title": "10-Slide Pitch Deck Narrative",
+    "modelSlug": "claude-opus",
+    "categorySlug": "marketing-sales",
+    "promptText": "Build a narrative pitch deck outline.\n\nCOMPANY: {one_line_intro}\nSTAGE: {pre-seed / seed / series-A}\nROUND: {amount}\nUSE OF FUNDS: {what_it_pays_for}\nNORTH STAR METRIC: {single_number_you_optimize}\n\nDraft slides 1-10 in this exact order — each slide gets:\n- **Title** (4-7 words, no jargon)\n- **One-line story** (what the audience should feel/think)\n- **Visual cue** (chart? customer logo? screenshot?)\n- **The exact words you'd say out loud** (1-2 sentences)\n\nSlides:\n1. Title\n2. The world we're in (context, why now)\n3. The problem (one painful customer scene)\n4. The insight (what only we see)\n5. The product (in one screen)\n6. Why it works (mechanism, moat)\n7. Traction (3-5 numbers)\n8. Market (TAM/SAM, but framed)\n9. The team (why us)\n10. The ask + use of funds\n\nEnd with the 1-sentence elevator pitch you'd open the meeting with.",
+    "tags": ["pitch-deck", "fundraising", "startup", "narrative"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "case-study-interview-questions",
+    "title": "Case Study Interview Questions",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "I'm interviewing a customer for a case study about: {what_they_used_us_for}\n\nGenerate 15 interview questions that:\n- Pull out CONCRETE numbers (not 'a lot of time saved' — 'how many hours per week?')\n- Surface ONE specific moment / scene the customer remembers\n- Get the BEFORE state in pain-language, not 'we needed a solution'\n- Capture the DECISION MOMENT (why us, why now)\n- Reveal an UNEXPECTED benefit they didn't sign up for\n- Find a quote that's tweetable\n\nGroup into 4 sections: Before, Decision, Implementation, Results, Wildcard.\n\nFor each question, add a one-line note on what answer would be GOLD vs MEH.",
+    "tags": ["case-study", "customer-research", "marketing"],
+    "params": { "temperature": 0.6, "max_tokens": 1500 }
+  },
+
+  {
+    "type": "text",
+    "slug": "summarize-long-document-actionable",
+    "title": "Summarize This Long Document (with Actions)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "You are an expert analyst. Read the document below and summarize it for me.\n\n```\n{paste_full_document}\n```\n\nMY ROLE: {your_role}\nMY DECISION: {what_you_need_to_decide_after_reading}\n\nOUTPUT:\n- **TL;DR** (40 words max, answers my decision)\n- **5 key facts** (the ones that matter for ME, not the whole doc)\n- **3 things the author got wrong / I'd push back on**\n- **3 unanswered questions worth pursuing**\n- **What I should DO next**, ranked by impact\n\nLength budget: 350 words total. Cut everything else.",
+    "tips": "The 'what I should DO' section is the magic — most summaries stop at facts.",
+    "tags": ["summary", "analysis", "decision"],
+    "params": { "temperature": 0.4, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "compare-tools-decision-matrix",
+    "title": "Decision Matrix for Comparing Tools",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "analysis-research",
+    "promptText": "Help me decide between these options.\n\nWHAT I'M PICKING: {category_e.g._database / framework / CRM}\nOPTIONS: {option_a}, {option_b}, {option_c}\nMY CONTEXT: {team_size, scale, constraints}\nWHAT MATTERS MOST: {top_3_criteria}\n\nBuild me a 6-row × 4-column decision matrix:\n- Rows: my top 3 criteria, plus pricing, team-fit, lock-in\n- Columns: each option + a 'winner' verdict\n- Each cell: a single number (1-5) AND a one-line reason\n\nThen output:\n- The CLEAR WINNER for my specific context (with caveat)\n- The CONTRARIAN PICK (why someone might rationally disagree)\n- 3 questions I should answer about myself before deciding",
+    "tags": ["decision", "comparison", "tools", "analysis"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "research-rabbit-hole",
+    "title": "Research Rabbit-Hole Map",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "I want to learn about: {topic}\n\nMY GOAL: {what_you_want_to_be_able_to_do_after}\nCURRENT LEVEL: {beginner / intermediate / expert}\nTIME I HAVE: {realistic_hours}\n\nDesign a research path:\n1. **Foundational** (3-5 must-knows; for each, 1 specific resource + why it matters)\n2. **The 5 best papers / books / videos** people in this field reference repeatedly (with year + author)\n3. **The 3 people on Twitter/X or Substack** worth following for live updates\n4. **2 controversies / open debates** in the field (so I can spot bias)\n5. **One project I should do** to internalize the material\n\nNo Wikipedia. No \"top 10\" articles. Only sources a practitioner would respect.",
+    "tags": ["research", "learning", "curation"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "what-i-might-be-missing",
+    "title": "What Am I Missing in This Plan?",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "Act as a sharp consultant. Read my plan and tell me what I'm missing.\n\nMY PLAN:\n{paste_plan_or_describe}\n\nGOAL: {what_the_plan_is_supposed_to_achieve}\nCONSTRAINTS: {budget, time, team}\n\nIDENTIFY:\n1. **3 silent assumptions** I'm making (the dangerous kind — things I haven't even questioned)\n2. **2 second-order effects** the plan triggers (what changes downstream because of this)\n3. **1 cheaper / faster alternative** that gets 80% of the result\n4. **The thing that goes wrong first**, based on plans like this in the past\n5. **What I should test BEFORE I commit** (1 small experiment, < 1 week)\n\nBe specific. No generic advice.",
+    "tags": ["critique", "planning", "blind-spots"],
+    "params": { "temperature": 0.7, "max_tokens": 1500 }
+  },
+
+  {
+    "type": "text",
+    "slug": "meeting-notes-into-action",
+    "title": "Meeting Notes → Action Items",
+    "modelSlug": "chatgpt",
+    "categorySlug": "productivity",
+    "promptText": "Convert my raw meeting notes into a clean follow-up.\n\nNOTES:\n```\n{paste_raw_notes}\n```\n\nATTENDEES: {names}\n\nOUTPUT:\n- **Decisions made** (3-7 bullet points, one line each — past tense)\n- **Action items** (table: Owner | Action | Due date | Blocker if any)\n- **Open questions** (the ones we punted)\n- **One-paragraph summary** for someone who wasn't in the room (the email-back-to-the-team version)\n- **Suggested subject line** for the follow-up email",
+    "tags": ["meetings", "productivity", "notes"],
+    "params": { "temperature": 0.4, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "weekly-review-prompt",
+    "title": "Weekly Self-Review in 7 Questions",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "I'm doing a weekly self-review. Walk me through it Socratically — ask one question at a time, wait for my answer, then ask the next. Don't summarize until the end.\n\nMY ROLE: {role}\nMY GOAL THIS QUARTER: {q_goal}\n\nQUESTION SEQUENCE:\n1. What did I do this week that moved my Q goal forward?\n2. What did I do this week that DIDN'T move it forward — and why did I still do it?\n3. What's one thing I dreaded but did anyway?\n4. What did I learn that I didn't know on Monday?\n5. What slipped? What was the cost?\n6. What's the ONE thing I'd reset if I could start the week over?\n7. What's the single most important thing I'll do next week?\n\nAfter I answer all 7, give me a 3-sentence summary of the week + 1 sentence of advice in YOUR voice (a wise mentor).",
+    "tags": ["weekly-review", "productivity", "reflection"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "task-breakdown-from-vague-goal",
+    "title": "Break a Vague Goal Into Real Tasks",
+    "modelSlug": "chatgpt",
+    "categorySlug": "productivity",
+    "promptText": "I have a vague goal. Break it into concrete tasks.\n\nGOAL: {my_vague_goal}\nDEADLINE: {when}\nTIME I CAN GIVE: {hours_per_week}\n\nOUTPUT:\n- **The real goal underneath** (often the surface goal is the wrong level — what's the actual desired state?)\n- **3 phases**, each 1-3 weeks\n- **For each phase: 4-7 concrete tasks**, each one a self-contained 25-90 minute chunk\n- **Definition of done** for each phase (how do I know I'm finished?)\n- **The 1-2 tasks I'll be tempted to skip** (and why I shouldn't)",
+    "tags": ["planning", "productivity", "task-breakdown"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "saying-no-template",
+    "title": "How to Say No Without Damage",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Write a polite-but-firm 'no' message.\n\nWHO'S ASKING: {their_relationship_to_me}\nWHAT THEY'RE ASKING FOR: {the_ask}\nWHY I'M SAYING NO (private, internal): {real_reason}\nWHAT I WANT TO PRESERVE: {the_relationship / future_optionality / my_reputation}\n\nDRAFT:\n- A short message (3-4 sentences)\n- Validates them first\n- Says no clearly — no 'I'll think about it' if I won't\n- Offers something cheap I CAN do (intro, async feedback, a different time) — only if genuine\n- Ends warmly, doesn't apologize twice\n\nThen explain WHY this works psychologically (one paragraph) so I learn the pattern.",
+    "tags": ["communication", "productivity", "boundaries"],
+    "params": { "temperature": 0.6, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "agenda-builder-1-on-1",
+    "title": "1-on-1 Agenda With Your Manager",
+    "modelSlug": "chatgpt",
+    "categorySlug": "productivity",
+    "promptText": "Build a 30-minute 1-on-1 agenda with my manager.\n\nMY ROLE: {role}\nMY MANAGER'S STYLE: {hands-off / detail-oriented / supportive / demanding}\nBIGGEST OPEN ISSUE: {what_you_actually_want_to_talk_about}\nMY CAREER GOAL THIS YEAR: {ambition}\n\nFORMAT:\n- 0-5 min: Quick wins / blockers update — 3 bullet points, max\n- 5-15 min: The real conversation. Frame the topic. 2-3 questions I'll ask. Anticipated objection + my response\n- 15-25 min: Their agenda (give them air)\n- 25-30 min: Career check-in. ONE specific ask (feedback / project / promotion / introduction) and how I'll frame it\n\nEnd with the 1-sentence outcome I want from this meeting. If I can't define it, this meeting is wasted.",
+    "tags": ["1on1", "management", "career", "productivity"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "decision-journal-entry",
+    "title": "Decision Journal: Record This Choice",
+    "modelSlug": "claude-opus",
+    "categorySlug": "productivity",
+    "promptText": "I'm about to make a decision. Help me record it in my decision journal so future-me can learn from it.\n\nTHE DECISION: {what_youre_choosing}\nDEADLINE: {when}\nOPTIONS I'M WEIGHING: {options}\n\nGUIDE ME THROUGH FILLING THIS OUT:\n1. **Decision in one sentence**\n2. **What I'm optimizing for** (not 'success' — be specific)\n3. **What I'm willing to give up**\n4. **The 3 most likely outcomes**, with my probability for each\n5. **What I'm WORRIED about** but won't admit aloud\n6. **My emotional state right now** (FOMO? exhaustion? excitement?) — naming it reduces its grip\n7. **My choice + reasoning** (60 words max)\n8. **When I'll revisit this** to score the outcome (90 days? 1 year?)\n\nAfter I fill it out, give me ONE pointed observation about my reasoning — something I'd want to hear from a wise friend.",
+    "tips": "The act of writing #5 and #6 alone is worth more than the answer. Re-read this entry on the revisit date — your future self will thank you.",
+    "tags": ["decision", "journaling", "metacognition"],
+    "params": { "temperature": 0.7, "max_tokens": 1800 }
+  },
+
+  {
+    "type": "text",
+    "slug": "explain-like-im-5-then-15",
+    "title": "Explain Like I'm 5 (Then 15, Then 25)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "learning-education",
+    "promptText": "Explain this concept three times, for three audiences:\n\nCONCEPT: {what_you_want_to_understand}\n\n**Level 1 — ELI5 (age 5)**\n- A 4-sentence story or scene\n- No jargon\n- One concrete metaphor\n\n**Level 2 — ELI15 (high schooler)**\n- 2-3 paragraphs\n- Introduce the real terms but define them inline\n- Use one chart-able example\n\n**Level 3 — ELI25 (smart adult, not a specialist)**\n- 3-4 paragraphs\n- Use the actual terminology\n- Mention 1-2 places this concept connects to bigger ideas\n- Cite a real-world application from the past 3 years\n\nEnd with: \"The 30-second cocktail-party version is...\" — one paragraph, anybody can repeat it.",
+    "tags": ["learning", "explanation", "eli5"],
+    "params": { "temperature": 0.6, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "study-plan-from-zero",
+    "title": "Study Plan from Zero to Working Skill",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "Design a study plan to learn: {skill_or_subject}\n\nMY STARTING POINT: {beginner / some-exposure / rusty}\nTIME I HAVE: {hours_per_week} for {weeks}\nMY GOAL: {specific_outcome_e.g.\"ship_a_small_app\"_or_\"pass_an_exam\"}\n\nOUTPUT:\n- **Week-by-week schedule** with topic, 1 specific resource (book/video/course/repo), and what 'done' looks like\n- **Spaced repetition flashcards**: 10 cards I should create on day 1\n- **Project milestones**: 3 small builds spread across the plan that prove I'm learning\n- **Common dead ends** people hit when learning this — what to avoid\n- **The one resource I should NOT use** (and why)\n\nAdjust difficulty so weeks 1-2 build confidence and weeks 5+ are where breakdowns are productive.",
+    "tags": ["learning", "study-plan", "education"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "quiz-me-on-this",
+    "title": "Quiz Me on What I Just Read",
+    "modelSlug": "chatgpt",
+    "categorySlug": "learning-education",
+    "promptText": "Quiz me on the material below. Don't show me the answers.\n\nMATERIAL:\n```\n{paste_text_or_summary}\n```\n\nFORMAT:\n- 8 questions across difficulty: 3 recall, 3 application, 2 synthesis\n- Multi-choice for the recall questions, open-ended for the others\n- DON'T number the answers visibly — wait for me to answer\n\nAfter I respond:\n- Grade each answer (CORRECT / PARTIAL / WRONG) with one-line feedback\n- For each WRONG, give me a 2-line corrected explanation\n- End with a study suggestion: which 1-2 concepts I should revisit",
+    "tags": ["learning", "quiz", "education", "study"],
+    "params": { "temperature": 0.6, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "feynman-technique-walkthrough",
+    "title": "Feynman Technique: Teach Me to Teach It",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "I want to learn {topic} using the Feynman Technique.\n\nWalk me through it in 4 stages:\n\n**STAGE 1 — Pretend you're teaching it to a child.**\nGive me your simplest possible explanation. Find the metaphor that makes it CLICK.\n\n**STAGE 2 — Find the gaps.**\nAsk me 3 'naive child' questions that adults often can't actually answer. Wait for my response.\n\n**STAGE 3 — Refine.**\nUsing my answers, point out where my mental model is fuzzy. Re-explain those parts.\n\n**STAGE 4 — Teach back.**\nNow I'll try to explain it to YOU. You'll act like a curious 10-year-old and ask the dumbest, most surface-level questions. After 3 questions, grade my understanding 1-5 and tell me the ONE thing I still don't fully get.",
+    "tags": ["learning", "feynman", "education", "deep-understanding"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "vocabulary-flashcards-in-context",
+    "title": "Vocabulary Flashcards (In Real Sentences)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "learning-education",
+    "promptText": "Make me flashcards for these words/phrases in {language}.\n\nWORDS: {list}\nMY LEVEL: {A1 / A2 / B1 / B2 / C1}\n\nFor EACH word, output:\n- **Front**: the word + IPA pronunciation + part of speech\n- **Back**: definition (in target language), 2 example sentences (real, modern, not textbook), 1 collocation (common phrase the word appears in), 1 false friend or common mistake\n- **Memory hook**: a vivid one-line mnemonic\n\nAvoid the dictionary-definition voice. Sound like a friend explaining it.",
+    "tags": ["language-learning", "vocabulary", "flashcards"],
+    "params": { "temperature": 0.7, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "concept-map-builder",
+    "title": "Concept Map for a Hard Topic",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "learning-education",
+    "promptText": "Build me a concept map for {topic}.\n\nMY GOAL: {what_youre_trying_to_understand}\n\nOUTPUT (as nested bullets):\n- **Central concept**\n  - **3-5 key sub-concepts**\n    - For each, 2-3 specific terms with one-line definitions\n  - **3 connections BETWEEN sub-concepts** (the often-missed links)\n  - **3 misconceptions** to actively unlearn\n  - **2 'aha' insights** that change how you think about the central concept\n\nKeep the language tight. This is a map, not an essay.",
+    "tags": ["learning", "concept-map", "deep-understanding"],
+    "params": { "temperature": 0.6, "max_tokens": 1500 }
+  },
+
+  {
+    "type": "text",
+    "slug": "resume-rewrite-stars",
+    "title": "Resume Bullets That Use STAR + Numbers",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "Rewrite my resume bullets using STAR (Situation, Task, Action, Result) with concrete numbers.\n\nMY BULLETS AS WRITTEN:\n{paste_your_bullets}\n\nTARGET ROLE: {role_youre_applying_for}\nKEY SKILLS YOU WANT TO SIGNAL: {3_to_5_skills}\n\nFOR EACH BULLET, GIVE ME:\n- **Original** (verbatim)\n- **Rewritten** (one sentence, starts with a strong verb, ends with a quantified outcome)\n- **What's stronger** (1 line)\n- **What number you could ADD** (if I gave you the data — placeholder me where to fill in)\n\nIf an original bullet is unsalvageable, mark it CUT and explain why.\n\nFinal rule: no buzzwords (synergy, leverage, ecosystem). Show, don't claim.",
+    "tags": ["resume", "career", "writing"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "cover-letter-that-doesnt-suck",
+    "title": "Cover Letter That Doesn't Sound Like a Cover Letter",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Write a cover letter for: {role_at_company}\n\nMY BACKGROUND (the relevant part): {2-3_sentences}\nWHY THIS COMPANY SPECIFICALLY: {your_genuine_reason}\nWHY THIS ROLE: {what_excites_you}\nMY UNIQUE EDGE: {one_thing_others_dont_have}\n\nRULES:\n- 220 words. Period.\n- NEVER start with 'I am writing to apply for'\n- First sentence: a specific moment / observation / question that proves I know what this company does\n- Middle: one concrete thing I've built/done that maps directly to this role\n- End: a forward-looking line — what I'd bring in the first 90 days\n- No formal closing ('Sincerely yours, John Smith') — just my name\n\nIt should read like an email a smart stranger would write — not a form letter.",
+    "tags": ["cover-letter", "career", "job-search"],
+    "params": { "temperature": 0.7, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "interview-answer-frame",
+    "title": "Frame Your Best Interview Story (STAR)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "I'm interviewing for: {role}\n\nThe interviewer asked: \"{interview_question}\"\n\nMy raw story:\n{paste_your_story_in_any_form}\n\nRESHAPE IT for me using STAR:\n- **Situation** (1 sentence — set the scene with a vivid detail)\n- **Task** (1 sentence — what was MY specific responsibility)\n- **Action** (3-4 sentences — what I did, with 1 surprising/uncomfortable choice that shows judgment)\n- **Result** (2 sentences — what changed, with one number, and what I LEARNED that I now apply elsewhere)\n\nThen give me:\n- The 60-second version (read aloud-able)\n- The 90-second version (with one extra story beat)\n- 3 follow-up questions an interviewer is likely to ask next, with my best 1-line answer to each",
+    "tags": ["interview", "career", "star-method"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "salary-negotiation-script",
+    "title": "Salary Negotiation Script",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Help me negotiate a salary offer.\n\nROLE: {role}\nCOMPANY: {company}\nTHEIR OFFER: {base_salary, equity_or_bonus, location}\nMY TARGET: {what_you_actually_want}\nMY LEVERAGE: {competing_offer / unique_skill / referral / hot_market}\nMY BACK-POCKET NUMBER: {what_youd_walk_away_for}\n\nDRAFT:\n1. **The opening line** to send when they reveal the offer (warm acknowledgement, no commitment)\n2. **The counter** (specific number + 2-sentence justification that doesn't beg or apologize)\n3. **Their 3 most likely responses** and your come-back to each\n4. **The non-base levers** to pull if base is locked (signing bonus, vesting, start date, equity, title, remote days)\n5. **The exact words to use if you decline**\n\nTone: warm, confident, specific. Never adversarial.",
+    "tags": ["salary", "negotiation", "career"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "networking-message-warm-intro",
+    "title": "Networking Message That Doesn't Feel Slimy",
+    "modelSlug": "chatgpt",
+    "categorySlug": "personal-career",
+    "promptText": "Write a networking message.\n\nWHO I'M MESSAGING: {their_role_and_company}\nHOW I FOUND THEM: {LinkedIn / talk / referral / their_writing}\nWHAT I ACTUALLY WANT: {advice / intro / job_lead / no_specific_ask_just_relationship}\nWHAT I CAN OFFER THEM: {something_real_or_nothing_yet}\n\nDRAFT:\n- Under 80 words\n- Specific reason this is THEM (not 'I love what you do')\n- Honest about my goal\n- A small ask (15 mins, async questions, one specific question)\n- Not 'pick your brain'\n- Not 'mutually beneficial'\n- No emojis\n\nThen write a follow-up message I can send 7 days later if they don't reply (50 words).",
+    "tags": ["networking", "career", "outreach"],
+    "params": { "temperature": 0.7, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "career-pivot-decision-frame",
+    "title": "Should I Make This Career Pivot?",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "I'm considering a career pivot. Help me think through it.\n\nWHERE I AM NOW: {current_role_and_what_you_like_dislike}\nWHERE I'M CONSIDERING GOING: {proposed_new_path}\nWHAT'S DRIVING THE PIVOT (honest answer): {pull / push / fear / curiosity}\nMY CONSTRAINTS: {income_needs, time_horizon, family, location, etc.}\n\nDO THIS:\n1. Reflect back the 'why' I just gave you — and tell me if it sounds like a PULL toward the new thing or a PUSH from the old one (push-driven pivots fail more often)\n2. Map the 3-5 transferable skills I have and 3-5 NEW skills I need to acquire\n3. Sketch a 'paid bridge': how do I get to the new path WITHOUT a leap-of-faith income gap?\n4. Identify the ONE conversation I should have this week (with whom, what to ask)\n5. The 12-month reversibility test: if I do this and hate it, what's the cost of going back?",
+    "tags": ["career", "pivot", "decision"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+
+  {
+    "type": "image",
+    "slug": "moody-cyberpunk-detective",
+    "title": "Moody Cyberpunk Detective Portrait",
+    "modelSlug": "flux-dev",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "A weary cyberpunk detective in a rain-soaked alley at 3am, neon Chinese signs reflecting in puddles, rim-lit by a flickering pink neon sign, smoke from a vape curling under the brim of a trench coat, deeply shadowed face with one cybernetic eye glowing faint blue, fine grain, 35mm anamorphic lens, shallow depth of field, blade runner 2049 color grade, hyperrealistic photography",
+    "imageSeeds": ["cyber-det-1", "cyber-det-2"],
+    "params": { "aspect_ratio": "2:3", "steps": 32, "guidance": 3.5 },
+    "tips": "Use 2:3 portrait aspect for cinematic feel. Reduce guidance to 3 for more painterly look.",
+    "tags": ["cyberpunk", "noir", "portrait", "cinematic"]
+  },
+  {
+    "type": "image",
+    "slug": "renaissance-tech-founder-portrait",
+    "title": "Renaissance-Style Tech Founder",
+    "modelSlug": "midjourney",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "Oil painting in the style of a Vermeer portrait, but the subject is a young Silicon Valley founder in a charcoal hoodie, holding a vintage circuit board like it's a religious relic, single window light from the left, dust motes visible in the beam, dark green velvet backdrop, signed lower right with a tiny barcode in place of a signature, ultra-fine brush detail, Rijksmuseum aesthetic, 4k --ar 4:5 --stylize 750",
+    "imageSeeds": ["renaissance-founder"],
+    "params": { "aspect_ratio": "4:5" },
+    "tags": ["portrait", "renaissance", "concept", "fine-art"]
+  },
+  {
+    "type": "image",
+    "slug": "high-fashion-editorial-bw",
+    "title": "High-Fashion Editorial Black & White",
+    "modelSlug": "flux-pro",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "Black and white high-fashion editorial portrait, model in a structural Issey Miyake-style pleated garment, single hard side-light from camera right, deep blacks, no fill, expression neutral and powerful, looking off-frame, shot on Hasselblad 80mm, gallery-quality print, Avedon-influenced composition, full grain visible, no color cast",
+    "imageSeeds": ["fashion-bw-1", "fashion-bw-2"],
+    "params": { "aspect_ratio": "4:5", "guidance": 4 },
+    "tags": ["fashion", "editorial", "black-and-white", "portrait"]
+  },
+  {
+    "type": "image",
+    "slug": "studio-ghibli-quiet-moment",
+    "title": "Studio Ghibli Quiet Moment",
+    "modelSlug": "flux-schnell",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "Studio Ghibli-style illustration, a young woman in a yellow rain jacket sitting on a wooden bench outside a small Japanese train station at dawn, mist rising off the wet platform, a thermos in her hands, looking peacefully at distant mountains, soft watercolor wash, Miyazaki color palette of cool blues and warm oranges, hand-painted feel, no harsh lines, golden hour glow",
+    "imageSeeds": ["ghibli-bench"],
+    "params": { "aspect_ratio": "16:9", "steps": 4 },
+    "tags": ["ghibli", "illustration", "anime", "peaceful"]
+  },
+  {
+    "type": "image",
+    "slug": "luxury-perfume-product-shot",
+    "title": "Luxury Perfume Bottle Hero Shot",
+    "modelSlug": "flux-pro",
+    "categorySlug": "product-photography",
+    "promptText": "Studio product photograph of a tall, faceted glass perfume bottle on a polished travertine surface, single soft strip-light from above creating a kissed top-edge highlight, a swirl of pale gold liquid frozen mid-flow next to it, background a gradient from deep midnight blue to charcoal, no logo on the bottle, no other props, shot on Hasselblad with 100mm macro, focus stack-sharp at every facet, advertising-grade, Vogue spread quality",
+    "imageSeeds": ["perfume-hero-1", "perfume-hero-2"],
+    "params": { "aspect_ratio": "1:1", "steps": 35, "guidance": 3.8 },
+    "tips": "Replace 'gold liquid' with the color of YOUR perfume. Add the brand etched on the bottle if you want a mockup.",
+    "tags": ["product", "luxury", "perfume", "advertising"]
+  },
+  {
+    "type": "image",
+    "slug": "skincare-minimalist-shot",
+    "title": "Minimalist Skincare Bottle on Stone",
+    "modelSlug": "flux-pro",
+    "categorySlug": "product-photography",
+    "promptText": "Minimalist e-commerce product shot, an unbranded matte ceramic skincare dropper bottle in pale sage green, resting on a slab of cracked travertine, single eucalyptus sprig artfully placed beside it casting a soft natural shadow, top-down 3/4 view, soft window light from upper right, color palette of sage / cream / warm stone, no harsh shadows, no shiny highlights, organic-luxury brand aesthetic, 1:1 aspect, professional product photography",
+    "imageSeeds": ["skincare-1"],
+    "params": { "aspect_ratio": "1:1" },
+    "tags": ["product", "skincare", "minimalist", "ecommerce"]
+  },
+  {
+    "type": "image",
+    "slug": "sneaker-floating-shot",
+    "title": "Sneaker Floating in Space",
+    "modelSlug": "midjourney",
+    "categorySlug": "product-photography",
+    "promptText": "A modern white-and-cobalt running sneaker frozen mid-air against a soft pastel gradient backdrop, casting a small contact shadow on a glossy floor, side profile composition, ultra-clean studio lighting, deep texture detail on the mesh and stitching, no human, no props, advertising-grade product photograph, sneaker drop campaign aesthetic --ar 16:10 --stylize 250",
+    "imageSeeds": ["sneaker-float"],
+    "params": { "aspect_ratio": "16:10" },
+    "tags": ["product", "sneakers", "footwear", "advertising"]
+  },
+  {
+    "type": "image",
+    "slug": "minimalist-tech-startup-logo",
+    "title": "Minimalist Wordmark Logo for a Tech Startup",
+    "modelSlug": "flux-pro",
+    "categorySlug": "logo-design",
+    "promptText": "A minimalist wordmark logo for a fictional company called \"NORTH\" — sans-serif, geometric, custom letterforms with a subtle uplift on the N's diagonal mimicking a compass needle, monochromatic black on a clean white background, centered composition, vector-clean edges, 80% negative space, premium identity design like the work of Pentagram or Mucho, brand-book quality, 1:1 aspect",
+    "imageSeeds": ["logo-north-1"],
+    "params": { "aspect_ratio": "1:1", "guidance": 4 },
+    "tips": "Replace NORTH with your brand name. Use Flux Pro or Midjourney for clean text; Flux Schnell tends to mangle letters.",
+    "tags": ["logo", "wordmark", "minimalist", "branding"]
+  },
+  {
+    "type": "image",
+    "slug": "abstract-monogram-mark",
+    "title": "Abstract Geometric Monogram",
+    "modelSlug": "midjourney",
+    "categorySlug": "logo-design",
+    "promptText": "Abstract geometric monogram combining the letters A and Q into a single mark, gradient from deep indigo to electric magenta, the negative space forms the letter Q, custom vector design, isolated on white, scalable from favicon to billboard, premium tech-brand identity, in the style of Stripe's mark or Linear's logo --ar 1:1 --stylize 600",
+    "imageSeeds": ["monogram-aq"],
+    "params": { "aspect_ratio": "1:1" },
+    "tags": ["logo", "monogram", "branding", "geometric"]
+  },
+  {
+    "type": "image",
+    "slug": "anime-magical-girl-spell",
+    "title": "Anime Magical Girl Casting a Spell",
+    "modelSlug": "flux-dev",
+    "categorySlug": "anime-illustration",
+    "promptText": "Anime illustration in the style of modern Kyoto Animation, a magical girl with long silver hair and luminous turquoise eyes casting a complex glyph of light into the night air, twin moons in the background, particles of sparkles drifting upward, navy and turquoise color palette with hot-pink highlights, dynamic 3/4 hero shot, sharp cel-shaded linework, no background blur, vibrant and detailed",
+    "imageSeeds": ["magical-girl-1", "magical-girl-2"],
+    "params": { "aspect_ratio": "9:16", "steps": 28 },
+    "tags": ["anime", "magical-girl", "fantasy", "illustration"]
+  },
+  {
+    "type": "image",
+    "slug": "shonen-protagonist-pose",
+    "title": "Shonen Protagonist in Battle Pose",
+    "modelSlug": "flux-dev",
+    "categorySlug": "anime-illustration",
+    "promptText": "Shonen anime protagonist, spiky black hair with one streak of red, torn white shirt, glowing crimson aura swirling around the body, dramatic low-angle shot, one fist clenched, the other reaching toward the camera, debris floating mid-air, intense rim-light from behind, cel-shaded linework, dynamic background lines radiating from center, manga-cover quality, vivid saturated colors",
+    "imageSeeds": ["shonen-1"],
+    "params": { "aspect_ratio": "2:3", "guidance": 3.5 },
+    "tags": ["anime", "shonen", "battle", "illustration"]
+  },
+  {
+    "type": "image",
+    "slug": "ancient-dragon-mountain-throne",
+    "title": "Ancient Dragon on a Mountain Throne",
+    "modelSlug": "flux-pro",
+    "categorySlug": "fantasy-characters",
+    "promptText": "An ancient dragon coiled atop a moss-covered mountain throne at sunset, scales shimmering with a slow internal ember-glow, one massive amber eye fixed on the viewer, vast tattered wings half-folded, the carcass of an old knight's armor half-buried in the rocks beside it, mist drifting through the valley below, painted in oil with the texture of a Frazetta cover, deep umber and ember-orange palette, full body composition, epic fantasy book cover quality",
+    "imageSeeds": ["dragon-throne-1", "dragon-throne-2"],
+    "params": { "aspect_ratio": "16:9", "steps": 32, "guidance": 4 },
+    "tags": ["dragon", "fantasy", "epic", "illustration"]
+  },
+  {
+    "type": "image",
+    "slug": "forest-witch-portrait",
+    "title": "Hedgewitch in Her Forest Cottage",
+    "modelSlug": "flux-dev",
+    "categorySlug": "fantasy-characters",
+    "promptText": "A weathered hedgewitch in her late 60s standing in the doorway of a moss-covered cottage at twilight, deep forest behind her, holding a brass lantern in one hand and a sprig of mountain ash in the other, a smoky black cat at her feet, deep wrinkles around kind eyes, hooded cloak in deep mossy green, golden hour rim-light, painterly digital art in the style of Tony DiTerlizzi, full body slightly off-center composition, 2:3 portrait",
+    "imageSeeds": ["witch-1"],
+    "params": { "aspect_ratio": "2:3" },
+    "tags": ["fantasy", "witch", "character", "painterly"]
+  },
+  {
+    "type": "image",
+    "slug": "brutalist-concrete-stair",
+    "title": "Brutalist Concrete Stairwell",
+    "modelSlug": "flux-pro",
+    "categorySlug": "architecture",
+    "promptText": "Architectural photograph of a brutalist concrete spiral stairwell shot from below looking up, single shaft of golden afternoon sun cutting diagonally through the negative space, raw board-formed concrete texture, deep contrast between sun-warmed and shadowed surfaces, no people, no signage, square frame, captured on a Hasselblad 50mm at f/8, in the style of Hélène Binet, museum exhibition print",
+    "imageSeeds": ["brutalist-stair"],
+    "params": { "aspect_ratio": "1:1", "guidance": 4 },
+    "tags": ["architecture", "brutalist", "concrete", "fine-art"]
+  },
+  {
+    "type": "image",
+    "slug": "japanese-tea-house-interior",
+    "title": "Japanese Tea House Interior",
+    "modelSlug": "flux-pro",
+    "categorySlug": "architecture",
+    "promptText": "Interior architectural photograph of a quiet traditional Japanese tea house at dawn, tatami flooring, a single low table with one ceramic bowl, soft morning light filtering through a shoji paper screen casting geometric shadows, a small cherry branch in a wabi-sabi vase, color palette of warm wood / cream / soft green, no people, no clutter, ultra-clean composition, peaceful and contemplative, shot at 24mm tilt-shift",
+    "imageSeeds": ["tea-house"],
+    "params": { "aspect_ratio": "3:2" },
+    "tags": ["architecture", "japanese", "interior", "wabi-sabi"]
+  },
+  {
+    "type": "image",
+    "slug": "futuristic-vertical-farm",
+    "title": "Futuristic Vertical Farm at Sunset",
+    "modelSlug": "midjourney",
+    "categorySlug": "architecture",
+    "promptText": "Hyperrealistic concept render of a 50-story vertical-farm skyscraper at sunset, cascading green terraces with leafy crops spilling over each level, the building wrapped in a glass-and-steel exoskeleton, hovering delivery drones leaving the upper floors, a city of conventional buildings in the foreground for scale, warm golden-hour light, atmosphere thick with haze, in the style of architectural visualization studio Mir, 16:9 widescreen, photorealistic detail",
+    "imageSeeds": ["vertical-farm"],
+    "params": { "aspect_ratio": "16:9" },
+    "tags": ["architecture", "futuristic", "concept", "scifi"]
+  },
+  {
+    "type": "image",
+    "slug": "abstract-liquid-chrome",
+    "title": "Abstract Liquid Chrome Sculpture",
+    "modelSlug": "flux-pro",
+    "categorySlug": "abstract-art",
+    "promptText": "Abstract 3D render of a continuous liquid chrome ribbon twisting through the air, reflecting a deep violet and electric magenta gradient sky, mirrored surface picks up every color around it, frozen mid-motion, no gravity, floating against a soft black gradient backdrop, ultra-high detail, rendered in Octane with global illumination, the kind of image you'd see on a Pentagram-designed magazine cover",
+    "imageSeeds": ["chrome-ribbon"],
+    "params": { "aspect_ratio": "4:5", "guidance": 4.2 },
+    "tags": ["abstract", "3d", "chrome", "concept"]
+  },
+  {
+    "type": "image",
+    "slug": "iridescent-bubble-macro",
+    "title": "Iridescent Soap Bubble Macro",
+    "modelSlug": "flux-dev",
+    "categorySlug": "abstract-art",
+    "promptText": "Extreme macro photograph of a single soap bubble at the moment of bursting, oil-slick rainbow iridescence swirling across its surface, frozen droplets flying outward, captured against a deep velvet-black background, hyperreal detail, every micro-current of color visible, no other props, shot on a 100mm macro lens with ring flash, scientific-photography sharpness, fine-art print quality",
+    "imageSeeds": ["bubble-burst"],
+    "params": { "aspect_ratio": "1:1" },
+    "tags": ["macro", "abstract", "iridescent", "photography"]
+  },
+  {
+    "type": "image",
+    "slug": "data-mountain-3d",
+    "title": "3D Data Mountain Visualization",
+    "modelSlug": "flux-pro",
+    "categorySlug": "abstract-art",
+    "promptText": "Abstract 3D visualization of a mountain made entirely of cascading data — luminous bar charts, glowing line graphs, and translucent number panels forming the peaks and ridges, deep indigo base bleeding into electric magenta at the summit, mist of particle-data drifting between the layers, dark void background, no logos, no readable numbers, futuristic infographic aesthetic, rendered with volumetric light, 16:9 widescreen",
+    "imageSeeds": ["data-mountain"],
+    "params": { "aspect_ratio": "16:9", "guidance": 3.8 },
+    "tags": ["abstract", "data-viz", "3d", "futuristic"]
+  },
+  {
+    "type": "image",
+    "slug": "watercolor-rainy-tokyo",
+    "title": "Watercolor Tokyo Street in the Rain",
+    "modelSlug": "flux-schnell",
+    "categorySlug": "abstract-art",
+    "promptText": "Loose watercolor painting of a Tokyo back street at night in the rain, glow of red lantern signs reflecting in puddles, a lone figure with a transparent umbrella walking away from the viewer, bleeding wet-on-wet watercolor edges, ink line accents, color palette of warm reds against cool blue-greys, the kind of image you'd see in a small Japanese gallery, signed in the lower right with a tiny crimson stamp",
+    "imageSeeds": ["watercolor-tokyo"],
+    "params": { "aspect_ratio": "2:3", "steps": 4 },
+    "tags": ["watercolor", "tokyo", "rain", "atmospheric"]
+  },
+  {
+    "type": "image",
+    "slug": "isometric-tiny-office",
+    "title": "Isometric Tiny Office Diorama",
+    "modelSlug": "midjourney",
+    "categorySlug": "abstract-art",
+    "promptText": "An isometric 3D diorama of a tiny home office floating in space, polished pastel surfaces, a miniature desk with a glowing laptop, a mini plant, a tiny bookshelf, a tiny couch in mustard fabric, a tiny abstract painting on the wall, soft shadows below, the whole room sliced open like a doll house, miniature scale, Cuberun-style isometric rendering, vibrant but soft colors, ultra-clean lines, no people --ar 1:1 --stylize 350",
+    "imageSeeds": ["iso-office"],
+    "params": { "aspect_ratio": "1:1" },
+    "tags": ["isometric", "diorama", "3d", "illustration"]
+  },
+
+  {
+    "type": "text",
+    "slug": "brand-positioning-statement",
+    "title": "One-Sentence Brand Positioning Statement",
+    "modelSlug": "chatgpt",
+    "categorySlug": "validation-strategy",
+    "promptText": "Write a brand positioning statement using the classic frame.\n\nMY BRAND: {brand_name}\nWHAT WE SELL: {product_or_service}\nWHO IT'S FOR: {ICP}\nCATEGORY ALTERNATIVE: {what_they_use_today}\nKEY BENEFIT: {primary_outcome}\nREASON-TO-BELIEVE: {proof_or_mechanism}\n\nProduce 5 variants of the statement:\n\"For [audience] who [need], [brand] is the [category] that [benefit] because [proof].\"\n\nEach variant should change ONE variable to test a different angle (different audience cut, different need framing, different proof). End with one recommendation and why.",
+    "tags": ["positioning", "branding", "strategy"],
+    "params": { "temperature": 0.7, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "investor-update-monthly",
+    "title": "Monthly Investor Update Email",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Draft a monthly investor update.\n\nCOMPANY: {company}\nMONTH: {month_year}\nNORTH STAR METRIC: {metric_name} = {current} (was {prior})\nKEY WINS: {3_bullets}\nLOWLIGHTS: {2_bullets — be honest}\nWHAT WE'RE FOCUSED ON NEXT 30 DAYS: {3_bullets}\nASKS: {intros / hires / feedback}\nRUNWAY: {months}\n\nFORMAT: 400 words max. Sections in this order: TL;DR (3 lines) → Numbers (with delta) → Wins → Lowlights → Next month → Asks → Runway. Calm, founder-confident tone. No buzzwords. End with one specific ask the reader can answer in 30 seconds.",
+    "tags": ["investor-update", "fundraising", "founders"],
+    "params": { "temperature": 0.5, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "customer-persona-from-interviews",
+    "title": "Build a Customer Persona From Real Interviews",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "I conducted N customer interviews. Synthesize them into ONE rich primary persona.\n\nINTERVIEW NOTES (paste raw):\n```\n{paste_notes}\n```\n\nOUTPUT:\n- **Name + 1-line bio** (make them feel real, not a stock template)\n- **Day in the life** (a 100-word scene)\n- **Top 3 jobs to be done** (with the situation that triggers each)\n- **What they currently use & why it doesn't work**\n- **Buying triggers** (the moment that pushes them to look for a new solution)\n- **Objections they'd raise**\n- **The verbatim quote** that best captures their pain (pulled from the notes)\n- **Anti-persona**: who this IS NOT for (so we don't chase them)",
+    "tags": ["persona", "user-research", "discovery"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "jobs-to-be-done-analysis",
+    "title": "Jobs-To-Be-Done Analysis",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Apply the Jobs-to-be-Done framework to my product.\n\nMY PRODUCT: {product}\nWHO BUYS: {buyer}\nWHAT THEY 'HIRE' IT FOR (in their words): {how_they_describe_using_it}\n\nMAP OUT:\n1. **The functional job** (the practical thing they're trying to get done)\n2. **The emotional job** (how they want to FEEL during/after)\n3. **The social job** (how they want others to see them)\n4. **The competing alternatives** — both obvious (competitors) and non-obvious (Excel, doing nothing, a person, a process)\n5. **The hiring criteria** — what makes them 'hire' your product vs the alternatives\n6. **The firing criteria** — what makes them switch away from you\n\nEnd with: the ONE job statement to build your roadmap around (\"When [trigger], I want to [job], so I can [outcome]\").",
+    "tags": ["jtbd", "strategy", "product"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "north-star-metric-picker",
+    "title": "Pick the Right North Star Metric",
+    "modelSlug": "chatgpt",
+    "categorySlug": "validation-strategy",
+    "promptText": "Help me choose a North Star Metric for my company.\n\nWHAT WE DO: {product}\nBUSINESS MODEL: {how_we_make_money}\nGROWTH STAGE: {pre-PMF / early / scaling}\nCURRENT VANITY METRICS WE OBSESS OVER: {what_youre_tracking_now}\n\nDO THIS:\n1. Propose 4 candidate North Star metrics, each measuring a different layer (activation, engagement, retention, revenue).\n2. For each: score 1-5 on (a) leading indicator strength, (b) team controllability, (c) connection to long-term value, (d) gameability risk.\n3. Pick ONE and explain why.\n4. Propose 3 'guardrail metrics' that prevent us from gaming the NSM.\n5. Write the metric formula precisely (eg. 'unique users who completed action X within 7 days of signup').",
+    "tags": ["metrics", "strategy", "north-star"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "okr-quarterly-draft",
+    "title": "Draft Quarterly OKRs",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Draft a quarterly OKR set.\n\nCOMPANY OR TEAM: {who}\nTHE ONE BIG BET FOR THIS QUARTER: {bet}\nLAST QUARTER'S RESULTS: {what_went_well_and_what_didnt}\nCONSTRAINTS: {team_size, budget}\n\nPROPOSE:\n- **2 OBJECTIVES** (qualitative, ambitious, time-bound, inspiring — not 'increase revenue by X')\n- **3 KEY RESULTS per objective** — quantitative, falsifiable, with current → target baselines\n- A confidence score 1-10 for each KR (anything 10/10 is too easy)\n- The single biggest RISK to hitting each objective + the mitigation\n- ONE 'stop doing' commitment to free up team focus\n\nNo 'work on', 'launch', 'continue' — every KR must end in a measurable result.",
+    "tags": ["okr", "planning", "strategy"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "feature-prioritization-rice",
+    "title": "RICE-Score My Roadmap",
+    "modelSlug": "chatgpt",
+    "categorySlug": "validation-strategy",
+    "promptText": "Apply the RICE framework (Reach, Impact, Confidence, Effort) to score these candidate features.\n\nCANDIDATE FEATURES:\n{list_of_features_with_1_line_each}\n\nFOR EACH, ESTIMATE:\n- **Reach**: # of users impacted per quarter\n- **Impact**: 0.25 (minimal) / 0.5 / 1 / 2 / 3 (massive)\n- **Confidence**: 50% / 80% / 100%\n- **Effort**: person-weeks\n\nRICE score = (R × I × C) / E\n\nOutput as a sortable table with my best-guess values, then a 2-sentence justification per row. Flag any feature where I'm clearly biased (low-confidence pet project ranking high, or high-effort skeptic-killer ranking low).\n\nEnd with the recommended quarter's worth of work (top 3-5) and what gets cut.",
+    "tags": ["rice", "prioritization", "roadmap"],
+    "params": { "temperature": 0.4, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "moat-audit",
+    "title": "Audit Your Competitive Moat",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "Audit my competitive moat honestly. Score each of the 7 classic moats 0-10 with reasoning.\n\nMY BUSINESS: {describe}\nHOW WE WIN TODAY: {what_makes_customers_pick_us}\n\nSCORE & EXPLAIN:\n1. **Network effects** — do users get more value as more users join?\n2. **Scale economies** — does cost per unit drop as you grow?\n3. **Switching costs** — what does a customer lose by leaving?\n4. **Brand** — would customers pay a premium even for a worse product?\n5. **Proprietary data** — do you have data competitors can't replicate?\n6. **Distribution lock-in** — do you own a channel competitors can't access?\n7. **Counter-positioning** — would a competitor cannibalize their core if they copied you?\n\nThen: which moat could realistically grow over the next 18 months, and what bet would compound it? End with the unflattering truth: which moats you DON'T have but pretend you do.",
+    "tags": ["moat", "strategy", "competitive"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "1-page-business-case",
+    "title": "1-Page Business Case (for a New Initiative)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Write a 1-page business case for: {initiative}\n\nCONTEXT: {why_this_matters}\nPROPOSED INVESTMENT: {money + people + time}\n\nFORMAT (400 words, hard cap):\n- **The opportunity** (2 lines, what changes if we win)\n- **The customer pain we'd solve** (1 paragraph, specific)\n- **Why now** (timing argument)\n- **The plan**: 3 phases with dates\n- **The financials**: investment, payback period, 18-month upside, downside\n- **What we'd stop doing** to make room\n- **The recommendation**: GO / NO-GO / PILOT, in 1 sentence\n\nNo charts described, no fluff, no 'we are excited to propose'.",
+    "tags": ["business-case", "strategy", "writing"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "investor-cold-email",
+    "title": "Cold Email a VC (Without Being Generic)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "Write a cold outreach email to a VC partner.\n\nTHE FIRM: {firm}\nTHE PARTNER: {partner_name_and_thesis_or_recent_post}\nMY COMPANY (one line): {what_we_do}\nMY TRACTION (one specific number): {metric}\nTHE ASK: {15_min_call / feedback / intro}\n\nRULES:\n- 90 words max.\n- First sentence proves you read THEIR recent writing/portfolio — not generic flattery.\n- One specific number, no vanity metrics.\n- The ask is one sentence, easy to say yes to.\n- No \"hope this finds you well\". No 'disruptive'. No 'AI-powered' unless it actually is.\n- Sign-off with first name only.\n- Optional P.S. with a single link (deck or product).",
+    "tags": ["fundraising", "vc", "cold-email"],
+    "params": { "temperature": 0.6, "max_tokens": 800 }
+  },
+  {
+    "type": "text",
+    "slug": "risk-register-startup",
+    "title": "Startup Risk Register (with Mitigations)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "validation-strategy",
+    "promptText": "Build a risk register for my company.\n\nWHAT WE DO: {describe}\nSTAGE: {pre-seed / seed / growth}\nTOP CONCERNS I ALREADY HAVE: {2-3_concerns}\n\nIDENTIFY 12 risks across 4 buckets (Market, Product, Team, Operational). For each:\n- **Risk** (one sentence)\n- **Likelihood**: Low / Med / High\n- **Impact**: Low / Med / High / Existential\n- **Early signal** (the metric or event that says 'this is happening')\n- **Mitigation** (specific action, not 'monitor closely')\n- **Owner** (which role)\n\nFlag the 3 risks that are most under-discussed in your experience — the ones founders systematically underestimate.",
+    "tags": ["risk", "strategy", "startup"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "founder-market-fit-audit",
+    "title": "Are You the Right Founder for This?",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "Audit my founder-market fit. Be unsparing.\n\nMY BACKGROUND (resume highlights): {your_background}\nTHE MARKET I'M ATTACKING: {market}\nMY UNFAIR ADVANTAGE (as I see it): {your_claim}\nMY OBVIOUS GAPS: {what_youre_missing}\n\nEVALUATE ON:\n1. **Insight asymmetry**: do I understand this market better than 99% of people?\n2. **Distribution access**: can I reach early customers without a marketing budget?\n3. **Credibility**: would target customers take a meeting with me on cold email?\n4. **Stamina match**: does the 7-year arc of this problem match my emotional reserves?\n5. **Network density**: do I know the 20 people who'd help me hire, sell, raise?\n6. **Capital absorption**: have I run anything that successfully spent $1M+ before?\n\nFor each: score 1-5, justify in 2 sentences, propose ONE thing I could do this month to raise the score by a point. End with: should I pursue this, partner up, or pass?",
+    "tags": ["founder-fit", "self-assessment", "strategy"],
+    "params": { "temperature": 0.7, "max_tokens": 2200 }
+  },
+
+  {
+    "type": "text",
+    "slug": "convert-code-between-languages",
+    "title": "Port This Code to Another Language",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Port the code below from {from_language} to {to_language} idiomatically.\n\nSOURCE:\n```{from_language}\n{paste_source}\n```\n\nRULES:\n- Use the IDIOMS of the target language, not a literal transliteration.\n- Map standard library to standard library (eg. JS `Array.map` → Python `[ ... for ... in ... ]`, not `map(lambda)`).\n- Keep variable names but convert casing convention (snake_case ↔ camelCase).\n- Preserve behavior exactly, including edge-case handling and error semantics.\n- If a feature has no idiomatic equivalent, write a 1-line comment explaining the trade-off.\n\nOUTPUT:\n1. The ported code\n2. A short table of the 3-5 most important translation decisions\n3. One thing the original was doing inefficiently that you fixed (or rejected fixing — say why)",
+    "tags": ["porting", "engineering", "translation"],
+    "params": { "temperature": 0.3, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "add-types-to-vanilla-js",
+    "title": "Add TypeScript Types to Vanilla JS",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Add types to this JS code, idiomatically. Don't over-type; don't under-type.\n\n```javascript\n{paste_code}\n```\n\nRULES:\n- Prefer narrow types (literal unions, branded types) where it adds safety.\n- Avoid `any`. If forced, comment why.\n- Don't add a type when inference is fine.\n- Use `as const` where appropriate.\n- For function params: prefer interfaces if the object has 3+ fields, inline type otherwise.\n- Generic <T> only when re-use is real.\n\nReturn: the typed code + a short note on the 2-3 strongest type-safety improvements your changes unlock.",
+    "tags": ["typescript", "types", "refactor"],
+    "params": { "temperature": 0.3, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "git-commit-message",
+    "title": "Conventional Commit Message From a Diff",
+    "modelSlug": "chatgpt",
+    "categorySlug": "coding-development",
+    "promptText": "Write a Conventional Commit message for this change.\n\nDIFF / CHANGE SUMMARY:\n```\n{paste_diff_or_description}\n```\n\nFORMAT:\n- `<type>(<scope>): <subject>` (lowercase subject, no period, ≤72 chars)\n- Types: feat / fix / refactor / perf / test / docs / chore / build / ci / style\n- If breaking change, prefix subject with `!` and add `BREAKING CHANGE:` block\n\nThen include a 2-3 sentence body explaining the WHY, not the WHAT. Mention any side effect a reviewer should look at.\n\nReturn 3 alternative subject lines ranked by clarity, then your top pick.",
+    "tags": ["git", "commit", "conventional"],
+    "params": { "temperature": 0.4, "max_tokens": 800 }
+  },
+  {
+    "type": "text",
+    "slug": "pr-description-from-diff",
+    "title": "Pull Request Description From a Diff",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Write a PR description.\n\nWHAT CHANGED (rough notes or diff):\n```\n{paste}\n```\n\nSTRUCTURE:\n- **Title** (≤72 chars, imperative voice)\n- **Why** (one paragraph — the problem this solves, with a link target placeholder for the ticket)\n- **What changed** (3-7 bullets, each starting with a verb)\n- **Out of scope** (one line per skipped thing — sets reviewer expectations)\n- **Risk** (Low/Med/High + the rollback plan in one sentence)\n- **Test plan** (a numbered list a reviewer can paste into their terminal)\n- **Screenshots / clips placeholder** (a 1-line caption per expected attachment)\n\nIf the diff includes a schema migration, an SQL query, or a public-API change, call it out at the TOP under a bold ⚠️ banner.",
+    "tags": ["pr", "git", "code-review"],
+    "params": { "temperature": 0.4, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "architecture-decision-record",
+    "title": "Architecture Decision Record (ADR)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Write an Architecture Decision Record.\n\nDECISION: {what_youre_deciding}\nCONTEXT: {when_does_this_decision_apply}\nALTERNATIVES CONSIDERED: {2-4_alternatives}\nMY LEAN: {your_current_preference}\n\nFORMAT (standard ADR):\n1. **Title** (a sentence stating the decision in the present tense)\n2. **Status**: PROPOSED / ACCEPTED / DEPRECATED / SUPERSEDED\n3. **Context** (3-4 sentences, the forces at play)\n4. **Decision** (the choice, in present tense — \"We will use X.\")\n5. **Consequences** — split into Positive (3 bullets), Negative (3 bullets), Neutral (2 bullets)\n6. **Alternatives considered** — for each: 1-line description + the specific reason rejected\n7. **Revisit trigger** — what new fact would invalidate this decision\n\nKeep it under 600 words. Future-you must be able to read this in 3 minutes.",
+    "tags": ["adr", "architecture", "engineering"],
+    "params": { "temperature": 0.5, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "dockerfile-from-stack",
+    "title": "Production-Ready Dockerfile",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Generate a production Dockerfile.\n\nLANGUAGE/RUNTIME: {language_and_version}\nFRAMEWORK: {framework}\nDEPENDENCY FILE: {package.json / pyproject.toml / go.mod / etc}\nSTART COMMAND: {how_to_run_locally}\n\nRULES:\n- Multi-stage build (builder + runtime)\n- Pinned base image version (no `latest`)\n- Non-root user in the final stage\n- `.dockerignore` content as a separate block\n- Layer caching optimized (copy deps file first, install, then copy code)\n- Final image as small as practical (alpine/slim where safe)\n- HEALTHCHECK if applicable\n- EXPOSE the right port\n\nAfter the Dockerfile, give me a 5-bullet review of trade-offs you made (security, size, build speed).",
+    "tags": ["docker", "devops", "infrastructure"],
+    "params": { "temperature": 0.4, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "cron-expression-builder",
+    "title": "Build a CRON Expression (Explained)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "coding-development",
+    "promptText": "I need a CRON schedule for: {plain_english_description}\nTIMEZONE: {timezone}\nFLAVOR: {standard_unix / quartz / aws_cloudwatch}\n\nGIVE ME:\n1. The CRON expression (copy-pasteable)\n2. A field-by-field explanation\n3. The next 5 fire times in {timezone}\n4. ONE common pitfall for this kind of schedule (DST, leap days, AM/PM confusion)\n\nIf the request is ambiguous (eg. \"twice a day\"), ask one clarifying question before answering.",
+    "tags": ["cron", "scheduling", "devops"],
+    "params": { "temperature": 0.3, "max_tokens": 800 }
+  },
+  {
+    "type": "text",
+    "slug": "openapi-spec-from-endpoints",
+    "title": "Generate OpenAPI Spec From Endpoint Descriptions",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Generate an OpenAPI 3.1 YAML spec from these endpoints.\n\nMY API: {one_line_purpose}\nBASE URL: {url}\nAUTH: {none / bearer / api-key / oauth}\nENDPOINTS:\n```\n{list_endpoints_with_method_path_and_short_description}\n```\n\nINCLUDE:\n- Top-level `info` with title, version, description\n- `servers` array\n- A `components.securitySchemes` block matching the auth\n- For each endpoint: parameters, request bodies, responses for 200, 4xx, 5xx, plus example payloads\n- A `components.schemas` block — reuse types, don't inline duplicates\n- `tags` for grouping in Swagger UI\n\nReturn valid YAML. End with a 5-bullet review of what I should manually verify (rate limits, idempotency keys, pagination).",
+    "tags": ["openapi", "api", "spec"],
+    "params": { "temperature": 0.4, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "explain-this-codebase",
+    "title": "Explain This Codebase Like a New Hire Tour",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Give me the new-hire tour of this codebase.\n\nKEY FILES / DIRECTORIES:\n```\n{paste_tree_or_describe_structure}\n```\n\nA FEW REPRESENTATIVE FILES:\n```\n{paste_contents}\n```\n\nWALK ME THROUGH:\n1. **The 30-second pitch**: what this codebase does, in one paragraph\n2. **Major boundaries**: the 3-5 areas (modules, services, layers) and their responsibilities\n3. **The request lifecycle**: trace a typical user action from input to response\n4. **State / data model**: where data lives, how it flows\n5. **The conventions**: 5 unwritten rules new devs need to know\n6. **The skeletons in the closet**: 2-3 places someone wouldn't want to touch without context",
+    "tags": ["onboarding", "code-tour", "documentation"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "tech-debt-prioritization",
+    "title": "Tech Debt Prioritization Matrix",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "I have a tech debt backlog. Help me triage it.\n\nMY DEBT ITEMS:\n```\n{list_items_one_per_line}\n```\n\nFOR EACH, ESTIMATE:\n- **Pain today** (0-3): how often does it slow us down RIGHT NOW?\n- **Pain at 10× scale** (0-3): how bad does it get if we grow?\n- **Effort to fix** (XS / S / M / L / XL person-weeks)\n- **Risk of leaving it** (low / med / high — bugs, security, perf, hiring)\n\nThen plot mentally on a 2×2 (Pain × Effort) and recommend:\n- **DO NOW** (high pain, low effort)\n- **PLAN** (high pain, high effort)\n- **WATCH** (low pain, monitored)\n- **LET IT DIE** (low pain, planned replacement)\n\nFlag the 1 item I'm probably underestimating.",
+    "tags": ["tech-debt", "prioritization", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "security-audit-quick-pass",
+    "title": "Quick Security Audit Pass",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Do a quick security audit on this code.\n\nLANGUAGE/FRAMEWORK: {stack}\nCONTEXT: {api / web / cli / mobile}\nWHAT IT DOES: {one_line}\n\nCODE:\n```\n{paste}\n```\n\nLOOK FOR:\n1. Input validation gaps (injection, deserialization, path traversal)\n2. AuthN / AuthZ holes (missing checks, race conditions, token handling)\n3. Sensitive-data exposure (logging secrets, error messages with PII, weak crypto)\n4. Resource issues (DoS via large payloads, unbounded loops, file uploads)\n5. Dependency / supply-chain risks visible in the code\n\nFOR EACH FINDING:\n- Severity: P0 / P1 / P2\n- Exact location (file/line if visible, or function name)\n- Reproducer (the 1-line attack)\n- Fix (with code snippet)\n\nEnd with a short note on what you DID NOT check (so I know the blind spots).",
+    "tags": ["security", "audit", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "performance-bottleneck-finder",
+    "title": "Find the Performance Bottleneck",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "My code is slow. Help me find the bottleneck — top-down, not vibes.\n\nWHAT IT DOES: {description}\nWHAT 'SLOW' MEANS: {observed_latency_or_throughput}\nTARGET: {desired_latency_or_throughput}\nWHAT I'VE PROFILED OR LOGGED: {data_if_any}\n\nCODE:\n```\n{paste}\n```\n\nDO:\n1. List the 5 most likely bottleneck classes for THIS code (algorithmic, I/O-bound, N+1, lock contention, allocation, serialization, etc.) — ranked by probability.\n2. For #1: propose the FASTEST way to confirm (timer, profiler flag, query log).\n3. If confirmed, the fix — with code. If not, the next experiment.\n4. The order-of-magnitude improvement I should expect from the top fix.\n5. Two SMALLER wins I can ship along the way.\n\nDo not propose a rewrite unless the data demands it.",
+    "tags": ["performance", "profiling", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "test-strategy-greenfield",
+    "title": "Test Strategy for a New Project",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Design a pragmatic test strategy for: {project_description}\n\nSTACK: {languages_and_frameworks}\nTEAM SIZE: {n_engineers}\nCI BUDGET: {minutes_per_PR}\nRISK TOLERANCE: {low / medium / high}\n\nOUTPUT:\n- **Test pyramid for this project**: ratio of unit / integration / e2e — justified for this risk tolerance\n- **Tools**: pick ONE per layer, with a 1-line reason (don't list options — pick)\n- **What we WILL NOT test** (and why — perf, accessibility, contracts can wait or use other tools)\n- **The first 5 tests we should write** before any other code\n- **The flaky-test policy** (1-line rule, plus the auto-quarantine logic)\n- **Coverage target** for v1 and the conditions for raising it\n\nNo \"100% coverage\", no \"shift left\". Concrete only.",
+    "tags": ["testing", "strategy", "engineering"],
+    "params": { "temperature": 0.5, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "data-migration-plan",
+    "title": "Data Migration Plan (Old → New)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "coding-development",
+    "promptText": "Plan a data migration from {old_system} to {new_system}.\n\nSCALE: {n_records, total_size}\nDOWNTIME TOLERATED: {minutes / zero}\nDATA SHAPE DIFFERENCES: {key_schema_deltas}\nBUSINESS CONSTRAINTS: {compliance / frozen_period / customer_communication}\n\nDESIGN:\n1. **Approach**: big-bang / dual-write / strangler / shadow-read — pick one with reasoning\n2. **Phases**: pre-migration backfill, cutover, verification, rollback window — with durations\n3. **The verification queries** (3-5 SQL/data queries that prove correctness post-cutover)\n4. **The rollback plan** (what triggers it, how it works, max time to restore)\n5. **Risks ranked**, mitigations attached\n6. **The customer comms plan** (what we tell them, when)\n7. **The dry-run plan** before we touch prod\n\nEnd with the 'go/no-go checklist' — 8 items the on-call must confirm before pressing the button.",
+    "tags": ["migration", "data", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "code-doc-comments",
+    "title": "Generate Doc Comments (JSDoc / Pydoc / etc.)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "coding-development",
+    "promptText": "Generate idiomatic doc comments for this code.\n\nLANGUAGE: {javascript / typescript / python / go / rust / java}\n\nCODE:\n```\n{paste}\n```\n\nRULES:\n- Use the conventional comment format for the language (JSDoc / docstring / godoc / rustdoc / javadoc).\n- For each function/method/class: one-line summary + params + return + thrown errors + 1 example where non-trivial.\n- Skip docstrings on obvious one-liners (getter, simple setter).\n- Don't restate the code — explain WHY and when to use.\n- If a function has side effects, call them out explicitly.\n\nReturn the annotated code.",
+    "tags": ["documentation", "comments", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 2000 }
+  },
+
+  {
+    "type": "text",
+    "slug": "blog-intro-5-hooks",
+    "title": "Blog Post Intro — 5 Hook Variants",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "writing-content",
+    "promptText": "Write 5 distinct opening paragraphs for a blog post titled: \"{title}\"\n\nTOPIC: {what_its_about}\nAUDIENCE: {who_reads_it}\nDESIRED EMOTION: {curious / angry / inspired / smarter}\n\nEach 80-110 words, each using a different hook strategy:\n\n1. **Statistic that contradicts intuition**\n2. **A scene** (a specific moment, like a film opening)\n3. **The lie everyone believes** (and which you'll demolish)\n4. **A reader-state mirror** (\"if you've ever ...\")\n5. **A confident contrarian claim** (then earn it in the article)\n\nEach must end in a one-line promise about what the rest of the article delivers. No 'In this article we will discuss...'",
+    "tags": ["blog", "hooks", "intro", "writing"],
+    "params": { "temperature": 0.8, "max_tokens": 1600 }
+  },
+  {
+    "type": "text",
+    "slug": "tone-rewriter",
+    "title": "Tone Rewriter (Same Words, Different Voice)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "writing-content",
+    "promptText": "Rewrite the text below in 5 different tones, preserving the meaning exactly.\n\nORIGINAL:\n```\n{paste}\n```\n\nTONES:\n1. **Professional / corporate** (would land in a CEO email)\n2. **Casual / friend-to-friend** (would land in iMessage)\n3. **Punchy / Hemingway** (short sentences, strong verbs, zero adverbs)\n4. **Warm / empathetic** (counselor energy)\n5. **Direct / 1996 startup founder** (terse, no fluff, no apologies)\n\nFor each, note in one line WHAT you changed (vocabulary, sentence length, perspective) and WHO it's for.",
+    "tags": ["tone", "rewriting", "writing"],
+    "params": { "temperature": 0.8, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "summarize-into-tweet",
+    "title": "Compress an Article into a Tweet",
+    "modelSlug": "chatgpt",
+    "categorySlug": "writing-content",
+    "promptText": "Compress the text below into 3 tweet-length summaries (under 270 chars each), each emphasizing a different angle.\n\nSOURCE TEXT:\n```\n{paste}\n```\n\nVARIANT A: **The TL;DR** — the single most important fact a reader should know.\nVARIANT B: **The contrarian take** — what would make someone DISAGREE with the article enough to click.\nVARIANT C: **The how-to** — boil it down to a 3-step action.\n\nFor each, end with a 1-line note on what KIND of audience would respond (\"engineers,\" \"founders,\" \"hiring managers\"). No hashtags. No \"thread below.\"",
+    "tags": ["tweet", "summary", "social"],
+    "params": { "temperature": 0.7, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "linkedin-carousel-script",
+    "title": "LinkedIn Carousel Script (8 Slides)",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "writing-content",
+    "promptText": "Write an 8-slide LinkedIn carousel.\n\nTOPIC: {topic}\nAUDIENCE: {who}\nDESIRED ACTION: {save / comment / DM / click_link}\n\nSTRUCTURE:\n- Slide 1: **Cover** — a counterintuitive headline (8 words max) + a sub-line that makes them swipe\n- Slides 2-7: ONE idea per slide, in this order: HOOK → CONTEXT → COMPLICATION → INSIGHT → EXAMPLE → ACTIONABLE STEP\n- Slide 8: **CTA** — a clean ask. Single line. Friendly.\n\nFOR EACH SLIDE, GIVE:\n- The on-slide headline (≤ 10 words)\n- Body text (≤ 40 words)\n- A note for the designer about ONE visual element (a chart? icon? quote callout?)\n\nThen write the long-form caption (180 words) that lives below the carousel.",
+    "tags": ["linkedin", "carousel", "social"],
+    "params": { "temperature": 0.8, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "press-release-product-launch",
+    "title": "Press Release for a Product Launch",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "writing-content",
+    "promptText": "Draft a press release.\n\nCOMPANY: {company_name}\nLAUNCH: {product_name_and_one_line}\nWHY NOW: {timing_reason}\nQUOTE FROM CEO (rough): {paraphrase}\nQUOTE FROM CUSTOMER (rough): {paraphrase}\nNUMBERS: {3_metrics_that_matter}\nAVAILABILITY: {when, where, pricing}\n\nFORMAT (AP style, 400 words):\n- Dateline + headline + sub-headline\n- Opening paragraph: WHO did WHAT, WHEN, WHERE — the 5 W's, no hype\n- Second paragraph: the problem this solves, with a number\n- Third paragraph: the CEO quote — make it sound like a human said it, not a press team\n- Fourth paragraph: the customer quote — let them describe BEFORE/AFTER\n- Fifth paragraph: availability, pricing, links\n- About blurb + media contact placeholder\n\nNo 'thrilled', 'revolutionary', 'game-changing', 'next generation'.",
+    "tags": ["press-release", "pr", "writing"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "about-us-page-copy",
+    "title": "About Page That Doesn't Bore",
+    "modelSlug": "claude-opus",
+    "categorySlug": "writing-content",
+    "promptText": "Write our About page.\n\nCOMPANY: {name}\nWHAT WE DO (one line): {product}\nFOUNDING STORY (the real one): {origin}\nWHO WE SERVE: {ICP}\nWHAT MAKES US DIFFERENT (no 'innovative' / 'world-class'): {real_edge}\nVALUES (3 max, must be falsifiable): {values}\nFOUNDERS' QUIRK / HOBBY / OBSESSION: {humanizing_detail}\n\nSTRUCTURE (500 words):\n- **Hook**: a single sentence that makes the reader want to read on\n- **The problem we kept seeing** (a paragraph that proves we understand it)\n- **What we built and why this way** (one paragraph, no feature list)\n- **The team** (2 sentences, names + one specific credibility detail each)\n- **What we believe** (the 3 values, each with one example of how it shows up in our work)\n- **Closing line** (not a CTA — a quiet promise)\n\nNo 'mission statement', no 'on a journey'. Read it aloud test: it should sound like a smart human talking, not a corporate page.",
+    "tags": ["about-page", "copy", "writing"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "headline-ab-variants",
+    "title": "Headline A/B Test Variants",
+    "modelSlug": "chatgpt",
+    "categorySlug": "writing-content",
+    "promptText": "Write 8 headline variants for testing.\n\nWHAT IT SELLS: {product}\nAUDIENCE: {who}\nPRIMARY KEYWORD: {keyword}\nCURRENT HEADLINE: {current_if_any}\n\nGENERATE 8 OPTIONS, EACH USING A DIFFERENT FORMULA:\n1. Outcome-led (\"Get X without Y\")\n2. Loss-aversion (\"Stop losing X\")\n3. Time-bound (\"X in N minutes\")\n4. Number-led (\"3 ways to ...\")\n5. Question (\"What if X?\")\n6. Contrarian (\"Everyone says X. They're wrong.\")\n7. How-to (\"How to X without Y\")\n8. Identity (\"For people who X\")\n\nFor each:\n- The headline (≤ 12 words)\n- One-line subhead\n- Predicted strongest audience reaction (curiosity / urgency / trust / FOMO)\n\nRank by your bet on highest CTR for THIS audience.",
+    "tags": ["headlines", "copywriting", "ab-test"],
+    "params": { "temperature": 0.8, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "essay-outline-classic",
+    "title": "Essay Outline (5 Sections + Counterargument)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "writing-content",
+    "promptText": "Outline a long-form essay.\n\nTHESIS (what you're arguing): {one_sentence_thesis}\nAUDIENCE: {who}\nTARGET LENGTH: {2000 / 3000 / 5000_words}\nMY POV / ANGLE: {what_makes_this_essay_yours}\n\nSTRUCTURE:\n- **Cold open** (the scene, anecdote, or paradox that earns the first 60 seconds)\n- **Setup** (the conventional view this essay will challenge or extend)\n- **3-4 supporting moves** (each with: claim, evidence type, counterexample handled)\n- **The strongest counterargument** (steelman it for one paragraph — actually defeat it)\n- **The 'so what'** (why this matters TODAY for THIS reader)\n- **The kicker** (the line you want quoted)\n\nFor each section: a 2-line scope note + the kind of evidence you'd use (data, story, history, primary source). Suggest 3 specific titles ranked by curiosity.",
+    "tags": ["essay", "outline", "long-form"],
+    "params": { "temperature": 0.7, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "story-beat-sheet-3-act",
+    "title": "Story Beat Sheet (3-Act Structure)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "writing-content",
+    "promptText": "Build a 3-act beat sheet for: {story_premise}\n\nGENRE: {genre}\nLENGTH: {short_story / novella / novel / screenplay}\nPROTAGONIST'S WANT: {external_goal}\nPROTAGONIST'S NEED: {internal_truth_they_must_learn}\n\nGIVE ME 15 BEATS:\n- **Act 1**: Opening Image, Setup, Inciting Incident, Debate, Break into Act 2\n- **Act 2A**: B-Story, Fun and Games, Midpoint\n- **Act 2B**: Bad Guys Close In, All Is Lost, Dark Night of the Soul\n- **Act 3**: Break into Act 3, Finale, Final Image\n\nFor EACH beat: 1-2 sentences describing what happens in MY story (be specific, not 'the hero is challenged'). End with the THEMATIC STATEMENT in one sentence — what is this story really about?",
+    "tags": ["story", "structure", "writing", "screenwriting"],
+    "params": { "temperature": 0.8, "max_tokens": 2500 }
+  },
+
+  {
+    "type": "text",
+    "slug": "email-sequence-5-touch",
+    "title": "5-Touch Nurture Email Sequence",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write a 5-email nurture sequence for new free-trial signups.\n\nPRODUCT: {what_it_does}\nIDEAL OUTCOME (after 14 days): {desired_action}\nMOST COMMON CONVERSION BLOCKER: {what_kills_conversions}\nVOICE: {your_brand_voice}\n\nSCHEDULE:\n- **Day 0**: Welcome + the ONE thing to do in the next 5 minutes\n- **Day 2**: A specific use case in story form (no feature dump)\n- **Day 5**: Address the #1 objection head-on\n- **Day 9**: Customer story (300 words, real numbers)\n- **Day 13**: Trial-ending nudge with a single, plain CTA\n\nFOR EACH EMAIL:\n- Subject line (≤ 6 words, no caps, no emojis)\n- Preview text (80 chars)\n- Body (120-180 words)\n- The ONE link / button\n\nNo 'just checking in', no 'last chance', no urgency theater.",
+    "tags": ["email-sequence", "nurture", "marketing"],
+    "params": { "temperature": 0.7, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "onboarding-email-series",
+    "title": "Product Onboarding Email Series (7 Days)",
+    "modelSlug": "chatgpt-5",
+    "categorySlug": "marketing-sales",
+    "promptText": "Design a 7-day onboarding email series for new signups.\n\nPRODUCT: {product}\nAHA MOMENT (the moment users \"get it\"): {moment}\nKEY ACTIVATION ACTIONS: {3-5_actions_that_predict_retention}\nDROP-OFF POINT (where users churn): {step_or_friction}\n\nDESIGN:\n- For each of the 7 emails: subject, hook (1 line), the ONE action to take, the expected payoff, the friction-reducer (template, example, default)\n- Day 1: the first activation action\n- Day 2: address the drop-off point pre-emptively\n- Day 3: the surprising / under-used feature\n- Day 4: a customer story doing what they should be doing\n- Day 5: a one-question survey (genuine learning, not a CSAT)\n- Day 6: how to invite a teammate / share it\n- Day 7: a celebration + the next milestone\n\nEnd with the 3 KPIs to track for this whole sequence.",
+    "tags": ["onboarding", "lifecycle", "email"],
+    "params": { "temperature": 0.6, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "referral-program-design",
+    "title": "Design a Referral Program",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Design a referral program for: {product}\n\nMODEL: {SaaS_subscription / marketplace / e-commerce / consumer_app}\nCURRENT CAC: {amount}\nMARGIN PER CUSTOMER: {amount_or_unknown}\nREFERRAL CULTURE TODAY: {organic_word_of_mouth / nothing / negative}\n\nPROPOSE:\n1. **Incentive structure**: who gets what when (referrer/referee, % cash/credit/discount, vesting)\n2. **The trigger moment** to ask (which in-product event signals high satisfaction)\n3. **The ask copy** — exact words for the in-product prompt and the share message\n4. **The math** — what referral rate would make this self-funding, and is that realistic?\n5. **3 anti-fraud rules** (one-line each)\n6. **The success metric** (not 'referrals sent' — pick the leading retention metric)\n\nFlag the variant most likely to NOT work for THIS product and why.",
+    "tags": ["referral", "growth", "marketing"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "win-loss-analysis-template",
+    "title": "Win/Loss Analysis (From a Lost Deal)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "marketing-sales",
+    "promptText": "Conduct a structured win/loss analysis for a deal we just lost.\n\nDEAL: {company_size_and_industry}\nDEAL VALUE: {ACV}\nCOMPETITORS: {who_they_picked_or_no-decision}\nMY POV (what I think happened): {your_take}\n\nGIVE ME:\n1. **10 questions** to ask the buyer in a 20-minute call (open-ended, behavioral, never leading)\n2. **5 questions** for OUR account team (rep, SE, CSM if involved)\n3. The 4 most likely root-cause categories (Product, Pricing, Process, People) — for each, the 1-2 specific failure modes to listen for\n4. The output template I should fill in AFTER the call (1 page max): timeline, the moment we lost, the systemic issue, the one change worth making\n\nNo 'lessons learned', no 'going forward'. Give me a tool I can fill in.",
+    "tags": ["win-loss", "sales", "analysis"],
+    "params": { "temperature": 0.5, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "demo-script-15-min",
+    "title": "15-Minute Sales Demo Script",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write a 15-minute demo script.\n\nPRODUCT: {product}\nBUYER PERSONA: {role_and_company_size}\nTHEIR #1 PAIN: {pain}\nTHE 3 FEATURES THAT MATTER MOST FOR THEM: {features}\nMY ASKED-ABOUT COMPETITORS: {if_any}\n\nFORMAT:\n- **Minute 0-1**: confirm the agenda + what you want them to know by the end\n- **Minute 1-3**: discovery recap — repeat back THEIR words on the pain (no slides)\n- **Minute 3-12**: 3 use-case demos — for each, the setup story, the click path (1 sentence each step), the moment of value, and the silence to let it land\n- **Minute 12-14**: the boring questions (security, pricing model, integrations) — pre-empt them\n- **Minute 14-15**: the close — \"based on what you've seen, would [next step] make sense?\"\n\nAlso: the 3 'red flag' phrases a buyer might use that mean SLOW DOWN, and the 3 'green flag' phrases that mean MOVE TO PROPOSAL.",
+    "tags": ["demo", "sales", "script"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "ad-copy-meta-facebook-3",
+    "title": "Meta Ad Variants (Image + Copy)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write 3 Meta (Facebook/Instagram) ad variants.\n\nPRODUCT: {product}\nOFFER: {what_clicking_gets_them}\nTARGET AUDIENCE: {interest_or_demo}\nWE'RE OPTIMIZING FOR: {clicks / leads / purchases}\n\nFOR EACH VARIANT:\n- **Primary text** (90-125 chars, the hook)\n- **Headline** (≤ 40 chars)\n- **Description** (≤ 30 chars)\n- **Image / video brief** (one paragraph for a designer — composition, mood, what's in frame, what's NOT)\n- **CTA button**: pick one from Meta's allowed list (Shop Now, Sign Up, Learn More, Get Quote, Subscribe)\n\nMake the 3 variants use these angles:\nA) Problem-aware (assumes they know the pain)\nB) Curiosity-led (offers something they didn't know they needed)\nC) Social-proof / numbers\n\nFlag the variant most likely to fail Meta's ad review (\"too good to be true\" claims, personal attributes) so we can sanitize.",
+    "tags": ["meta-ads", "facebook", "ad-copy"],
+    "params": { "temperature": 0.7, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "value-proposition-canvas",
+    "title": "Value Proposition Canvas",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Fill out the Value Proposition Canvas for: {product}\n\nMY CUSTOMER SEGMENT: {specific_buyer}\n\nLEFT SIDE — CUSTOMER PROFILE:\n- **Jobs**: 5 functional/emotional/social jobs the customer is trying to do\n- **Pains**: 5 frustrations / obstacles / risks (concrete, not 'inefficiency')\n- **Gains**: 5 outcomes they desire (functional + emotional)\n\nRIGHT SIDE — VALUE MAP:\n- **Products & services**: 3 things you actually offer\n- **Pain relievers**: how each product reduces a SPECIFIC pain from the left (1-to-1 map)\n- **Gain creators**: how each product produces a SPECIFIC gain from the left\n\nFINISH WITH:\n- The 3 strongest pain-reliever / pain matches (where you're indisputably the answer)\n- The 2 gains you DON'T deliver (where competitors win)\n- The one pivot to your offering that would close one of those gaps",
+    "tags": ["value-proposition", "strategy", "marketing"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "re-engagement-email",
+    "title": "Re-engagement Email (Win Back the Inactive)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write a re-engagement email for users who haven't opened the product in 30+ days.\n\nPRODUCT: {product}\nWHY THEY MIGHT HAVE LEFT: {top_reason_you_suspect}\nWHAT'S CHANGED SINCE THEY LEFT: {actual_recent_improvement}\nTHE ASK: {come_back / take_one_action / give_feedback / unsubscribe}\n\nFORMAT:\n- Subject line (3 variants, each ≤ 6 words, no 'we miss you')\n- Body (130 words max):\n  - Open with honesty: acknowledge they've been gone\n  - One specific thing that's better now\n  - A low-friction return path (one click, no setup re-do)\n  - An out (\"Or if it's no longer for you, here's the one-click unsubscribe\")\n- Tone: respectful adult-to-adult. Not desperate. Not corporate.",
+    "tags": ["re-engagement", "lifecycle", "email"],
+    "params": { "temperature": 0.7, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "pricing-page-copy",
+    "title": "Pricing Page Copy",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write pricing page copy.\n\nPRODUCT: {product}\nTIERS: {list_with_price_and_who_each_is_for}\nMOST_COMMON_OBJECTION: {what_makes_people_hesitate}\nMONEY-BACK / GUARANTEE: {if_any}\n\nFOR EACH TIER, WRITE:\n- **Tier name** (action-oriented, not 'Basic / Pro / Enterprise' if you can do better)\n- **One-line who-it's-for** (specific, eg. 'for solo creators just starting out')\n- **Headline price** + billing frequency\n- **The 5-7 features** that matter, sorted by 'value-to-effort' (not feature category)\n- **Single sentence trade-off** (\"You'll outgrow this when [trigger]\")\n- **CTA button** (verb + outcome, not 'Buy Now')\n\nABOVE THE TABLE: One sentence that frames the choice (not 'simple, transparent pricing').\nBELOW THE TABLE: FAQ — 4 questions: cancellation, switching tiers, guarantee, enterprise.\nNo 'pay annually and save 20%' unless you mean it. No 'starting at' if there's a hidden floor.",
+    "tags": ["pricing-page", "copy", "saas"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+
+  {
+    "type": "text",
+    "slug": "pestle-analysis",
+    "title": "PESTLE Analysis (Macro Environment)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "analysis-research",
+    "promptText": "Run a PESTLE analysis for: {industry_or_company}\n\nGEOGRAPHIC FOCUS: {country_or_region}\nTIME HORIZON: {12_months / 3_years / 5_years}\n\nFOR EACH OF THE 6 LENSES, GIVE:\n- **Political**: 2 forces shifting the regulatory or political environment\n- **Economic**: 2 macro factors (rates, currency, employment, capex cycles)\n- **Social**: 2 demographic or behavioral shifts\n- **Technological**: 2 emerging tech changes likely to disrupt this\n- **Legal**: 2 specific compliance or law changes on the horizon\n- **Environmental**: 2 climate, supply-chain, or sustainability forces\n\nFor each: 1 sentence describing the force + 1 sentence on whether it's a TAILWIND or HEADWIND for the subject + 1 number or news event from the past 24 months to anchor it.\n\nEnd with the 3 most-overlooked forces — the ones nobody on a Board would mention but everyone should.",
+    "tags": ["pestle", "analysis", "strategy"],
+    "params": { "temperature": 0.6, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "extract-data-from-text",
+    "title": "Extract Structured Data From Messy Text",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "Extract structured data from the unstructured text below.\n\nSOURCE TEXT:\n```\n{paste}\n```\n\nSCHEMA I NEED:\n```\n{describe_or_paste_json_or_csv_columns}\n```\n\nRULES:\n- Output as valid JSON (or CSV if my schema is column-based).\n- If a field isn't mentioned, set it to null — never invent.\n- For dates: ISO 8601.\n- For currency: ISO 4217 code + amount as a number.\n- For ambiguous values: pick the most likely + add a `confidence` field per record (low / med / high).\n- Skip records that lack the minimum required fields (note them in a `skipped` block).\n\nReturn ONE JSON object with `records: [...]` and `skipped: [{reason, source_excerpt}]`. No commentary outside the JSON.",
+    "tags": ["extraction", "data", "structured"],
+    "params": { "temperature": 0.2, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "synthesize-multiple-sources",
+    "title": "Synthesize Multiple Sources Into One View",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "Synthesize the sources below into ONE coherent view, with attributed claims.\n\nSOURCES:\n```\n{paste_source_1}\n```\n\n```\n{paste_source_2}\n```\n\n```\n{paste_source_3}\n```\n\nMY QUESTION: {what_you_want_synthesized}\n\nDO THIS:\n1. **Areas of agreement** (3-5 bullets, each with [S1, S2] attribution tags)\n2. **Areas of disagreement** (2-3, with WHO claims what)\n3. **Strongest single claim** across all three (and which source makes it)\n4. **The bias in each source** (1 sentence each)\n5. **The TL;DR for someone who hasn't read any of them** — 4 sentences\n\nNever say 'sources suggest' — always cite which source.",
+    "tags": ["synthesis", "research", "analysis"],
+    "params": { "temperature": 0.4, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "survey-question-designer",
+    "title": "Design Survey Questions That Don't Lie",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "analysis-research",
+    "promptText": "Design a survey to answer: {research_question}\n\nAUDIENCE: {who_is_taking_it}\nTARGET RESPONSE COUNT: {n}\nMAX TIME TO COMPLETE: {minutes}\n\nWRITE 8-12 QUESTIONS THAT:\n- Mix closed (Likert, multi-select, ranking) and ONE open-ended\n- Avoid double-barreled questions, leading wording, and acquiescence bias\n- Include a 'red herring' question to detect straight-lining\n- Include screening questions at the top\n\nFOR EACH QUESTION:\n- The question text exactly as it will appear\n- The response type + options (if applicable)\n- 1-line note on what bias the wording AVOIDS\n- 1-line note on how the response will be USED in analysis\n\nEnd with: the ONE question I should pilot-test with 5 people before sending, because the response will tell me if the survey itself needs revision.",
+    "tags": ["survey", "research", "questions"],
+    "params": { "temperature": 0.5, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "compare-two-papers",
+    "title": "Compare Two Papers / Reports",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "Compare these two sources head-to-head.\n\nSOURCE A:\n```\n{paste_or_summarize}\n```\n\nSOURCE B:\n```\n{paste_or_summarize}\n```\n\nMY GOAL: {what_youre_trying_to_decide_or_understand}\n\nDO THIS:\n1. **A 3-column table**: question | A's answer | B's answer — 6-8 rows of the most important questions\n2. **The fundamental disagreement** (the one root claim where they diverge)\n3. **Methodology comparison** — sample size, study design, conflicts of interest, recency\n4. **Which to trust more for MY goal** — 2 sentences\n5. **The reasonable middle position** — what would someone who took both seriously believe?\n6. **What new evidence would settle it**\n\nDo not pretend they agree more than they do.",
+    "tags": ["comparison", "research", "papers"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "interview-transcript-themes",
+    "title": "Extract Themes From Interview Transcripts",
+    "modelSlug": "claude-opus",
+    "categorySlug": "analysis-research",
+    "promptText": "I have multiple interview transcripts. Find the patterns.\n\nTRANSCRIPTS:\n```\n{paste_or_describe}\n```\n\nOUTPUT:\n1. **Top 5 themes** — each with: name, 2-sentence description, the # of participants who mentioned it, 1 verbatim quote that best captures it\n2. **Surprises** — 2 things you DIDN'T expect to come up but kept appearing\n3. **The strongest signal** (the thing >70% of participants converged on)\n4. **The contradictions** (where participants flatly disagreed — and what predicted which side)\n5. **What's NOT here** — important questions nobody raised (telling negative space)\n6. **Recommended next steps**: 3 follow-up interviews to run + the ONE question to ask each\n\nUse participant codes (P1, P2…) not names.",
+    "tags": ["interviews", "qualitative", "research"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+
+  {
+    "type": "text",
+    "slug": "email-triage-protocol",
+    "title": "Inbox-Zero Triage Protocol",
+    "modelSlug": "chatgpt",
+    "categorySlug": "productivity",
+    "promptText": "Help me design a personal email triage protocol.\n\nMY ROLE: {role}\nDAILY EMAIL VOLUME: {n_per_day}\nWHAT I HATE: {what_drains_you_most_about_email}\nWHAT'S OK TODAY: {what_works}\n\nDESIGN:\n1. **The 4 buckets** at first glance: Do Now (<2 min), Schedule (calendar block), Delegate, Delete/Archive — and ONE-LINE RULES for each\n2. **The folder/label structure** (no more than 6 folders)\n3. **My daily review ritual** — 15 minutes, when, what I do\n4. **My weekly review ritual** — 30 minutes, when, what I do\n5. **What I unsubscribe from / mute** — 3 specific categories\n6. **The 'reply once a week' batch rule** — what qualifies, and the 'sorry for the delay' template\n7. **The auto-responder template** for vacations / focus sprints",
+    "tags": ["email", "productivity", "system"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "calendar-audit",
+    "title": "Calendar Audit (Reclaim 5 Hours a Week)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Audit my calendar to find 5 hours of weekly waste.\n\nMY LAST WEEK'S MEETINGS (paste rough list):\n```\n{paste_calendar}\n```\n\nMY ROLE: {role}\nMY TOP 3 PRIORITIES THIS QUARTER: {priorities}\n\nDO THIS:\n1. **Classify each meeting**: Aligned / Tangential / Wasteful — with reason\n2. **The 'cancel without consequence' list** — meetings I could drop and almost nobody would notice\n3. **The 'shorten without consequence' list** — 60-min meetings that could be 30, 30-min that could be a Slack message\n4. **The 'one-on-ones I'm dragging out'** — frequency that's no longer right\n5. **The recurring meeting trap** — at least one event that started for a real reason and is now ceremonial\n6. **The decision rule** for accepting new meeting invites — single sentence I can put as a calendar policy\n\nFor each: how much time you'd return to me weekly.",
+    "tags": ["calendar", "meetings", "productivity"],
+    "params": { "temperature": 0.5, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "weekly-priorities-3-3-3",
+    "title": "Weekly Priorities (3-3-3 Method)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Plan my week using the 3-3-3 method (Oliver Burkeman).\n\nBIG STUFF I HAVE GOING ON: {projects_and_commitments}\nWHAT I FEEL GUILTY ABOUT NOT DOING: {hidden_pressure}\nWHAT WAS WAITING FOR ME ON MONDAY: {leftover_from_last_week}\nIDEAL FRIDAY EVENING FEELING: {what_done_looks_like}\n\nPROPOSE:\n- **3 HOURS** every weekday on the single hardest project I've been avoiding (specify when on the calendar and the first task to start with)\n- **3 SMALLER TASKS** to clear each day — specific enough to do in <60 minutes\n- **3 MAINTENANCE HABITS** to keep me human (sleep, exercise, social, family — pick three)\n\nFINISH WITH:\n- The ONE thing I'll say NO to this week\n- The ONE risk to this plan (eg. 'midweek travel, expect Wed to compress')\n- A 2-sentence Friday-self letter from current-me, anticipating the win",
+    "tags": ["weekly-planning", "productivity", "focus"],
+    "params": { "temperature": 0.6, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "annual-review-prompts",
+    "title": "Annual Review Self-Reflection (12 Prompts)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "productivity",
+    "promptText": "Walk me through an annual review of my year. Ask one question at a time, wait for my answer, and adjust your follow-up based on what I say.\n\nMY ROLE / SEASON OF LIFE: {context}\nWHAT I HOPED THIS YEAR WOULD BE: {ambition_at_jan_1}\n\nQUESTION SEQUENCE:\n1. What 3 moments do I remember as if they were yesterday — and why?\n2. What did I do this year that, a year ago, I wouldn't have predicted?\n3. What did I LEARN about myself that surprised me?\n4. Where did I quietly grow without noticing?\n5. What did I OVER-INVEST in?\n6. What did I UNDER-INVEST in?\n7. What did I keep promising myself and never deliver?\n8. Who are the 3 people that mattered most this year?\n9. What did I let go of — relationships, beliefs, identities?\n10. What's one thing I'm proud of that I haven't told anyone?\n11. What is the SINGLE BIGGEST lesson — in one sentence?\n12. What's one thing I want to be true a year from now?\n\nAfter I answer all 12: summarize the year in 4 sentences, in MY voice. Then a 1-sentence 'pin to your wall' takeaway.",
+    "tags": ["annual-review", "reflection", "year-end"],
+    "params": { "temperature": 0.7, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "habit-design",
+    "title": "Design a New Habit (BJ Fogg Style)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Help me design a new habit using the Tiny Habits methodology.\n\nMY DESIRED OUTCOME: {what_you_actually_want}\nMY CURRENT IDENTITY: {who_you_are_today}\nMY TARGET IDENTITY: {who_you_want_to_become}\nMY TIME BUDGET: {minutes_per_day}\nWHAT'S DERAILED ME BEFORE: {past_failure_pattern}\n\nDESIGN:\n1. **The tiny version** — the absolute smallest version of the habit (so small you can't say no, even on a bad day)\n2. **The anchor** — the existing daily behavior I'll attach it TO (\"After I [X], I will [Y]\")\n3. **The celebration** — the immediate reward (5-second positive emotion — Fogg's secret sauce)\n4. **The growth path** — how the habit GROWS from tiny → meaningful over 8 weeks\n5. **3 failure modes** (mine, specifically) and the recovery rule for each\n6. **The identity reinforcement** — what I tell MYSELF after each instance",
+    "tags": ["habits", "self-improvement", "productivity"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "personal-okrs",
+    "title": "Set Personal OKRs",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Help me set personal OKRs for {quarter / year}.\n\nWHERE I AM NOW: {brief_status_health_career_relationships_money}\nWHAT'S BEEN BUGGING ME: {nagging_issue}\nWHAT I WANT TO BE TRUE 12 MONTHS FROM NOW: {vision}\nWHAT I CAN ACTUALLY GIVE: {weekly_hours_for_personal_goals}\n\nPROPOSE:\n- **2 OBJECTIVES** (qualitative, vision-aligned, energizing — not 'lose weight')\n- **3 KEY RESULTS per objective** — quantitative, measurable, with a baseline and target\n- The **CONFIDENCE LEVEL** for each KR (1-10; if all 10s, you set them too easy)\n- The **WEEKLY HABIT** that compounds to each KR\n- The **ONE THING I'LL STOP DOING** that's blocking these\n- A check-in cadence (1 hr every {2_weeks / month})\n- The single MEASUREMENT TOOL for each KR (app / journal / scale / weekly review)",
+    "tags": ["okrs", "personal-goals", "planning"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "energy-management-audit",
+    "title": "Energy Management Audit",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Help me audit my energy, not my time.\n\nMY TYPICAL DAY (paste rough schedule): {schedule}\nMY ENERGY PATTERN (when am I sharpest? when do I crash?): {pattern}\nWHAT DEPLETES ME: {depleters}\nWHAT RESTORES ME: {restorers}\n\nDO THIS:\n1. Match my **most cognitively demanding tasks** to my **peak energy windows** — what's misaligned today?\n2. Identify the **3 biggest energy leaks** in my current week (people, meetings, content I consume, food, sleep)\n3. Find the **3 restorative inputs** I'm under-using\n4. Propose a **redesigned default day** (with specific time blocks)\n5. The **30-day experiment**: change ONE thing first. What and why?\n6. The **warning sign** that I'm sliding back into the old pattern",
+    "tags": ["energy", "productivity", "self-management"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "8020-audit",
+    "title": "80/20 Audit of My Work",
+    "modelSlug": "claude-opus",
+    "categorySlug": "productivity",
+    "promptText": "Run the Pareto audit on what I do.\n\nMY ROLE: {role}\nMY WEEK IN ROUGH HOURS: {activity_breakdown}\nMY MEASURABLE OUTPUTS: {what_you_get_judged_on}\n\nIDENTIFY:\n1. **The 20% of activities producing 80% of my results** (be specific — name them)\n2. **The 80% of activities producing 20% of my results** — the long tail\n3. **The 5% of activities that are NEGATIVE-value** (they actively cost more than they produce)\n4. **The activities I CAN'T cut** (legitimate maintenance work, even if low-leverage)\n5. **A redesigned week** if I shifted 6 hours from the bottom 80% to the top 20%\n6. **The honest reason I haven't done this already** (it's almost never 'no time')",
+    "tags": ["pareto", "productivity", "audit"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+
+  {
+    "type": "text",
+    "slug": "mental-model-explainer",
+    "title": "Explain a Mental Model (with Real Examples)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "Teach me the mental model: {model_name}\n\nMY GOAL: {what_youre_trying_to_use_it_for}\n\nFORMAT:\n1. **The one-sentence core idea** (no jargon)\n2. **Where it came from** (the person + field of origin, in 2 sentences)\n3. **3 examples in DIFFERENT domains** — finance, biology, relationships, software — so I see the pattern\n4. **3 misuses** — the most common ways people misapply this model\n5. **What it pairs well with** (2 sister models that strengthen this one)\n6. **An exercise**: a real situation I'm facing where this model applies — walk me through using it\n\nEnd with the line I'd want pinned to my wall.",
+    "tags": ["mental-models", "learning", "frameworks"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "build-cheat-sheet-from-notes",
+    "title": "Build a Cheat Sheet From My Notes",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "learning-education",
+    "promptText": "Compress my rough notes into a 1-page cheat sheet.\n\nNOTES:\n```\n{paste_notes}\n```\n\nTHE THING I MIGHT FORGET FIRST: {what_you_want_to_remember_most}\nUSE CASE FOR THE CHEAT SHEET: {studying / on-the-job / preparing_for_meeting}\n\nFORMAT (must fit on one screen):\n- **Top of page**: a 1-sentence definition of the topic\n- **3 key formulas / rules / heuristics** (boxed)\n- **A decision flowchart** (in nested bullets) for the most common 'which do I use?' question\n- **5 worked-example one-liners**\n- **3 traps** — things that LOOK right but aren't\n- **The mnemonic / memory hook** at the bottom\n\nCut anything that's not in the top 20%.",
+    "tags": ["cheat-sheet", "learning", "compression"],
+    "params": { "temperature": 0.5, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "argument-analyzer",
+    "title": "Analyze an Argument (Rhetoric + Logic)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "Analyze this argument as a rhetoric professor would.\n\nARGUMENT:\n```\n{paste_full_text}\n```\n\nDO THIS:\n1. **Reconstruct the argument**: state the CLAIM in one sentence, then the 2-4 REASONS offered, then the EVIDENCE for each\n2. **Identify the IMPLICIT assumptions** (the premises the author assumes without arguing)\n3. **Find the logical fallacies** (with the specific name and a 1-line example from the text)\n4. **Find the rhetorical moves** (appeals to authority, fear, identity, urgency) — neutral observation, not necessarily 'bad'\n5. **Steelman the opposite view** in 4 sentences\n6. **My honest assessment**: which 1-2 points the author got RIGHT, and the 1-2 places they're MOST vulnerable",
+    "tags": ["rhetoric", "critical-thinking", "argument"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "counter-argument-prep",
+    "title": "Prep the Strongest Counter-Argument",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "I'm about to present this idea: {your_idea_or_position}\n\nAUDIENCE: {who_will_push_back}\nWHAT I'M HOPING THEY'LL DO: {agree / fund / approve / hire / change_their_mind}\n\nPREPARE ME FOR THE STRONGEST PUSHBACK:\n1. **The 5 most likely objections**, ranked by likelihood\n2. For each: the steelman version (the SHARPEST possible form, not a strawman)\n3. For each: a 30-second response\n4. The ONE objection I CANNOT cleanly defeat — and how to acknowledge it gracefully\n5. The DETERMINISTIC question to ask the audience that reveals which objection THEY're carrying (so I can address it before they vocalize it)\n6. The closing line if the room is still skeptical",
+    "tags": ["debate", "persuasion", "preparation"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "memory-palace-builder",
+    "title": "Build a Memory Palace",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "learning-education",
+    "promptText": "Help me build a memory palace to memorize: {list_or_concept}\n\nMY FAMILIAR LOCATION (must be vivid in my mind): {your_home_or_route}\n\nDESIGN:\n1. Walk me through MY chosen location step by step (10-15 stations)\n2. For each station, attach ONE item from my list using a vivid, multi-sensory, slightly-absurd image (the more emotionally weird, the stickier)\n3. Include the SOUND or SMELL or PHYSICAL SENSATION in each image — vision alone fades\n4. Group related items into station clusters where natural\n5. End with the **review protocol**: how often to mentally walk it (today / 1 day / 4 days / 14 days)\n\nQuiz me on item #3 and item #7 to check the encoding before we finish.",
+    "tags": ["memory", "mnemonics", "learning"],
+    "params": { "temperature": 0.8, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "compare-two-schools-of-thought",
+    "title": "Compare Two Schools of Thought",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "Compare these two schools of thought: {school_a} vs {school_b}\n\nWITHIN THE FIELD OF: {field}\nMY GOAL: {understand_the_debate / pick_a_side / use_in_my_work}\n\nGIVE ME:\n1. **The core disagreement** in one sentence\n2. **Where each starts** — the foundational assumption each makes\n3. **A side-by-side on 6 sub-questions** (a real table)\n4. **The strongest argument each makes against the other**\n5. **What they actually AGREE on** — almost always more than people realize\n6. **Where the field is moving** today (and which school is winning, if there's evidence)\n7. **The 1 book + 1 paper + 1 thinker** per school worth reading to go deeper\n\nDo not pretend it's a tie if it isn't.",
+    "tags": ["compare", "philosophy", "education"],
+    "params": { "temperature": 0.6, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "domain-glossary",
+    "title": "Domain Glossary (for a Specialist Field)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "learning-education",
+    "promptText": "Build me a working glossary for: {domain}\n\nMY LEVEL: {beginner / intermediate / expert}\nMY USE CASE: {casual_curiosity / job_interview / build_a_product / write_about_it}\n\nLIST THE 25 MOST IMPORTANT TERMS in this domain. For EACH:\n- **The term**\n- **A one-sentence definition** at my level (no jargon stack)\n- **Why it matters** (what understanding this UNLOCKS)\n- **A common misconception** people have about it\n- **A SISTER TERM** they often confuse it with (and the difference)\n\nGroup the 25 terms into 4-5 logical clusters. End with the 3 terms I should learn FIRST.",
+    "tags": ["glossary", "learning", "domain"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "socratic-tutor",
+    "title": "Socratic Tutor (Don't Give Me the Answer)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "learning-education",
+    "promptText": "Be my Socratic tutor on: {topic}\n\nMY CURRENT MENTAL MODEL: {what_you_currently_believe_or_understand}\nMY GOAL: {what_you_want_to_understand_deeply}\n\nRULES:\n- Do NOT give me direct answers.\n- Ask one question at a time. WAIT for my response.\n- Each question should expose a gap or contradiction in my current thinking.\n- After every 3-4 questions, summarize what I've now figured out (without spoiling what's next).\n- When I'm clearly stuck, ask a SMALLER question — never give the answer.\n- After ~10 exchanges, ask me to summarize what I've learned, in MY words.\n- THEN — and only then — fill in any pieces I still don't see.",
+    "tags": ["socratic", "tutor", "learning"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+
+  {
+    "type": "text",
+    "slug": "intro-pitch-60-seconds",
+    "title": "60-Second Self-Introduction",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "Help me write a 60-second self-introduction.\n\nMY NAME: {name}\nMY CURRENT ROLE: {role_and_company}\nWHAT I DO IN PLAIN ENGLISH: {what_you_actually_do}\nWHAT MAKES ME UNUSUAL FOR MY ROLE: {distinctive_angle}\nWHAT I'M LOOKING FOR (if anything): {opportunity / collaboration / nothing}\nWHO I'M TALKING TO: {context_of_introduction}\n\nFORMAT:\n- Total: 60 seconds when read aloud (≈150 words)\n- Start with my name + a hook (not 'so I work at X')\n- One concrete thing I've built or solved\n- One detail about how I think or work (something they couldn't guess)\n- A clean ask or invitation if appropriate — otherwise an open door\n\nNo 'I'm passionate about'. No 'driven by'. No 'I'm a [X] with a passion for [Y]'.",
+    "tags": ["pitch", "introduction", "networking"],
+    "params": { "temperature": 0.7, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "conference-talk-proposal",
+    "title": "Conference Talk Proposal",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Write a conference talk proposal.\n\nMY TOPIC: {topic}\nTHE CONFERENCE: {conference_name_and_audience}\nWHY I'M THE RIGHT PERSON: {your_credential_or_unique_perspective}\nTHE TALK FORMAT: {30_min / 45_min / lightning_5_min / workshop}\n\nDRAFT:\n- **Title** (8-10 words, MUST make a reviewer curious — not 'An overview of...')\n- **Abstract** (180 words for the public site)\n- **Outline** (5-7 sections with a 1-line scope note each)\n- **Why this audience needs it NOW** (the one paragraph that wins reviewers)\n- **The takeaway**: 3 things attendees can DO Monday morning\n- **Your bio** (60 words, third person, with one specific credibility detail)\n- **Suggested slide count** + the visual demos / live-code segments that would make this memorable",
+    "tags": ["conference", "speaking", "career"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "promotion-case-writeup",
+    "title": "Promotion Case Write-Up",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Write the promotion case for me.\n\nCURRENT LEVEL: {your_level}\nTARGET LEVEL: {next_level}\nCOMPANY: {company}\nKEY ACCOMPLISHMENTS (last 6-12 months): {paste_with_numbers}\nMY MANAGER'S BIGGEST CONCERN: {what_might_block_it}\n\nDRAFT (this is what my manager will paste into their HR system):\n1. **Impact** (3-4 bullets, each one project, with: scope, MY specific role, the OUTCOME with a number)\n2. **Leadership** (situations where I influenced beyond my pay grade — mentoring, technical direction, cross-team)\n3. **Scope demonstration** (the next-level behaviors I'm ALREADY exhibiting consistently)\n4. **The growth narrative** (where I was 12 months ago → where I am now → next 6 months)\n5. **The 1-paragraph TL;DR** my manager can use as the case summary\n\nBe concrete. Replace 'helped with' with 'owned'. Replace 'collaborated on' with 'led'. Don't claim what you can't defend.",
+    "tags": ["promotion", "career", "writeup"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "resignation-letter-warm",
+    "title": "Resignation Letter (Warm, Professional, Final)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "Write my resignation letter.\n\nMY ROLE: {role}\nMY COMPANY: {company}\nLAST DAY: {date}\nTHE REAL REASON I'M LEAVING (private context): {real_reason}\nWHAT I WANT TO PRESERVE: {the_relationship / future_referral / reputation}\nHOW MUCH NOTICE I'M GIVING: {two_weeks / one_month / longer}\n\nDRAFT a 4-paragraph letter:\n- **Para 1**: Clear, unambiguous resignation + last day\n- **Para 2**: Brief, dignified reason (matches the public story, never the petty truth)\n- **Para 3**: What I'll do to make the transition smooth (specific commitments)\n- **Para 4**: Genuine gratitude — one specific moment / colleague / lesson\n\nTone: warm, brief, unapologetic but kind. Never bitter, never effusive. The 'they read it 10 years later and don't cringe' test.",
+    "tags": ["resignation", "career", "letter"],
+    "params": { "temperature": 0.5, "max_tokens": 1200 }
+  },
+  {
+    "type": "text",
+    "slug": "side-hustle-validation",
+    "title": "Validate Your Side Hustle Idea",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Help me decide whether to start this side hustle.\n\nIDEA: {side_hustle}\nMY DAY JOB & ENERGY LEFT: {dayjob_context}\nMY UNUSED EDGE: {skill / network / time / asset}\nMY HONEST GOAL: {extra_income / future_full_time / creative_outlet / status}\nMY RISK PROFILE: {financial_runway, dependents, etc.}\n\nDO THIS:\n1. Diagnose: is this a HOBBY or a BUSINESS for me? (one paragraph)\n2. Smallest-possible-test in 4 weekends — what would I sell, to whom, for how much?\n3. The 3 conditions under which I'd go full-time (revenue, retention, energy)\n4. The 'kill criteria' — the 3 honest signs I should put this down\n5. The 1 conversation I should have this week before doing anything\n6. The brutal question: am I doing this for the money or the avoidance of my main job?",
+    "tags": ["side-hustle", "career", "validation"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "performance-review-self",
+    "title": "Self-Evaluation for Performance Review",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "Write my performance review self-evaluation.\n\nMY ROLE: {role}\nPERIOD: {q1 / h1 / year}\nKEY PROJECTS: {projects}\nWHAT I WANT MY MANAGER TO SEE: {top_3_messages}\nWHAT I'M WORRIED THEY THINK: {a_concern_you_want_to_address}\n\nDRAFT:\n- **Accomplishments** (5-6 bullets, in 'situation → action → quantified outcome' format)\n- **Growth areas** (2 honest ones — the kind senior leaders RESPECT seeing acknowledged)\n- **What I'm proud of** (1 short paragraph, a moment that mattered)\n- **What I'd do differently** (1 short paragraph, lesson learned)\n- **Goals for the next period** (3 things, with a 1-line success criterion each)\n- **What I need from my manager / the org** (1 specific ask)\n\nTone: confident, specific, honest. No padding. No defensiveness. Read it aloud — does it sound like someone who'd promote themselves?",
+    "tags": ["performance-review", "career", "self-eval"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "mentor-coldreach-message",
+    "title": "Cold Message to a Mentor",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "personal-career",
+    "promptText": "Write a cold message asking for mentorship.\n\nWHO I'M MESSAGING: {their_role_and_background}\nHOW I FOUND THEM: {specific_writing_talk_or_project}\nWHAT I'M WORKING ON: {your_current_challenge}\nWHAT I CAN OFFER (be honest, even if 'nothing yet'): {your_offer_or_none}\n\nDRAFT:\n- Subject line: 5-7 words, specific, NOT 'asking for advice'\n- Body (80-100 words):\n  - First sentence: a specific reference to their work that proves I paid attention\n  - One sentence on what I'm trying to figure out (not 'pick your brain')\n  - The smallest possible ask — ideally async (one 3-sentence reply > 30-min call)\n  - One sentence offering to send them my answer once I figure it out (real reciprocity)\n  - Sign-off with first name only\n\nAlso: the follow-up message I should send if they haven't replied in 2 weeks (50 words, low-pressure, doesn't guilt-trip).",
+    "tags": ["mentorship", "outreach", "career"],
+    "params": { "temperature": 0.7, "max_tokens": 1200 }
+  },
+
+  {
+    "type": "image",
+    "slug": "kodachrome-1970s-family",
+    "title": "Kodachrome 1970s Family Snapshot",
+    "modelSlug": "flux-dev",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "A candid Kodachrome photograph from 1973, a family of four standing in front of a wood-panel station wagon at a national park overlook, dad in tan slacks and aviators, mom in a floral sundress holding a paper map, two kids squinting in the sun, slightly faded warm color palette, soft film grain, the kind of family photo you'd find in a shoebox in the attic, mid-afternoon golden hour, deep saturated greens and warm browns, 35mm slide film aesthetic",
+    "imageSeeds": ["kodachrome-1973"],
+    "params": { "aspect_ratio": "3:2", "guidance": 3.5 },
+    "tags": ["vintage", "kodachrome", "family", "portrait"]
+  },
+  {
+    "type": "image",
+    "slug": "tokyo-streetwear-portrait",
+    "title": "Tokyo Streetwear Portrait at Night",
+    "modelSlug": "midjourney",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "Editorial street fashion portrait shot at midnight in Shibuya, a young woman in oversized cream-colored streetwear, hair in twin space buns, standing under the magenta-and-cyan neon of a corner ramen shop, motion-blurred crowd around her but she's tack-sharp, captured on 35mm portrait lens at f/1.4, Wong Kar-wai color palette, slight film grain, --ar 4:5 --stylize 600",
+    "imageSeeds": ["tokyo-street-1"],
+    "params": { "aspect_ratio": "4:5" },
+    "tags": ["tokyo", "fashion", "neon", "portrait"]
+  },
+  {
+    "type": "image",
+    "slug": "weathered-fisherman-bw",
+    "title": "Weathered Fisherman Black & White",
+    "modelSlug": "flux-pro",
+    "categorySlug": "cinematic-portraits",
+    "promptText": "A weathered Atlantic fisherman in his 70s, deep lines on a sun-burnt face, salt-bleached beard, wool sweater patched at the elbows, single window of golden afternoon light illuminating one side of his face, the other in soft shadow, looking just past the camera with the calm of someone who has seen 50 winters at sea, shot on Hasselblad 80mm, deep black and white, museum print quality, in the style of Sebastião Salgado",
+    "imageSeeds": ["fisherman-bw"],
+    "params": { "aspect_ratio": "4:5", "guidance": 4 },
+    "tags": ["portrait", "documentary", "black-and-white"]
+  },
+  {
+    "type": "image",
+    "slug": "afrofuturist-warrior",
+    "title": "Afrofuturist Warrior Portrait",
+    "modelSlug": "flux-dev",
+    "categorySlug": "fantasy-characters",
+    "promptText": "An Afrofuturist warrior queen in ceremonial armor of polished obsidian and gold filigree, intricate beadwork on the chest plate, a crown of curved horns rising from a halo of cosmic dust, deep ebony skin with subtle iridescent highlights, eyes glowing faint cyan, standing against a deep-space backdrop with a binary star system, regal three-quarter pose, painted in the style of Black Panther concept art, hyper-detailed armor texture, 3:4 portrait",
+    "imageSeeds": ["afrofuturist-queen"],
+    "params": { "aspect_ratio": "3:4", "guidance": 4 },
+    "tags": ["afrofuturism", "warrior", "fantasy"]
+  },
+  {
+    "type": "image",
+    "slug": "viking-shieldmaiden-mist",
+    "title": "Viking Shieldmaiden in the Mist",
+    "modelSlug": "flux-pro",
+    "categorySlug": "fantasy-characters",
+    "promptText": "A young viking shieldmaiden standing on a misty Icelandic shore at dawn, braided red hair whipped by sea wind, iron-bound shield resting on the sand beside her, leather and fur tunic with hand-forged brooches, expression calm and unhurried, the silhouette of a longship behind her on the gray water, painterly digital art in the style of Greg Manchess, cool dawn palette of silver-blue and rust, full-body composition, 9:16",
+    "imageSeeds": ["shieldmaiden"],
+    "params": { "aspect_ratio": "9:16", "guidance": 4 },
+    "tags": ["viking", "fantasy", "character", "atmospheric"]
+  },
+  {
+    "type": "image",
+    "slug": "watercolor-coastal-village",
+    "title": "Watercolor Coastal Village at Sunset",
+    "modelSlug": "flux-schnell",
+    "categorySlug": "abstract-art",
+    "promptText": "Loose watercolor painting of a small Italian coastal village at sunset, terracotta rooftops cascading down to the sea, a single fishing boat in the bay, warm rose-gold sky washing into deep cobalt water, wet-on-wet bleeds of pigment, soft watercolor edges, slight ink linework on the boats and shutters, in the style of a small Mediterranean travel sketch, signed lower right with a tiny indigo stamp",
+    "imageSeeds": ["coastal-village"],
+    "params": { "aspect_ratio": "3:2", "steps": 4 },
+    "tags": ["watercolor", "coastal", "italian", "atmospheric"]
+  },
+  {
+    "type": "image",
+    "slug": "claymation-tiny-baker",
+    "title": "Claymation Tiny Baker at Work",
+    "modelSlug": "flux-pro",
+    "categorySlug": "abstract-art",
+    "promptText": "Claymation-style 3D render of a tiny round-faced baker carefully sliding a tray of pastel macarons into a miniature wood oven, soft hand-sculpted clay textures, fingerprints visible in the material, a tiny window with morning light streaming through, pastel pink walls, a small black-and-white cat watching from a stool, Aardman / Laika studio aesthetic, ultra-charming, depth of field on the macarons, 1:1",
+    "imageSeeds": ["claymation-baker"],
+    "params": { "aspect_ratio": "1:1", "guidance": 3.8 },
+    "tags": ["claymation", "3d", "wholesome", "illustration"]
+  },
+  {
+    "type": "image",
+    "slug": "vaporwave-mall-render",
+    "title": "Vaporwave Empty Mall",
+    "modelSlug": "midjourney",
+    "categorySlug": "abstract-art",
+    "promptText": "A vaporwave-aesthetic 3D render of an empty 1990s shopping mall fountain courtyard at night, palm trees in concrete planters, pastel-pink and teal tile floor, marble columns, a single Roman bust statue half-pixelated, glowing CRT TVs hanging from the ceiling showing static, retrofuturist Y2K vibes, sun-faded textures, lo-fi feel, no people, deep nostalgia, 16:9 widescreen",
+    "imageSeeds": ["vaporwave-mall"],
+    "params": { "aspect_ratio": "16:9" },
+    "tags": ["vaporwave", "retro", "aesthetic", "3d"]
+  },
+  {
+    "type": "image",
+    "slug": "synthwave-grid-mountain",
+    "title": "Synthwave Mountain at Midnight",
+    "modelSlug": "flux-dev",
+    "categorySlug": "abstract-art",
+    "promptText": "Synthwave aesthetic, a chrome-wireframe mountain rising out of a magenta-and-cyan grid plane, a setting sun painted in horizontal bands of orange and pink behind it, a single triangle-shaped sports car silhouette driving toward the horizon, deep purple sky with a faint scan-line texture, 80s retro-futurism, no text, no logos, hyper-clean digital painting, 16:9",
+    "imageSeeds": ["synthwave-mountain"],
+    "params": { "aspect_ratio": "16:9" },
+    "tags": ["synthwave", "retro", "80s", "abstract"]
+  },
+  {
+    "type": "image",
+    "slug": "anime-school-rooftop",
+    "title": "Anime School Rooftop at Sunset",
+    "modelSlug": "flux-dev",
+    "categorySlug": "anime-illustration",
+    "promptText": "Anime illustration in the modern Makoto Shinkai style, two students standing on the rooftop fence of a Japanese high school at sunset, golden-orange sky bleeding into deep violet, soft cumulus clouds with painterly brushwork, the city of Tokyo silhouetted in the distance, the wind catching the girl's loose hair and the boy's untucked shirt, both quietly looking ahead, cinematic cel-shaded composition, hyper-detailed clouds, slight sun flare, 16:9",
+    "imageSeeds": ["anime-rooftop"],
+    "params": { "aspect_ratio": "16:9", "guidance": 3.5 },
+    "tags": ["anime", "shinkai", "sunset", "school"]
+  },
+  {
+    "type": "image",
+    "slug": "studio-headshot-podcast",
+    "title": "Podcast Studio Headshot",
+    "modelSlug": "flux-pro",
+    "categorySlug": "product-photography",
+    "promptText": "Professional podcast studio environmental headshot — a person in their 30s wearing a plain charcoal sweater and round glasses, sitting at a wooden desk in front of a Shure SM7B microphone on a boom arm, soft warm key light from above-left, gentle blue rim-light from the right, a tasteful blurred background of acoustic foam tiles and a single neon sign with hand-drawn type, shot on 50mm at f/1.8, sharp focus on the eyes, premium podcast cover art quality, 4:5",
+    "imageSeeds": ["podcast-headshot"],
+    "params": { "aspect_ratio": "4:5" },
+    "tags": ["headshot", "podcast", "professional"]
+  },
+  {
+    "type": "image",
+    "slug": "geometric-mark-cafe",
+    "title": "Geometric Logo for a Specialty Café",
+    "modelSlug": "flux-pro",
+    "categorySlug": "logo-design",
+    "promptText": "A minimal geometric logo for a fictional specialty coffee shop called \"AURUM,\" combining a stylized coffee bean shape with an abstract sunrise — a half-circle resting on a thin horizontal line, with two tapered seed shapes inside forming the bean's split, monochromatic charcoal on warm cream background, generous negative space, vector-clean edges, the kind of mark that would scale from a 16px favicon to a 4-meter shopfront sign, in the lineage of Aesop and Blue Bottle, 1:1",
+    "imageSeeds": ["aurum-logo"],
+    "params": { "aspect_ratio": "1:1", "guidance": 4 },
+    "tags": ["logo", "cafe", "minimalist", "branding"]
+  },
+  {
+    "type": "image",
+    "slug": "cabin-snowy-forest",
+    "title": "Cabin in a Snowy Forest at Dusk",
+    "modelSlug": "flux-pro",
+    "categorySlug": "architecture",
+    "promptText": "A modern A-frame cabin tucked into a dense pine forest at dusk in deep snow, warm amber light glowing from every window, smoke rising softly from the chimney, fresh boot tracks leading to the front door, the dark blue of late-twilight sky, a single car parked off to the side with its headlights faintly washing the snow, painterly photographic style, in the cinematic feel of an Architectural Digest cover, 16:9 widescreen",
+    "imageSeeds": ["snow-cabin"],
+    "params": { "aspect_ratio": "16:9", "guidance": 3.5 },
+    "tags": ["architecture", "cabin", "winter", "cinematic"]
+  },
+  {
+    "type": "image",
+    "slug": "industrial-loft-interior",
+    "title": "Industrial Loft Interior",
+    "modelSlug": "flux-pro",
+    "categorySlug": "architecture",
+    "promptText": "Architectural interior photograph of a converted industrial loft in Brooklyn, exposed brick wall on one side, raw steel columns, polished concrete floor, vintage Persian rug grounding the seating area, mid-century modern leather sofa, a wall of factory windows letting in soft afternoon light, a single tall fiddle-leaf fig in the corner, no people, no clutter, warm neutral palette, shot on 24mm tilt-shift, AD-magazine quality, 3:2",
+    "imageSeeds": ["loft-interior"],
+    "params": { "aspect_ratio": "3:2" },
+    "tags": ["architecture", "interior", "loft", "industrial"]
+  },
+  {
+    "type": "image",
+    "slug": "fox-in-snow-illustration",
+    "title": "Fox in Snow — Children's Book Illustration",
+    "modelSlug": "flux-schnell",
+    "categorySlug": "anime-illustration",
+    "promptText": "A children's book illustration of a small red fox standing in deep snow at the edge of a quiet forest, looking up at falling snowflakes with wonder, soft pastel watercolor textures, gentle outlines, warm crimson against cool blue snow, a single warm yellow window glowing in the distant cabin, the style of a Beatrix Potter / Jon Klassen hybrid, peaceful and slightly magical, 1:1",
+    "imageSeeds": ["fox-snow"],
+    "params": { "aspect_ratio": "1:1", "steps": 4 },
+    "tags": ["illustration", "children", "watercolor"]
+  },
+
+  {
+    "type": "text",
+    "slug": "decision-fatigue-audit",
+    "title": "Reduce Your Daily Decision Load",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "productivity",
+    "promptText": "Audit my daily decision load and design defaults that free up cognition.\n\nMY ROLE: {role}\nA TYPICAL DAY'S RECURRING DECISIONS: {list_what_you_decide_each_day}\nMY BIGGEST 'DECISION FATIGUE' SYMPTOM: {when_it_hits}\n\nDO THIS:\n1. **Classify each recurring decision**: HIGH-STAKES (deserves attention every time), MEDIUM (default works 80% of the time), LOW (always the same answer — auto)\n2. **Propose a DEFAULT** for every medium and low decision (eating, scheduling, communication, clothes, content, breaks)\n3. **The override rule** — when does the default get re-examined? (eg. quarterly review, or specific triggers)\n4. **The 3 things I'm spending decision-cycles on that shouldn't even be in my brain**\n5. **The afternoon-only rule** — list of things I MUST defer past my lowest-energy window",
+    "tags": ["decision-fatigue", "productivity", "systems"],
+    "params": { "temperature": 0.6, "max_tokens": 1800 }
+  },
+  {
+    "type": "text",
+    "slug": "negotiation-prep-anchor",
+    "title": "Negotiation Prep With Anchors",
+    "modelSlug": "claude-opus",
+    "categorySlug": "personal-career",
+    "promptText": "Prep me for this negotiation.\n\nWHAT I'M NEGOTIATING: {salary / contract / freelance_rate / partnership / sale}\nCOUNTERPARTY: {who_they_are_and_their_likely_constraints}\nMARKET RANGE (if known): {range}\nMY BATNA: {what_I_do_if_no_deal}\n\nPRODUCE:\n1. **My anchor** (the high but defensible opening — with the 1-line justification)\n2. **My target** (where I actually want to land)\n3. **My walk-away** (below which I'm worse-off than my BATNA)\n4. **Their likely anchor + their walk-away**, estimated\n5. **The ZOPA** (zone of possible agreement) — is there one?\n6. **3 LEVERS BEYOND PRICE** I can trade (timing, scope, exclusivity, equity, terms)\n7. **The 3 questions to ask FIRST** that reveal what they actually care about\n8. **The single sentence I'll use if they say 'that's too high'**\n9. **The single sentence I'll use to close** when we converge",
+    "tags": ["negotiation", "career", "prep"],
+    "params": { "temperature": 0.6, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "ux-microcopy-pack",
+    "title": "UX Microcopy Pack (Buttons / Empty States / Errors)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "writing-content",
+    "promptText": "Write UX microcopy for these moments.\n\nPRODUCT: {product}\nVOICE: {warm / dry / playful / professional}\n\nWRITE COPY FOR:\n1. **Primary CTA buttons** — 5 variants of an action verb + outcome (NOT 'Submit', 'OK', 'Click here')\n2. **Empty state — list view** (the moment the user has zero items): a 1-sentence reassurance + a single tappable action\n3. **Empty state — search no-results**: warm, specific, suggests a recovery path\n4. **404 page**: 1 line for the headline, 2 lines for the body, 1 button label\n5. **Error toast**: a transient-error message (network failure) that doesn't blame the user — single sentence\n6. **Confirmation toast**: success message after a meaningful action (more than 'Saved')\n7. **Destructive action warning**: \"Are you sure?\" replacement that respects the user's intelligence\n\nNo 'Oops!', no 'Sorry, something went wrong', no 'Please try again later' as the only advice.",
+    "tags": ["microcopy", "ux", "writing"],
+    "params": { "temperature": 0.7, "max_tokens": 1500 }
+  },
+  {
+    "type": "text",
+    "slug": "youtube-video-script-tight",
+    "title": "YouTube Video Script (Tight & Hook-First)",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "writing-content",
+    "promptText": "Write a tight YouTube video script.\n\nTOPIC: {topic}\nMY CHANNEL ANGLE: {what_makes_you_different}\nTARGET LENGTH: {6 / 10 / 15_minutes}\nAUDIENCE: {who_watches}\nKEY TAKEAWAY: {what_they_should_remember}\n\nWRITE:\n- **Hook (0-15 sec)** — the line that prevents the bounce in the first 5 seconds (no 'In this video we will...')\n- **Promise (15-30 sec)** — what they'll be able to do / know by the end\n- **Section beats** — 4-6 numbered sections, each with: the on-screen text, the 2-3 sentences I'll say, and a B-roll / cutaway note\n- **Pattern interrupts** every 60-90 seconds (zoom-in, jump cut, b-roll, on-screen graphic) — call them out\n- **Outro** — the recap in one sentence + a soft CTA that's not 'like and subscribe' (eg. 'try this and reply in the comments with which one you picked')\n- **Title + thumbnail concept** at the end: 3 title variants, 1 thumbnail brief",
+    "tags": ["youtube", "script", "video"],
+    "params": { "temperature": 0.7, "max_tokens": 2500 }
+  },
+  {
+    "type": "text",
+    "slug": "investor-pitch-2-minute",
+    "title": "2-Minute Investor Pitch (Spoken)",
+    "modelSlug": "claude-opus",
+    "categorySlug": "marketing-sales",
+    "promptText": "Write my 2-minute spoken investor pitch (≈300 words).\n\nCOMPANY: {name}\nWHAT WE DO (in one line, no jargon): {what}\nWHY THE INSIGHT (the thing only we see): {insight}\nTRACTION (3 best numbers): {metrics}\nMARKET (sized in one line): {market}\nWHY US (the team): {team}\nROUND + ASK: {amount, use_of_funds}\n\nSTRUCTURE (verbal, not slides):\n- **0:00-0:15** — the hook (a customer scene OR a counterintuitive fact OR a number that shouldn't exist)\n- **0:15-0:45** — the problem and the insight\n- **0:45-1:20** — the solution + traction (lead with the most surprising number, not the biggest)\n- **1:20-1:40** — why us\n- **1:40-2:00** — the ask, the use of funds, the bold 18-month milestone\n\nWrite the EXACT WORDS I'd say. Include where I PAUSE. Include the closing line I'd want them to remember.",
+    "tags": ["pitch", "fundraising", "spoken"],
+    "params": { "temperature": 0.7, "max_tokens": 2000 }
+  },
+  {
+    "type": "text",
+    "slug": "thank-you-note-real",
+    "title": "Thank-You Note (Not Generic)",
+    "modelSlug": "chatgpt",
+    "categorySlug": "personal-career",
+    "promptText": "Write a thank-you note that doesn't sound like every other thank-you note.\n\nWHO IT'S TO: {their_relationship_to_me}\nWHAT THEY DID: {specific_action}\nWHY IT MATTERED TO ME (specifically): {real_reason}\nFORMAT: {email / handwritten_card / dm / linkedin}\n\nDRAFT (60-90 words):\n- First sentence: NAME the specific thing they did, with a detail only present in OUR interaction\n- Second sentence: what changed for ME because of it (not 'I appreciate it')\n- Third sentence: one thing I'm carrying forward / paying forward / building on\n- Sign-off: warm, specific, no 'best regards'\n\nNo 'thank you so much for your time'. No 'I really appreciate'. The test: would they save it?",
+    "tags": ["thank-you", "writing", "relationships"],
+    "params": { "temperature": 0.7, "max_tokens": 800 }
+  },
+  {
+    "type": "text",
+    "slug": "out-of-office-clever",
+    "title": "Out-of-Office That People Actually Read",
+    "modelSlug": "chatgpt",
+    "categorySlug": "productivity",
+    "promptText": "Write an out-of-office auto-reply that's professional but not boring.\n\nMY ABSENCE TYPE: {vacation / conference / focus_sprint / parental_leave}\nDATES: {start - end}\nWHO TO CONTACT FOR URGENT: {name + email}\nMY RETURN BEHAVIOR: {check_email_at_set_time / fully_unplugged / partial}\nVOICE: {dry / warm / playful / professional}\n\nFORMAT (under 80 words):\n- First line: I'm out + dates (no 'I'll be away from the office')\n- Second line: a small specific detail that humanizes me (where, what, why) — keep tasteful\n- Third line: who to contact for what\n- Fourth line: when I'll be back to email — and the realistic expectation about response time\n- Optional last line: one warm sign-off\n\nWrite 2 variants — one warm, one dry — both decent across cultures.",
+    "tags": ["email", "out-of-office", "writing"],
+    "params": { "temperature": 0.7, "max_tokens": 1000 }
+  },
+  {
+    "type": "text",
+    "slug": "post-mortem-blameless",
+    "title": "Blameless Post-Mortem Template",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Write a blameless post-mortem.\n\nINCIDENT: {what_broke}\nWHEN: {date_and_time_window}\nIMPACT: {users_affected, revenue_loss, SLA_breach}\nWHO RESPONDED: {team / on-call}\n\nFORMAT:\n- **Summary** (3 sentences a non-engineer can follow)\n- **Timeline** (UTC timestamps, every detection / mitigation / decision — not feelings)\n- **Root cause** (the technical cause AND the system-level cause; eg. 'we deployed at 3pm on a Friday' is system, not technical)\n- **Trigger** (the specific change that lit the fuse)\n- **Resolution** (what stopped the bleeding)\n- **What went well** (3 things — celebrate the saves)\n- **What didn't go well** (3 things — never blaming a person, always a system)\n- **Action items** (Owner | Action | Due date | Type: prevention / detection / response)\n- **Where we got lucky** (the bullets that could have made it much worse)\n\nUse no names of individuals. Use roles ('on-call eng', 'release manager').",
+    "tags": ["post-mortem", "incident", "engineering"],
+    "params": { "temperature": 0.4, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "user-story-from-feature",
+    "title": "User Stories from a Feature Idea",
+    "modelSlug": "claude-sonnet",
+    "categorySlug": "coding-development",
+    "promptText": "Convert this feature idea into user stories.\n\nFEATURE: {one_paragraph_description}\nTARGET USER: {persona}\nWHAT 'DONE' LOOKS LIKE: {success_criteria}\n\nFORMAT (5-8 user stories):\n- **As a [role], I want [capability], so that [outcome]**\n- **Acceptance criteria** (3-5 GIVEN/WHEN/THEN bullets, fully testable)\n- **Edge cases** (2-4 — the painful ones, eg. empty state, max-length input, concurrent edit)\n- **Estimate** (XS / S / M / L)\n- **Dependencies** (what must exist already)\n\nAlso write:\n- The 1-sentence FEATURE BRIEF for the team\n- The 'NON-GOALS' — 3 things we intentionally won't do in v1\n- The TELEMETRY events to instrument from day 1",
+    "tags": ["user-stories", "product", "engineering"],
+    "params": { "temperature": 0.5, "max_tokens": 2200 }
+  },
+  {
+    "type": "text",
+    "slug": "explain-this-deal-paper",
+    "title": "Decode a Term Sheet / Deal Memo",
+    "modelSlug": "claude-opus",
+    "categorySlug": "validation-strategy",
+    "promptText": "Decode this term sheet / deal memo for me.\n\nDOCUMENT:\n```\n{paste}\n```\n\nMY ROLE: {founder / investor / employee / advisor}\nMY STAGE OF EXPERIENCE: {first_time / done_a_few / veteran}\n\nFOR EACH NON-TRIVIAL TERM:\n- The plain-English meaning (one sentence)\n- The CONSEQUENCE for me (what changes if I sign vs. negotiate)\n- The MARKET DEFAULT for this term at this stage (so I know if I'm getting screwed)\n- The 1-2 SPECIFIC REDLINES I should push for\n\nAt the end:\n- The 3 terms that MATTER MOST in this document\n- The 1 term that's TOXIC and would be a deal-breaker\n- A 2-sentence overall read: GOOD DEAL / NEGOTIATE / WALK\n\nI am not a lawyer; this is not legal advice — but tell me what to look up.",
+    "tags": ["term-sheet", "fundraising", "legal"],
+    "params": { "temperature": 0.5, "max_tokens": 2500 }
+  }
+]

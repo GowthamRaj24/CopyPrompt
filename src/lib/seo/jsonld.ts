@@ -1,0 +1,332 @@
+/**
+ * Typed JSON-LD builders for Schema.org structured data.
+ *
+ * Why structured data matters
+ * ───────────────────────────
+ * SEO  : Google uses Schema.org to power rich results (star ratings,
+ *        breadcrumbs, sitelinks search box, FAQ accordions in SERPs).
+ *
+ * GEO  : Generative engines (ChatGPT browse, Perplexity, Bing Chat,
+ *        Google AI Overviews) parse JSON-LD to extract citable facts
+ *        and decide which sources to attribute.
+ *
+ * AEO  : Answer engines and voice assistants prefer FAQPage and HowTo
+ *        schemas — they're the easiest to map to a direct answer.
+ *
+ * Conventions
+ * ───────────
+ *   - Every builder returns a plain JSON object (not stringified)
+ *   - `@context` and `@type` are always set
+ *   - Optional fields are omitted (not set to null/undefined) so the
+ *     resulting JSON is minimal and validation-clean
+ *   - URLs are absolutized with `abs()` so they're crawlable
+ */
+
+const SITE_NAME = "CopyPrompt";
+const SITE_LEGAL_NAME = "CopyPrompt";
+const SITE_TAGLINE =
+  "The fastest way to find AI prompts. Free, curated, copy-paste ready.";
+
+export function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
+/** Convert a path or absolute URL into an absolute URL. */
+export function abs(pathOrUrl: string): string {
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  const base = getSiteUrl();
+  if (pathOrUrl.startsWith("/")) return `${base}${pathOrUrl}`;
+  return `${base}/${pathOrUrl}`;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Site-wide schemas
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Organization — site identity. Helps engines tie all pages back to a
+ * single publisher and shows the logo + sameAs links in knowledge panels.
+ */
+export function organizationJsonLd(opts?: { sameAs?: string[] }) {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${base}/#organization`,
+    name: SITE_NAME,
+    legalName: SITE_LEGAL_NAME,
+    url: base,
+    description: SITE_TAGLINE,
+    logo: {
+      "@type": "ImageObject",
+      url: abs("/logo.png"),
+      width: 512,
+      height: 512,
+    },
+    sameAs: opts?.sameAs ?? [],
+  };
+}
+
+/**
+ * WebSite — used for the Sitelinks Search Box in Google SERPs.
+ * The `potentialAction` lets engines surface the in-site search.
+ */
+export function webSiteJsonLd() {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${base}/#website`,
+    name: SITE_NAME,
+    url: base,
+    description: SITE_TAGLINE,
+    publisher: { "@id": `${base}/#organization` },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${base}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Page-level schemas
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * BreadcrumbList — appears as the trail under SERP titles.
+ * Pass the visible breadcrumb segments in order.
+ */
+export function breadcrumbListJsonLd(
+  items: Array<{ name: string; url: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: item.name,
+      item: abs(item.url),
+    })),
+  };
+}
+
+/**
+ * CreativeWork — the canonical schema for a "thing that was created".
+ * We use it for individual prompts. AI engines treat CreativeWork as a
+ * citable artifact and surface its author / aggregateRating / dates.
+ */
+export interface PromptJsonLdInput {
+  url: string;
+  name: string;
+  description: string;
+  /** The actual prompt text. */
+  text: string;
+  /** Image URLs if any. */
+  images?: string[];
+  /** Topic / category name */
+  about: string;
+  /** Tags/keywords */
+  keywords?: string[];
+  /** ISO timestamp of creation */
+  datePublished: string;
+  /** ISO timestamp of last update */
+  dateModified?: string;
+  /** Display name of the submitter / curator */
+  authorName?: string;
+  /** What AI model this prompt targets (e.g. "GPT-4", "Midjourney") */
+  targetModel?: string;
+  /** Aggregate rating from upvotes/downvotes */
+  rating?: {
+    upvotes: number;
+    downvotes: number;
+  };
+  /** Number of times the prompt has been copied (proxy for "views") */
+  copyCount?: number;
+}
+
+export function promptCreativeWorkJsonLd(input: PromptJsonLdInput) {
+  const base = getSiteUrl();
+  // CreativeWork covers prompts well; subtype "TechArticle" sometimes
+  // surfaces better in dev-flavored SERPs, but CreativeWork is safer
+  // for AI engines that aren't sure how to categorize a prompt.
+  const node: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "@id": `${abs(input.url)}#prompt`,
+    name: input.name,
+    headline: input.name,
+    description: input.description,
+    text: input.text,
+    url: abs(input.url),
+    inLanguage: "en",
+    isAccessibleForFree: true,
+    isFamilyFriendly: true,
+    license: abs("/terms"),
+    about: input.about,
+    datePublished: input.datePublished,
+    publisher: { "@id": `${base}/#organization` },
+    mainEntityOfPage: abs(input.url),
+  };
+
+  if (input.dateModified) node.dateModified = input.dateModified;
+  if (input.images && input.images.length > 0) {
+    node.image = input.images.map((url) => abs(url));
+  }
+  if (input.keywords && input.keywords.length > 0) {
+    node.keywords = input.keywords.join(", ");
+  }
+  if (input.authorName) {
+    node.author = { "@type": "Person", name: input.authorName };
+  } else {
+    node.author = { "@id": `${base}/#organization` };
+  }
+  if (input.targetModel) {
+    // Schema.org doesn't have a "targetModel" property, but we can use
+    // a custom keyword and the description prefix to convey it.
+    node.audience = {
+      "@type": "Audience",
+      audienceType: `Users of ${input.targetModel}`,
+    };
+  }
+  if (
+    input.rating &&
+    input.rating.upvotes + input.rating.downvotes >= 1
+  ) {
+    const total = input.rating.upvotes + input.rating.downvotes;
+    // Map +/- votes onto a 1..5 scale. 100% upvotes → 5.0.
+    const ratio = input.rating.upvotes / total;
+    const value = (1 + ratio * 4).toFixed(2);
+    node.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: value,
+      bestRating: "5",
+      worstRating: "1",
+      ratingCount: total,
+    };
+  }
+  if (input.copyCount && input.copyCount > 0) {
+    node.interactionStatistic = {
+      "@type": "InteractionCounter",
+      interactionType: "https://schema.org/CopyAction",
+      userInteractionCount: input.copyCount,
+    };
+  }
+
+  return node;
+}
+
+/**
+ * HowTo — step-by-step instructions to use the prompt.
+ * Voice assistants and Google's "How to" rich result both consume this.
+ */
+export function howToUsePromptJsonLd(opts: {
+  promptUrl: string;
+  promptTitle: string;
+  modelName: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: `How to use the ${opts.promptTitle} prompt`,
+    description: `Step-by-step instructions for using this prompt with ${opts.modelName}.`,
+    totalTime: "PT2M",
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "Copy the prompt",
+        text: `Click the Copy button on the prompt page to copy the full text to your clipboard.`,
+        url: `${abs(opts.promptUrl)}#copy`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: `Open ${opts.modelName}`,
+        text: `Open ${opts.modelName} in your browser or app, and start a new conversation.`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "Paste and customize",
+        text: `Paste the prompt. Replace any {placeholders} with your specifics before sending.`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 4,
+        name: "Iterate",
+        text: `If the first output isn't right, ask follow-up questions or tweak the variables — most prompts need 1-2 iterations.`,
+      },
+    ],
+  };
+}
+
+/**
+ * FAQPage — the highest-leverage schema for AEO.
+ * Engines like Google and Perplexity often pull verbatim answers from
+ * FAQPage entries into featured snippets and AI Overviews.
+ */
+export function faqJsonLd(faqs: Array<{ question: string; answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
+    })),
+  };
+}
+
+/**
+ * ItemList — for grids of prompts (homepage trending, category, search).
+ * Helps engines understand the page is a curated list, not a single item.
+ */
+export function itemListJsonLd(
+  items: Array<{ name: string; url: string }>,
+  opts?: { name?: string; description?: string },
+) {
+  const node: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((item, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      url: abs(item.url),
+      name: item.name,
+    })),
+    numberOfItems: items.length,
+  };
+  if (opts?.name) node.name = opts.name;
+  if (opts?.description) node.description = opts.description;
+  return node;
+}
+
+/**
+ * CollectionPage — wraps a category / search results page as a curated
+ * collection. Combine with ItemList for category pages.
+ */
+export function collectionPageJsonLd(opts: {
+  url: string;
+  name: string;
+  description: string;
+  itemList: ReturnType<typeof itemListJsonLd>;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${abs(opts.url)}#collection`,
+    url: abs(opts.url),
+    name: opts.name,
+    description: opts.description,
+    mainEntity: opts.itemList,
+    isPartOf: { "@id": `${getSiteUrl()}/#website` },
+  };
+}

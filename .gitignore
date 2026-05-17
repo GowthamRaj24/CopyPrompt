@@ -1,0 +1,140 @@
+# ════════════════════════════════════════════════════════════════════
+# CopyPrompt .gitignore
+# ════════════════════════════════════════════════════════════════════
+# Source: https://help.github.com/articles/ignoring-files/
+
+# ─── Dependencies ───────────────────────────────────────────────────
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ─── Build output ───────────────────────────────────────────────────
+/.next/
+/out/
+/build
+/dist
+
+# ─── Caches ─────────────────────────────────────────────────────────
+.cache/
+.turbo/
+.eslintcache
+.prettiercache
+.parcel-cache/
+.swc/
+
+# ─── TypeScript ─────────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Testing / coverage ─────────────────────────────────────────────
+/coverage
+*.lcov
+.nyc_output/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# ─── Logs ───────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Environment & secrets ──────────────────────────────────────────
+# NEVER commit env files — every one of them has real secrets in our
+# stack (DATABASE_URL, Supabase keys, Together AI keys, SMTP password).
+# The `.env.example` is the only safe one and is explicitly un-ignored.
+.env
+.env.*
+!.env.example
+
+# Other secret stores some tools / hosts drop in repos
+.env.vault
+.envrc
+.netrc
+
+# ─── Vercel ─────────────────────────────────────────────────────────
+.vercel
+
+# ─── Sentry ─────────────────────────────────────────────────────────
+.sentryclirc
+.env.sentry-build-plugin
+
+# ─── Database dumps & local data ────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.dump
+*.sql.gz
+/local-db-data/
+/supabase/.temp/
+/supabase/.branches/
+
+# ─── Drizzle / generated migrations meta (keep .sql files!) ─────────
+# The `meta/_journal.json` and snapshots are managed locally — re-
+# generated on `drizzle-kit generate`. Commit the .sql migrations
+# themselves (those ARE source code), ignore everything else in meta.
+/drizzle/meta/_journal.json
+/drizzle/meta/*_snapshot.json
+
+# ─── Cloudflare / Wrangler ──────────────────────────────────────────
+.wrangler/
+wrangler.toml.local
+
+# ─── Operating system noise ─────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ─── Editors / IDEs ─────────────────────────────────────────────────
+# Allow shared workspace settings but ignore personal noise.
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.history/
+.project
+.classpath
+.settings/
+
+# ─── Local tooling / scripts ────────────────────────────────────────
+*.pem
+*.pfx
+*.key
+*.crt
+*.p12
+
+# Auto-generated local seeds & one-off scripts
+/scripts/_*.ts
+/scripts/_*.js
+/scripts/local-*.ts
+
+# ─── Misc ───────────────────────────────────────────────────────────
+*.bak
+*.backup
+*.orig
+*.tmp
+/tmp/
+/temp/

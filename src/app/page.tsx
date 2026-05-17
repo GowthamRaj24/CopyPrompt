@@ -1,0 +1,597 @@
+import { asc, count, eq, isNull } from "drizzle-orm";
+import {
+  ArrowRightIcon,
+  ChevronDownIcon,
+  EyeIcon,
+  FlameIcon,
+  HelpCircleIcon,
+  LayersIcon,
+  SparklesIcon,
+  StarIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { PromptCarousel } from "@/components/prompt/PromptCarousel";
+import { SearchBox } from "@/components/search/SearchBox";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqJsonLd, itemListJsonLd } from "@/lib/seo/jsonld";
+import { db } from "@/server/lib/db";
+import { categories } from "@/server/models/category.model";
+import { prompts } from "@/server/models/prompt.model";
+import {
+  getMostViewedPrompts,
+  getRecentPrompts,
+  getTopRatedPrompts,
+  getTrendingPrompts,
+  type PromptListItem,
+} from "@/server/services/prompt.service";
+
+/**
+ * Homepage — premium, search-first.
+ *
+ * Design system (used by EVERY section on this page)
+ * ──────────────────────────────────────────────────
+ *   Vertical rhythm   py-16 md:py-20            (64 / 80 px)
+ *   Section heading   text-[1.625rem] md:text-3xl + tracking-[-0.03em]
+ *   Subtitle          text-[13px] muted-foreground
+ *   Eyebrow           .eyebrow + small primary icon (3-icon, gap-1.5)
+ *   View-all link     text-[13px] · link-underline · ArrowRightIcon
+ *   Tone alternation  every other rail uses `tone="muted"` so the
+ *                     page reads as bands of plain ↔ tinted surface
+ *
+ * Atmospheric layers
+ * ──────────────────
+ *   The global atmosphere (body::before mesh + AmbientOrbs +
+ *   body::after constellation) is rich on its own. Sections do NOT
+ *   stack extra orbs / grids / spotlights on top — that was the cause
+ *   of the previous "everything is glowing" noise. The hero keeps a
+ *   single subtle bg-hero radial; everything else inherits the
+ *   page background.
+ *
+ * Caching
+ * ───────
+ *   5-minute ISR — busted by `revalidatePath("/")` in
+ *   `admin.service.approveSubmission()` when content changes.
+ */
+export const revalidate = 300;
+
+const TRY_SUGGESTIONS = [
+  "cinematic portrait",
+  "validate startup idea",
+  "code review",
+  "moody landscape",
+  "essay outline",
+];
+
+/**
+ * Homepage FAQs — single source of truth for BOTH the JSON-LD
+ * `FAQPage` schema (consumed by AI Overviews, Perplexity, ChatGPT
+ * Browse, Bing answer boxes) AND the visible accordion at the bottom
+ * of the page.
+ *
+ * Why one constant
+ * ────────────────
+ * If the visible answer and the schema answer drift apart, Google
+ * penalizes the page for cloaking (showing engines content that
+ * differs from what users see). Keeping a single source guarantees
+ * they match forever.
+ *
+ * Authoring rules
+ * ───────────────
+ *   - Question is phrased exactly as a real user would type it.
+ *   - Answer leads with the direct answer in the first sentence.
+ *   - Answer is 1-3 sentences max — answer engines truncate longer.
+ *   - No HTML / markdown — plain prose so JSON-LD stays valid.
+ */
+const HOMEPAGE_FAQS = [
+  {
+    question: "What is CopyPrompt?",
+    answer:
+      "CopyPrompt is a free, curated library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested before publication.",
+  },
+  {
+    question: "Is CopyPrompt free?",
+    answer:
+      "Yes — CopyPrompt is free forever. No paywall, no signup wall for browsing or copying prompts. You only need an account to save favorites or submit your own prompts.",
+  },
+  {
+    question: "Which AI tools are supported?",
+    answer:
+      "CopyPrompt covers every major AI tool — ChatGPT, Claude, Gemini, GPT-4, Midjourney, DALL-E, Flux, Stable Diffusion, and more. Each prompt is labeled with the model it was designed for.",
+  },
+  {
+    question: "How do I find the right prompt?",
+    answer:
+      "Use the search bar to filter by keyword, or browse by category. You can also filter by type (image vs text) and sort by popularity or recency.",
+  },
+  {
+    question: "Can I submit my own prompt?",
+    answer:
+      "Yes. Sign in with email, click Submit at the top, and fill out the four-field form. Submissions are reviewed within 24 hours and you'll get an email when yours goes live.",
+  },
+];
+
+export default async function HomePage() {
+  // Five parallel queries — each indexed and capped at 8 rows so total
+  // dominant time is the slowest one (~25-40ms on Supabase free tier).
+  const [
+    topCategories,
+    trending,
+    recent,
+    mostViewed,
+    topRated,
+    publishedCountRows,
+  ] = await Promise.all([
+    db
+      .select()
+      .from(categories)
+      .where(isNull(categories.parentId))
+      .orderBy(asc(categories.name))
+      .limit(12),
+    getTrendingPrompts(8),
+    getRecentPrompts(8),
+    getMostViewedPrompts(8),
+    getTopRatedPrompts(8),
+    db
+      .select({ c: count() })
+      .from(prompts)
+      .where(eq(prompts.status, "published")),
+  ]);
+
+  const promptCount = Number(publishedCountRows[0]?.c ?? 0);
+
+  // ── Structured data for the homepage ──────────────────────
+  const homepageJsonLd = [
+    itemListJsonLd(
+      trending.map((t) => ({
+        name: t.title,
+        url: `/prompt/${t.slug}`,
+      })),
+      {
+        name: "Trending AI prompts",
+        description:
+          "The most-copied prompts on CopyPrompt this week, curated across image and text AI tools.",
+      },
+    ),
+    faqJsonLd(HOMEPAGE_FAQS),
+  ];
+
+  return (
+    <>
+      <JsonLd data={homepageJsonLd} />
+
+      {/* ════════════════════════════════════════════════════
+         HERO — minimal, search-dominant, instantly useful.
+         Single subtle bg-hero spotlight; the global atmosphere
+         (mesh + orbs + lattice) does the rest of the work.
+         ════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden
+          className="bg-hero pointer-events-none absolute inset-0 opacity-80"
+        />
+
+        <div className="container relative mx-auto flex min-h-[58svh] flex-col items-center justify-center px-4 py-12 text-center sm:px-6 md:py-16">
+          {/* Eyebrow pill — only when catalog has content */}
+          {promptCount > 0 && (
+            <div className="reveal inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground backdrop-blur-md">
+              <SparklesIcon className="size-3 text-primary" strokeWidth={2} />
+              <span className="text-foreground">
+                {promptCount.toLocaleString()}
+              </span>
+              curated {promptCount === 1 ? "prompt" : "prompts"}
+            </div>
+          )}
+
+          <h1 className="hero-enter mt-6 max-w-2xl text-balance text-[clamp(2rem,5.5vw,3.75rem)] font-bold leading-[1.04] tracking-[-0.045em] text-foreground">
+            The fastest way to find{" "}
+            <span className="bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent">
+              AI prompts.
+            </span>
+          </h1>
+
+          <p className="reveal delay-2 mt-4 max-w-lg text-balance text-[14px] leading-relaxed text-muted-foreground md:text-[15px]">
+            Search, copy, paste. Free curated prompts for ChatGPT, Claude,
+            Midjourney, Flux, Gemini and every AI tool.
+          </p>
+
+          {/* HERO SEARCH */}
+          <div className="reveal delay-3 mt-8 w-full max-w-xl md:mt-10">
+            <SearchBox
+              autoFocus
+              size="hero"
+              placeholder="Search prompts…"
+            />
+          </div>
+
+          {/* Try suggestions — refined pills */}
+          <div className="reveal delay-4 mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-1.5">
+            <span className="font-mono text-[10.5px] uppercase tracking-wider text-muted-foreground/60">
+              Try
+            </span>
+            {TRY_SUGGESTIONS.map((suggestion) => (
+              <Link
+                key={suggestion}
+                href={`/search?q=${encodeURIComponent(suggestion)}`}
+                className="press inline-flex items-center rounded-full border border-border/50 bg-card/50 px-2.5 py-0.5 text-[11.5px] font-medium text-muted-foreground backdrop-blur-sm transition-colors hover:border-primary/40 hover:bg-card hover:text-foreground"
+              >
+                {suggestion}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════
+         TRUST STRIP — slim, evenly-spaced row of real numbers.
+         Hairline divider top + bottom anchors it visually.
+         ════════════════════════════════════════════════════ */}
+      <section className="border-y border-border/40 bg-card/20">
+        <div className="container mx-auto flex flex-wrap items-center justify-center gap-x-7 gap-y-2 px-4 py-3.5 sm:px-6">
+          {promptCount > 0 && (
+            <>
+              <TrustItem
+                value={promptCount.toLocaleString()}
+                label={promptCount === 1 ? "prompt" : "prompts"}
+              />
+              <Divider />
+            </>
+          )}
+          {topCategories.length > 0 && (
+            <>
+              <TrustItem
+                value={String(topCategories.length)}
+                label={
+                  topCategories.length === 1 ? "category" : "categories"
+                }
+              />
+              <Divider />
+            </>
+          )}
+          <TrustItem value="Free" label="forever" />
+          <Divider />
+          <TrustItem value="No" label="signup to browse" />
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════
+         PROMPT RAILS — four sections, all using <PromptRail>
+         for identical typography, padding and ornament.
+         Tone alternates plain/muted/plain/muted for rhythm.
+         ════════════════════════════════════════════════════ */}
+      {trending.length > 0 && (
+        <PromptRail
+          eyebrow="This week"
+          title="Trending prompts"
+          subtitle="The most-copied prompts across the archive."
+          icon={<FlameIcon className="size-3" />}
+          viewAllHref="/search?sort=popular"
+          prompts={trending}
+          id="trending"
+        />
+      )}
+
+      {recent.length > 0 && (
+        <PromptRail
+          eyebrow="Just added"
+          title="Fresh from the queue"
+          subtitle="The newest entries, hot off review."
+          icon={<SparklesIcon className="size-3" />}
+          viewAllHref="/search?sort=latest"
+          prompts={recent}
+          tone="muted"
+        />
+      )}
+
+      {mostViewed.length > 0 && (
+        <PromptRail
+          eyebrow="Most viewed"
+          title="People are reading these"
+          subtitle="Highest view counts across the archive."
+          icon={<EyeIcon className="size-3" />}
+          viewAllHref="/search?sort=views"
+          prompts={mostViewed}
+        />
+      )}
+
+      {topRated.length > 0 && (
+        <PromptRail
+          eyebrow="Top rated"
+          title="Community favourites"
+          subtitle="Best net thumbs-up across every prompt."
+          icon={<StarIcon className="size-3" />}
+          viewAllHref="/search?sort=rated"
+          prompts={topRated}
+          tone="muted"
+        />
+      )}
+
+      {/* Empty state for fresh DBs — only when EVERY rail is empty. */}
+      {trending.length === 0 &&
+        recent.length === 0 &&
+        mostViewed.length === 0 &&
+        topRated.length === 0 && (
+          <section className="container mx-auto px-4 py-12 sm:px-6 md:py-16">
+            <EmptyState />
+          </section>
+        )}
+
+      {/* ════════════════════════════════════════════════════
+         CATEGORIES — quiet, dense grid of clickable chips.
+         Same heading rhythm as the rails so nothing breaks
+         the page's vertical typography pace.
+         ════════════════════════════════════════════════════ */}
+      {topCategories.length > 0 && (
+        <section className="border-t border-border/40">
+          <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
+            <SectionHeader
+              eyebrow="Browse"
+              eyebrowIcon={<LayersIcon className="size-3" />}
+              title="Every category, every model"
+              subtitle="Jump straight to what you’re building."
+            />
+
+            <div className="reveal grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-2.5 lg:grid-cols-4">
+              {topCategories.map((cat, idx) => (
+                <Link
+                  key={cat.id}
+                  href={`/category/${cat.slug}`}
+                  className="lift group flex h-11 items-center justify-between gap-2 rounded-lg border border-border/50 bg-card/60 px-3.5 text-[13px] font-medium transition-all hover:border-primary/30 hover:bg-card"
+                  style={{ animationDelay: `${idx * 25}ms` }}
+                >
+                  <span className="line-clamp-1 text-foreground transition-colors group-hover:text-primary">
+                    {cat.name}
+                  </span>
+                  <ArrowRightIcon
+                    className="size-3 shrink-0 text-muted-foreground/50 transition-all group-hover:translate-x-0.5 group-hover:text-primary"
+                    aria-hidden
+                  />
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-8 text-center">
+              <Link
+                href="/search"
+                className="magnetic inline-flex h-9 items-center gap-2 rounded-lg border border-border/60 bg-card/60 px-4 text-[12.5px] font-medium transition-all hover:border-border hover:bg-card"
+              >
+                Browse every prompt
+                <ArrowRightIcon className="size-3" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ════════════════════════════════════════════════════
+         FAQ — visible accordion. Mirrors the FAQPage JSON-LD
+         exactly (same source-of-truth constant), so engines that
+         compare visible content against schema (Google does) see
+         a perfect match.
+         ════════════════════════════════════════════════════ */}
+      <section className="border-t border-border/40 bg-card/30">
+        <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
+          <SectionHeader
+            eyebrow="Frequently asked"
+            eyebrowIcon={<HelpCircleIcon className="size-3" />}
+            title="Questions, answered"
+            subtitle="The short version. For everything else, drop a note via Submit."
+          />
+
+          <div className="reveal mx-auto max-w-3xl divide-y divide-border/60 overflow-hidden rounded-2xl border border-border bg-card/60 shadow-soft">
+            {HOMEPAGE_FAQS.map((faq) => (
+              <details
+                key={faq.question}
+                className="group/faq px-5 py-4 transition-colors hover:bg-muted/30 sm:px-6"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left">
+                  <span className="text-[14px] font-semibold tracking-[-0.005em] text-foreground sm:text-[15px]">
+                    {faq.question}
+                  </span>
+                  <ChevronDownIcon
+                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open/faq:rotate-180 group-open/faq:text-primary"
+                    aria-hidden
+                  />
+                </summary>
+                <p className="mt-3 text-[13.5px] leading-relaxed text-muted-foreground">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+
+          <p className="mt-6 text-center text-[12px] text-muted-foreground/70">
+            Have another question?{" "}
+            <Link
+              href="/submit"
+              className="link-underline font-medium text-foreground"
+            >
+              Tell us
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════
+         BOTTOM CTA — single, confident ask. No extra orbs.
+         ════════════════════════════════════════════════════ */}
+      <section className="border-t border-border/40">
+        <div className="container mx-auto px-4 py-12 text-center sm:px-6 md:py-16">
+          <h2 className="mx-auto max-w-xl text-balance text-[1.625rem] font-bold leading-[1.1] tracking-[-0.03em] md:text-4xl">
+            Have a prompt that{" "}
+            <span className="bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text text-transparent">
+              actually works?
+            </span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-muted-foreground">
+            Submit it. Approval typically lands within 24 hours.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5">
+            <Link
+              href="/submit"
+              className="magnetic inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-5 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1),0_4px_12px_-4px_oklch(0.66_0.21_270_/_0.35)] hover:bg-primary/90 hover:shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1),0_8px_20px_-6px_oklch(0.66_0.21_270_/_0.45)]"
+            >
+              Submit a prompt
+              <ArrowRightIcon className="size-3.5" aria-hidden />
+            </Link>
+            <Link
+              href="/search"
+              className="press inline-flex h-10 items-center rounded-lg border border-border/60 bg-card/60 px-5 text-[13px] font-medium transition-all hover:border-border hover:bg-card"
+            >
+              Browse the archive
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Section primitives — single source of truth so every section
+   on this page renders with the exact same rhythm.
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Canonical section header — eyebrow + title + subtitle + optional
+ * right-aligned action. Every prompt rail and the categories section
+ * use this so the page reads as one consistent typographic system.
+ */
+function SectionHeader({
+  eyebrow,
+  eyebrowIcon,
+  title,
+  subtitle,
+  action,
+}: {
+  eyebrow: string;
+  eyebrowIcon?: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="reveal mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end sm:gap-4 md:mb-7">
+      <div className="min-w-0">
+        <p className="eyebrow mb-1.5 inline-flex items-center gap-1.5">
+          {eyebrowIcon}
+          {eyebrow}
+        </p>
+        <h2 className="text-[1.375rem] font-bold leading-tight tracking-[-0.03em] md:text-[1.75rem]">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="mt-1 max-w-md text-[12.5px] leading-relaxed text-muted-foreground">
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+/**
+ * Reusable prompt-carousel section. Single primitive for ALL four
+ * prompt rails (Trending, Just added, Most viewed, Top rated) so they
+ * share padding, heading sizes, and ornament.
+ *
+ * `tone="muted"` adds a subtle `bg-card/30` band so adjacent sections
+ * read as distinct without needing heavy borders.
+ */
+function PromptRail({
+  eyebrow,
+  title,
+  subtitle,
+  icon,
+  viewAllHref,
+  prompts,
+  tone = "plain",
+  id,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  icon?: React.ReactNode;
+  viewAllHref: string;
+  prompts: PromptListItem[];
+  tone?: "plain" | "muted";
+  id?: string;
+}) {
+  return (
+    <section
+      id={id}
+      className={`relative scroll-mt-20 ${
+        tone === "muted" ? "border-y border-border/40 bg-card/30" : ""
+      }`}
+    >
+      <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
+        <SectionHeader
+          eyebrow={eyebrow}
+          eyebrowIcon={icon}
+          title={title}
+          subtitle={subtitle}
+          action={
+            <Link
+              href={viewAllHref}
+              className="link-underline group inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-foreground"
+            >
+              View all
+              <ArrowRightIcon
+                className="size-3 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </Link>
+          }
+        />
+        <PromptCarousel prompts={prompts} ariaLabel={title} />
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Tiny presentational helpers
+   ═══════════════════════════════════════════════════════════════ */
+
+function TrustItem({ value, label }: { value: string; label: string }) {
+  return (
+    <span className="text-[12px] text-muted-foreground">
+      <span className="font-semibold text-foreground">{value}</span> {label}
+    </span>
+  );
+}
+
+function Divider() {
+  return (
+    <span
+      aria-hidden
+      className="hidden h-3 w-px bg-border/70 sm:inline-block"
+    />
+  );
+}
+
+/** Friendly catalog-empty state — never references seed scripts. */
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
+      <div className="mb-4 grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+        <SparklesIcon className="size-5" strokeWidth={1.8} />
+      </div>
+      <p className="text-[15px] font-semibold tracking-[-0.005em]">
+        The catalog is just getting started.
+      </p>
+      <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">
+        We&apos;re curating the first wave of prompts. Have a great one? Be
+        the first to share it.
+      </p>
+      <Link
+        href="/submit"
+        className="magnetic mt-5 inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground shadow-soft hover:bg-primary/90"
+      >
+        Submit a prompt
+        <ArrowRightIcon className="size-3.5" aria-hidden />
+      </Link>
+    </div>
+  );
+}

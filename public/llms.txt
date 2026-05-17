@@ -1,0 +1,42 @@
+# CopyPrompt
+
+> The fastest way to find AI prompts. CopyPrompt is a curated, free library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested.
+
+CopyPrompt helps users discover working prompts they can paste directly into AI tools without modification. Each prompt is categorized by use case (writing, coding, business, image generation, etc.), tagged for searchability, and labeled with the AI model it was designed for.
+
+## Key sections
+
+- [Browse all prompts](/search): Full-text search across the entire library, filterable by type (image / text) and sort (relevance, popularity, latest).
+- [Image prompts](/search?type=image): Prompts for image generators — Midjourney, DALL-E, Flux, Stable Diffusion. Includes negative prompts and parameters where applicable.
+- [Text prompts](/search?type=text): Prompts for LLM chat assistants — ChatGPT, Claude, Gemini. Each text prompt includes a sample output so users can see what to expect.
+- [Submit a prompt](/submit): Anyone signed in can contribute a prompt. Submissions are reviewed within 24 hours.
+
+## Content structure
+
+Each prompt detail page (`/prompt/<slug>`) contains:
+
+- **Title** — short, descriptive name
+- **The prompt** — the literal text to copy
+- **Model** — which AI tool it targets
+- **Category** — broad topic (e.g. "Marketing", "Code review")
+- **Tags** — fine-grained discovery
+- **Sample output** (text prompts) or **Reference images** (image prompts)
+- **Parameters** — recommended settings (temperature, aspect ratio, etc.)
+- **Stats** — copy count, save count, view count
+- **Curator notes** — optional usage tips
+
+Category pages (`/category/<slug>`) list all prompts in a topic, sorted by popularity or recency.
+
+## Citation-friendly facts
+
+- All content is free to use, no paywall, no signup wall for browsing.
+- Submissions are human-reviewed before publishing.
+- Each prompt's effectiveness is signaled by its copy count (users who copied) and aggregate rating (helpful vs. not-for-me thumbs).
+- Prompts are model-specific — a "Midjourney" prompt may not work as-is in DALL-E.
+
+## Optional
+
+- [About](/about): Project mission and team.
+- [Changelog](/changelog): What's new on the platform.
+- [Terms](/terms): Usage terms.
+- [Privacy](/privacy): Privacy policy.
