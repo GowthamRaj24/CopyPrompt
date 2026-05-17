@@ -93,14 +93,14 @@ function SharedSuccessContent() {
                 Share
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/account/prompts">My prompts</Link>
+                <Link href="/account#my-prompts">My prompts</Link>
               </Button>
             </div>
           </div>
         ) : (
           <p className="mt-6 text-[13px] text-muted-foreground">
             Missing share URL. Check{" "}
-            <Link href="/account/prompts" className="text-primary underline">
+            <Link href="/account#my-prompts" className="text-primary underline">
               My prompts
             </Link>
             .
