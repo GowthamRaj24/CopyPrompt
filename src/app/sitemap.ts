@@ -20,19 +20,34 @@ export const revalidate = 21600; // 6 hours
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+async function safeQuery<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[sitemap] ${label} failed:`, err);
+    return fallback;
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch published prompts + all categories in parallel
   const [promptRows, categoryRows, tagRows, modelRows] = await Promise.all([
-    db
-      .select({
-        slug: prompts.slug,
-        updatedAt: prompts.updatedAt,
-      })
-      .from(prompts)
-      .where(publicPublishedWhere()),
-    db.select({ slug: categories.slug }).from(categories),
-    getAllTagSlugsForSitemap(),
-    getIndexableModels(),
+    safeQuery("prompts", () =>
+      db
+        .select({
+          slug: prompts.slug,
+          updatedAt: prompts.updatedAt,
+        })
+        .from(prompts)
+        .where(publicPublishedWhere()),
+      [],
+    ),
+    safeQuery(
+      "categories",
+      () => db.select({ slug: categories.slug }).from(categories),
+      [],
+    ),
+    safeQuery("tags", () => getAllTagSlugsForSitemap(), []),
+    safeQuery("models", () => getIndexableModels(), []),
   ]);
 
   // ─── Static pages ──────────────────────────────────────

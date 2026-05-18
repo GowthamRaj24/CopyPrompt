@@ -177,7 +177,7 @@ export async function getAllTagSlugsForSitemap(): Promise<
     .innerJoin(promptTags, eq(promptTags.tagId, tags.id))
     .innerJoin(prompts, eq(prompts.id, promptTags.promptId))
     .where(publicPublishedWhere())
-    .groupBy(tags.id);
+    .groupBy(tags.id, tags.slug);
 
   return rows;
 }

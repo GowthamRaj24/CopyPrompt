@@ -168,7 +168,7 @@ export async function getIndexableModels(): Promise<
       prompts,
       and(eq(prompts.modelId, models.id), publicPublishedWhere()),
     )
-    .groupBy(models.id)
+    .groupBy(models.id, models.slug, models.name, models.type)
     .having(sql`count(${prompts.id}) > 0`)
     .orderBy(desc(sql`count(${prompts.id})`));
 
