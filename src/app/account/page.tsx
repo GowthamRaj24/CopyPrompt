@@ -95,19 +95,19 @@ export default async function AccountPage() {
             <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-soft">
               <div className="border-b border-border/40 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent p-5">
                 <div className="flex items-center gap-4">
-                  <Avatar className="size-14 ring-2 ring-primary/20 ring-offset-2 ring-offset-card">
+                  <Avatar className="size-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-card">
                     {user.avatarUrl && (
                       <AvatarImage
                         src={user.avatarUrl}
                         alt={user.fullName ?? user.email}
                       />
                     )}
-                    <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary">
+                    <AvatarFallback className="bg-primary/15 text-sm font-semibold text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.02em]">
+                    <h2 className="line-clamp-1 text-[15px] font-semibold tracking-[-0.02em]">
                       {user.fullName ?? "Member"}
                     </h2>
                     <p className="line-clamp-1 text-[12px] text-muted-foreground">
@@ -192,7 +192,7 @@ export default async function AccountPage() {
           </aside>
 
           <div className="reveal delay-3 min-w-0">
-            <div className="rounded-xl border border-border/60 bg-card/30 p-4 shadow-soft sm:p-6 md:p-8">
+            <div className="rounded-xl border border-border/60 bg-card/30 p-4 shadow-soft sm:p-5">
               <MyPromptsSection initialPrompts={prompts} />
             </div>
           </div>
@@ -205,7 +205,7 @@ export default async function AccountPage() {
 function StatCell({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-2 py-3 text-center">
-      <p className="font-mono text-lg font-semibold tabular-nums tracking-tight text-foreground">
+      <p className="font-mono text-base font-semibold tabular-nums tracking-tight text-foreground">
         {value.toLocaleString()}
       </p>
       <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">

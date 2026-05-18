@@ -179,10 +179,6 @@ export function AdminAnalyticsLoading() {
           </div>
         ))}
       </div>
-
-      <div className="mt-10 flex justify-center">
-        <AdminLoadingSpinner label="Loading analytics…" />
-      </div>
     </section>
   );
 }

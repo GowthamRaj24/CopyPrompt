@@ -119,26 +119,12 @@ export function MyPromptsSection({
 
   return (
     <section id="my-prompts" className="scroll-mt-24">
-      <div className="flex flex-col gap-4 border-b border-border/50 pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="eyebrow mb-1">Your work</p>
-          <h2 className="text-[15px] font-semibold tracking-[-0.005em] md:text-base">
-            My prompts
-          </h2>
-          <p className="mt-1 max-w-md text-[13px] leading-relaxed text-muted-foreground">
-            Private prompts are link-only. Public prompts appear in search and
-            browse after review.
-          </p>
-        </div>
-        <Button
-          asChild
-          className="press h-9 shrink-0 gap-1.5 rounded-md px-3 text-[13px]"
-        >
-          <Link href="/submit">
-            <PlusIcon className="size-3.5" />
-            New prompt
-          </Link>
-        </Button>
+      <div className="border-b border-border/50 pb-5">
+        <h2 className="text-[13px] font-semibold">My prompts</h2>
+        <p className="mt-1 max-w-md text-[12px] leading-relaxed text-muted-foreground">
+          Private prompts are link-only. Public prompts appear in search and
+          browse after review.
+        </p>
       </div>
 
       {prompts.length > 0 && (
@@ -244,7 +230,7 @@ function PromptRow({
             )}
           </div>
 
-          <h3 className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.02em] text-foreground group-hover:text-primary">
+          <h3 className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug tracking-[-0.02em] text-foreground group-hover:text-primary">
             {p.title}
           </h3>
 
@@ -354,7 +340,7 @@ function EmptyPrompts() {
       <div className="mb-5 grid size-14 place-items-center rounded-xl bg-primary/10 text-primary">
         <SparklesIcon className="size-6" strokeWidth={2} />
       </div>
-      <h3 className="text-[16px] font-semibold">No prompts yet</h3>
+      <h3 className="text-[15px] font-semibold">No prompts yet</h3>
       <p className="mt-2 max-w-md text-[13px] leading-relaxed text-muted-foreground">
         Submit a private prompt for an instant share link, or go public to reach
         everyone on My Copyprompt.
@@ -362,14 +348,14 @@ function EmptyPrompts() {
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         <Link
           href="/submit"
-          className="magnetic inline-flex h-10 items-center gap-2 rounded-md bg-primary px-5 text-[13px] font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 hover:shadow-[0_8px_24px_-8px_oklch(0.66_0.21_270_/_0.45)]"
+          className="magnetic inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 hover:shadow-[0_8px_24px_-8px_oklch(0.66_0.21_270_/_0.45)]"
         >
           <PlusIcon className="size-3.5" />
           Create a prompt
         </Link>
         <Link
           href="/search"
-          className="press inline-flex h-10 items-center rounded-md border border-border bg-card px-5 text-[13px] font-medium transition-all hover:border-foreground/30 hover:bg-muted"
+          className="press inline-flex h-9 items-center rounded-md border border-border bg-card px-4 text-[13px] font-medium transition-all hover:border-foreground/30 hover:bg-muted"
         >
           Browse prompts
         </Link>

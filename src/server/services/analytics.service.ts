@@ -353,6 +353,45 @@ export const getDailyPulse = cache(async (): Promise<DailyPulse> => {
    Dashboard loader — batched for production pool limits
    ──────────────────────────────────────────────────────────── */
 
+export interface TrafficOverview {
+  publishedPrompts: number;
+  totalCopies: number;
+  totalViews: number;
+}
+
+/** Fast headline traffic metrics — one table scan, no joins. */
+export const getTrafficOverview = cache(async (): Promise<TrafficOverview> => {
+  const [row] = await db
+    .select({
+      publishedPrompts: sql<number>`count(*) filter (where ${prompts.status} = 'published')::int`,
+      totalCopies: sql<number>`coalesce(sum(${prompts.copyCount}), 0)::bigint`,
+      totalViews: sql<number>`coalesce(sum(${prompts.viewCount}), 0)::bigint`,
+    })
+    .from(prompts);
+
+  return {
+    publishedPrompts: row?.publishedPrompts ?? 0,
+    totalCopies: Number(row?.totalCopies ?? 0),
+    totalViews: Number(row?.totalViews ?? 0),
+  };
+});
+
+export interface AdminTrafficDashboard {
+  traffic: TrafficOverview;
+  topPrompts: PromptLeaderboardItem[];
+}
+
+/** Initial admin analytics load — traffic + top prompts only (2 queries). */
+export const loadAdminTrafficDashboard = cache(
+  async (): Promise<AdminTrafficDashboard> => {
+    const [traffic, topPrompts] = await Promise.all([
+      getTrafficOverview(),
+      getTopPromptsByCopies(10),
+    ]);
+    return { traffic, topPrompts };
+  },
+);
+
 export interface AdminAnalyticsDashboard {
   totals: AdminTotals;
   pulse: DailyPulse;
