@@ -99,7 +99,7 @@ export default async function AccountPage() {
           </Link>
         </header>
 
-        <div className="mx-auto grid max-w-[1080px] gap-6 lg:grid-cols-[minmax(0,272px)_minmax(0,1fr)] lg:gap-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,288px)_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[minmax(0,304px)_minmax(0,1fr)]">
           <aside className="reveal delay-2 space-y-3 lg:sticky lg:top-20 lg:self-start">
             <div className="overflow-hidden rounded-xl border border-border/60 bg-card/80 shadow-soft backdrop-blur-sm">
               <div className="border-b border-border/40 px-4 py-4">
