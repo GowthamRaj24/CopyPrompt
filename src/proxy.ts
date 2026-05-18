@@ -53,6 +53,20 @@ function metaCrawlerHtml(origin: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Supabase OAuth sometimes lands on Site URL (/) with ?code= instead of
+  // /auth/callback when redirect URLs are misconfigured — forward to handler.
+  if (
+    pathname !== "/auth/callback" &&
+    searchParams.has("code") &&
+    request.method === "GET"
+  ) {
+    const callback = new URL("/auth/callback", request.url);
+    callback.search = request.nextUrl.search;
+    return NextResponse.redirect(callback);
+  }
+
   // Pass current pathname + full URL (with query) as headers so server
   // components can read them for conditional rendering and redirect targets.
   const requestHeaders = new Headers(request.headers);
@@ -63,8 +77,6 @@ export async function proxy(request: NextRequest) {
   );
 
   const ua = request.headers.get("user-agent") ?? "";
-  const { pathname } = request.nextUrl;
-
   // Lightweight HTML for Meta — avoids heavy SSR/DB on their scrape (403 workaround)
   if (
     META_CRAWLER_UA.test(ua) &&

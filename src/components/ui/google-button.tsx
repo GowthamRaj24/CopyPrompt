@@ -3,6 +3,7 @@
 import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { authCallbackUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase-client";
 
 interface GoogleButtonProps {
@@ -29,14 +30,11 @@ export function GoogleButton({
   async function handleGoogle() {
     setLoading(true);
     const supabase = createClient();
-    const callbackPath = next
-      ? `/auth/callback?next=${encodeURIComponent(next)}`
-      : "/auth/callback";
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}${callbackPath}`,
+        redirectTo: authCallbackUrl(next),
       },
     });
 
