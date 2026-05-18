@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase-client";
+import { buildPromptShareUrl } from "@/lib/utm";
 
 interface ActionsBarProps {
   promptId: string;
@@ -79,7 +80,7 @@ export function ActionsBar({
   }
 
   async function handleShare() {
-    const url = `${window.location.origin}/prompt/${promptSlug}`;
+    const url = buildPromptShareUrl(promptSlug, "share");
     if (navigator.share) {
       try {
         await navigator.share({ title: promptTitle, url });

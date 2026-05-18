@@ -8,6 +8,7 @@ import {
   StarIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
 import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
 import { PromptCarousel } from "@/components/prompt/PromptCarousel";
@@ -18,10 +19,12 @@ import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import { prompts } from "@/server/models/prompt.model";
+import { getIndexableModels } from "@/server/services/model-catalog.service";
 import {
   getHomepageRails,
   type PromptListItem,
 } from "@/server/services/prompt.service";
+import { getIndexableTags } from "@/server/services/tag.service";
 
 /**
  * Homepage — premium, search-first.
@@ -111,19 +114,22 @@ const HOMEPAGE_FAQS = [
 export default async function HomePage() {
   // Five parallel queries — each indexed and capped at 8 rows so total
   // dominant time is the slowest one (~25-40ms on Supabase free tier).
-  const [topCategories, rails, publishedCountRows] = await Promise.all([
-    db
-      .select()
-      .from(categories)
-      .where(isNull(categories.parentId))
-      .orderBy(asc(categories.name))
-      .limit(12),
-    getHomepageRails(),
-    db
-      .select({ c: count() })
-      .from(prompts)
-      .where(publicPublishedWhere()),
-  ]);
+  const [topCategories, rails, publishedCountRows, indexableModels, indexableTags] =
+    await Promise.all([
+      db
+        .select()
+        .from(categories)
+        .where(isNull(categories.parentId))
+        .orderBy(asc(categories.name))
+        .limit(12),
+      getHomepageRails(),
+      db
+        .select({ c: count() })
+        .from(prompts)
+        .where(publicPublishedWhere()),
+      getIndexableModels(),
+      getIndexableTags(24),
+    ]);
 
   const { trending, recent, mostViewed, topRated } = rails;
 
@@ -310,6 +316,8 @@ export default async function HomePage() {
          Same heading rhythm as the rails so nothing breaks
          the page's vertical typography pace.
          ════════════════════════════════════════════════════ */}
+      <BrowseSeoSection models={indexableModels} tags={indexableTags} />
+
       {topCategories.length > 0 && (
         <section className="border-t border-border/40">
           <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">

@@ -244,14 +244,17 @@ export default async function PromptDetailPage({ params }: PageProps) {
         <div className="reveal delay-2 lg:col-span-7">
           {/* Top: badge + heart */}
           <div className="flex items-start justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/50 bg-card/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <Link
+              href={`/models/${prompt.model.slug}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border/50 bg-card/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+            >
               {isImage ? (
                 <ImageIcon className="size-3" />
               ) : (
                 <MessageSquareIcon className="size-3" />
               )}
               {prompt.model.name}
-            </span>
+            </Link>
             <HeartButton
               promptId={prompt.id}
               className="press grid size-9 place-items-center rounded-lg border border-border/50 bg-card/60 text-muted-foreground transition-all hover:border-border hover:bg-card hover:text-foreground"

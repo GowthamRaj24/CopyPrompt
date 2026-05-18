@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { SITE_BRAND } from "@/lib/site-brand";
+import { appendUtm } from "@/lib/utm";
 
 /** Cryptographically random unguessable share token (~43 chars base64url). */
 export function generateShareToken(): string {
@@ -13,5 +14,9 @@ export function buildShareUrl(shareToken: string): string {
   const base =
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
     `https://${SITE_BRAND.domain}`;
-  return `${base}/s/${shareToken}`;
+  return appendUtm(`${base}/s/${shareToken}`, {
+    source: "private_share",
+    medium: "referral",
+    campaign: "private_prompt",
+  });
 }

@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { prompts } from "@/server/models/prompt.model";
+import { getAllTagSlugsForSitemap } from "@/server/services/tag.service";
+import { getIndexableModels } from "@/server/services/model-catalog.service";
 
 /**
  * Dynamic sitemap.
@@ -20,7 +22,7 @@ const BASE_URL =
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch published prompts + all categories in parallel
-  const [promptRows, categoryRows] = await Promise.all([
+  const [promptRows, categoryRows, tagRows, modelRows] = await Promise.all([
     db
       .select({
         slug: prompts.slug,
@@ -29,6 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from(prompts)
       .where(publicPublishedWhere()),
     db.select({ slug: categories.slug }).from(categories),
+    getAllTagSlugsForSitemap(),
+    getIndexableModels(),
   ]);
 
   // ─── Static pages ──────────────────────────────────────
@@ -44,6 +48,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/models`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.75,
     },
     {
       url: `${BASE_URL}/search?type=image`,
@@ -99,5 +109,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...promptRoutes];
+  const tagRoutes: MetadataRoute.Sitemap = tagRows.map((t) => ({
+    url: `${BASE_URL}/tag/${t.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.55,
+  }));
+
+  const modelRoutes: MetadataRoute.Sitemap = modelRows.map((m) => ({
+    url: `${BASE_URL}/models/${m.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.65,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...categoryRoutes,
+    ...modelRoutes,
+    ...tagRoutes,
+    ...promptRoutes,
+  ];
 }

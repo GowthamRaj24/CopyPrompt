@@ -31,9 +31,9 @@ export function Footer() {
               title="Browse"
               links={[
                 { href: "/search", label: "All prompts" },
+                { href: "/models", label: "By AI model" },
                 { href: "/search?type=image", label: "Image" },
                 { href: "/search?type=text", label: "Text" },
-                { href: "/search?sort=trending", label: "Trending" },
               ]}
             />
             <FooterColumn
