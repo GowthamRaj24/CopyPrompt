@@ -39,6 +39,21 @@ export interface AppUser {
  * in the server render tree — duplicate calls are deduped to a single
  * Supabase Auth check + a single Postgres lookup.
  */
+/** Fallback profile when the public.users lookup fails / row is missing. */
+function profileFromAuthRow(user: {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+}): AppUser {
+  return {
+    id: user.id,
+    email: user.email ?? "",
+    fullName: (user.user_metadata?.full_name as string) ?? null,
+    avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
+    plan: "free",
+  };
+}
+
 export const getCurrentUser = cache(
   async (): Promise<AppUser | null> => {
     const supabase = await createClient();
@@ -48,49 +63,51 @@ export const getCurrentUser = cache(
 
     if (!user) return null;
 
-    // Read our app-level fields (plan, etc.) from public.users
-    const [row] = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        fullName: users.fullName,
-        avatarUrl: users.avatarUrl,
-        plan: users.plan,
-        welcomedAt: users.welcomedAt,
-      })
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1);
+    // Read our app-level fields (plan, etc.) from public.users.
+    // Wrapped in try/catch so a pending migration (e.g. a missing
+    // `welcomed_at` column on the deployed DB) never crashes every
+    // authenticated request. We log the error and fall back to the
+    // auth-row metadata so the user can still browse.
+    try {
+      const [row] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          fullName: users.fullName,
+          avatarUrl: users.avatarUrl,
+          plan: users.plan,
+          welcomedAt: users.welcomedAt,
+        })
+        .from(users)
+        .where(eq(users.id, user.id))
+        .limit(1);
 
-    if (!row) {
-      // The auth.users row exists but public.users hasn't synced yet.
-      // Return what we know from the auth row.
+      if (!row) {
+        // auth.users exists, public.users hasn't synced yet.
+        return profileFromAuthRow(user);
+      }
+
+      // Fire welcome email exactly once. Atomic claim inside the service
+      // makes this safe to call from every authenticated render.
+      if (!row.welcomedAt && row.email) {
+        void welcomeIfFirstSignIn({
+          userId: row.id,
+          email: row.email,
+          fullName: row.fullName,
+        });
+      }
+
       return {
-        id: user.id,
-        email: user.email ?? "",
-        fullName: (user.user_metadata?.full_name as string) ?? null,
-        avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
-        plan: "free",
-      };
-    }
-
-    // Fire welcome email exactly once. Atomic claim inside the service
-    // makes this safe to call from every authenticated render.
-    if (!row.welcomedAt && row.email) {
-      void welcomeIfFirstSignIn({
-        userId: row.id,
+        id: row.id,
         email: row.email,
         fullName: row.fullName,
-      });
+        avatarUrl: row.avatarUrl,
+        plan: row.plan as "free" | "premium" | "admin",
+      };
+    } catch (err) {
+      console.error("[auth] getCurrentUser db lookup failed:", err);
+      return profileFromAuthRow(user);
     }
-
-    return {
-      id: row.id,
-      email: row.email,
-      fullName: row.fullName,
-      avatarUrl: row.avatarUrl,
-      plan: row.plan as "free" | "premium" | "admin",
-    };
   },
 );
 
