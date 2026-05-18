@@ -4,13 +4,10 @@ const PRODUCTION_HOST = "mycopyprompt.in";
 
 const nextConfig: NextConfig = {
   async redirects() {
+    // Only redirect the old Vercel hostname. Do NOT redirect www here —
+    // Vercel → Domains should handle www ↔ apex in one place, or you get
+    // ERR_TOO_MANY_REDIRECTS when both layers fight each other.
     return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: `www.${PRODUCTION_HOST}` }],
-        destination: `https://${PRODUCTION_HOST}/:path*`,
-        permanent: true,
-      },
       {
         source: "/:path*",
         has: [{ type: "host", value: "copy-prompt.vercel.app" }],
