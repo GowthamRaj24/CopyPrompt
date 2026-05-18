@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
 
+const PRODUCTION_HOST = "mycopyprompt.in";
+
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: `www.${PRODUCTION_HOST}` }],
+        destination: `https://${PRODUCTION_HOST}/:path*`,
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "copy-prompt.vercel.app" }],
+        destination: `https://${PRODUCTION_HOST}/:path*`,
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       // Picsum placeholders for seed prompts
