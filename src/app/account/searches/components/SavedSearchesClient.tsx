@@ -13,7 +13,7 @@ import {
   buildSearchHref,
   describeSavedSearch,
   type SavedSearchRow,
-} from "@/server/services/saved-search.service";
+} from "@/lib/saved-search-shared";
 
 interface Props {
   initial: SavedSearchRow[];

@@ -22,9 +22,23 @@ export const revalidate = 21600; // 6 hours
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-async function safeQuery<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+const QUERY_TIMEOUT_MS = 15_000;
+
+async function safeQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  // Hard-bound each lookup so a single slow / hung query never starves
+  // the 60s budget Next allocates to the sitemap worker.
+  const timeout = new Promise<T>((_, reject) => {
+    setTimeout(
+      () => reject(new Error(`${label} timed out after ${QUERY_TIMEOUT_MS}ms`)),
+      QUERY_TIMEOUT_MS,
+    );
+  });
   try {
-    return await fn();
+    return await Promise.race([fn(), timeout]);
   } catch (err) {
     console.error(`[sitemap] ${label} failed:`, err);
     return fallback;

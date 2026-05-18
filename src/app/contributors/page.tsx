@@ -22,8 +22,28 @@ export const metadata: Metadata = {
 
 export const revalidate = 600;
 
+async function safeQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[contributors] ${label} failed:`, err);
+    return fallback;
+  }
+}
+
 export default async function ContributorsPage() {
-  const entries = await listContributorLeaderboard(50);
+  // Wrapped so a pending migration (users.handle / total_copies_received
+  // missing on the deployed DB) renders an empty state instead of
+  // failing the static export.
+  const entries = await safeQuery(
+    "leaderboard",
+    () => listContributorLeaderboard(50),
+    [] as Awaited<ReturnType<typeof listContributorLeaderboard>>,
+  );
 
   return (
     <section className="relative">

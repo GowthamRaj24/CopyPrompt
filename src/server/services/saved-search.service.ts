@@ -1,5 +1,10 @@
 import { and, count, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { publicPublishedWhere } from "@/lib/prompt-visibility";
+import {
+  buildSearchHref as buildSearchHrefShared,
+  describeSavedSearch as describeSavedSearchShared,
+  type SavedSearchRow as SharedSavedSearchRow,
+} from "@/lib/saved-search-shared";
 import { db } from "@/server/lib/db";
 import { assertCanCreateSavedSearch } from "@/server/lib/plan";
 import type { AppUser } from "@/server/lib/auth";
@@ -7,6 +12,16 @@ import { images } from "@/server/models/image.model";
 import { models } from "@/server/models/model.model";
 import { prompts } from "@/server/models/prompt.model";
 import { savedSearches } from "@/server/models/saved-search.model";
+
+// Re-export pure helpers + type so server callers keep their existing
+// imports. The actual implementations live in `@/lib/saved-search-shared`
+// so client components can import them without pulling in `postgres`.
+export const buildSearchHref = buildSearchHrefShared;
+export const describeSavedSearch = describeSavedSearchShared;
+export type SavedSearchRow = SharedSavedSearchRow & {
+  lastSeenAt: Date;
+  createdAt: Date;
+};
 
 /**
  * Saved searches + digest matching.
@@ -31,19 +46,6 @@ const VALID_SORTS = new Set([
   "rated",
 ]);
 
-export interface SavedSearchRow {
-  id: string;
-  label: string;
-  query: string | null;
-  type: string | null;
-  sort: string | null;
-  categorySlug: string | null;
-  modelSlug: string | null;
-  tagSlugs: string[] | null;
-  lastSeenAt: Date;
-  createdAt: Date;
-}
-
 function normalizeType(value: string | null | undefined): string | null {
   if (!value) return null;
   return VALID_TYPES.has(value) && value !== "all" ? value : null;
@@ -52,25 +54,6 @@ function normalizeType(value: string | null | undefined): string | null {
 function normalizeSort(value: string | null | undefined): string | null {
   if (!value) return null;
   return VALID_SORTS.has(value) ? value : null;
-}
-
-/** Reconstruct the public `/search?...` URL for a saved row — used in emails + UI. */
-export function buildSearchHref(row: SavedSearchRow): string {
-  const sp = new URLSearchParams();
-  if (row.query) sp.set("q", row.query);
-  if (row.type && row.type !== "all") sp.set("type", row.type);
-  if (row.sort && row.sort !== "relevance") sp.set("sort", row.sort);
-  const qs = sp.toString();
-  return qs ? `/search?${qs}` : "/search";
-}
-
-/** Human-readable summary line — "ChatGPT prompts about cyberpunk". */
-export function describeSavedSearch(row: SavedSearchRow): string {
-  const parts: string[] = [];
-  if (row.type === "image") parts.push("Image");
-  else if (row.type === "text") parts.push("Text");
-  if (row.query) parts.push(`"${row.query}"`);
-  return parts.length > 0 ? parts.join(" · ") : "All new prompts";
 }
 
 /* ── Reads ───────────────────────────────────────────────── */

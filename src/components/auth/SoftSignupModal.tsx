@@ -2,7 +2,6 @@
 
 import { HeartIcon, SparklesIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoogleButton } from "@/components/ui/google-button";
 import {
@@ -27,16 +26,23 @@ import {
  * modal that converts at peak intent without blocking browse/copy flow.
  */
 export function SoftSignupModal() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [trigger, setTrigger] = useState<"copy" | "favorite-attempt">("copy");
+  const [returnTo, setReturnTo] = useState("/");
 
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent<SoftSignupEventDetail>).detail;
       if (!detail) return;
       setTrigger(detail.trigger);
+      // Capture the current URL at event time. We deliberately avoid
+      // `useSearchParams()` because this modal is mounted globally in
+      // `FavoritesProvider`, and that hook forces every static page
+      // (including `/changelog` and `/_not-found`) into a dynamic-only
+      // build path.
+      if (typeof window !== "undefined") {
+        setReturnTo(window.location.pathname + window.location.search);
+      }
       setOpen(true);
     }
     window.addEventListener(SOFT_SIGNUP_EVENT, handler);
@@ -48,7 +54,7 @@ export function SoftSignupModal() {
     if (!next) dismissSoftSignup();
   }
 
-  const next = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
+  const next = returnTo || "/";
   const heroIcon =
     trigger === "favorite-attempt" ? (
       <HeartIcon className="size-4 fill-primary stroke-primary" />
