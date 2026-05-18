@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 import { db } from "@/server/lib/db";
 import { categories } from "@/server/models/category.model";
 import { prompts } from "@/server/models/prompt.model";
+import { getIndexableCollectionSlugs } from "@/server/services/collection.service";
+import { listIndexableCreatorHandles } from "@/server/services/creator.service";
 import { getAllTagSlugsForSitemap } from "@/server/services/tag.service";
 import { getIndexableModels } from "@/server/services/model-catalog.service";
 
@@ -30,7 +32,14 @@ async function safeQuery<T>(label: string, fn: () => Promise<T>, fallback: T): P
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [promptRows, categoryRows, tagRows, modelRows] = await Promise.all([
+  const [
+    promptRows,
+    categoryRows,
+    tagRows,
+    modelRows,
+    collectionSlugs,
+    creatorHandles,
+  ] = await Promise.all([
     safeQuery("prompts", () =>
       db
         .select({
@@ -48,6 +57,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
     safeQuery("tags", () => getAllTagSlugsForSitemap(), []),
     safeQuery("models", () => getIndexableModels(), []),
+    safeQuery(
+      "collections",
+      () => getIndexableCollectionSlugs(),
+      [] as string[],
+    ),
+    safeQuery(
+      "creators",
+      () => listIndexableCreatorHandles(),
+      [] as string[],
+    ),
   ]);
 
   // ─── Static pages ──────────────────────────────────────
@@ -87,6 +106,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/contributors`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.55,
+    },
+    {
+      url: `${BASE_URL}/collections`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.65,
     },
     {
       url: `${BASE_URL}/about`,
@@ -138,11 +169,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
+  const collectionRoutes: MetadataRoute.Sitemap = collectionSlugs.map(
+    (slug) => ({
+      url: `${BASE_URL}/c/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }),
+  );
+
+  const creatorRoutes: MetadataRoute.Sitemap = creatorHandles.map((handle) => ({
+    url: `${BASE_URL}/u/${handle}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.55,
+  }));
+
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...modelRoutes,
     ...tagRoutes,
+    ...collectionRoutes,
+    ...creatorRoutes,
     ...promptRoutes,
   ];
 }

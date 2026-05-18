@@ -1,5 +1,7 @@
 import {
+  BellIcon,
   ChevronRightIcon,
+  FolderIcon,
   HeartIcon,
   LayoutDashboardIcon,
   LogOutIcon,
@@ -20,8 +22,12 @@ import { Button } from "@/components/ui/button";
 import { buildShareUrl } from "@/lib/share-token";
 import { SITE_BRAND } from "@/lib/site-brand";
 import { requireUser } from "@/server/lib/auth";
+import { getCreatorById } from "@/server/services/creator.service";
 import { listOwnedPrompts } from "@/server/services/private-prompt.service";
+import { listRecentCopiedPrompts } from "@/server/services/recent-copies.service";
 import { MyPromptsSection } from "./components/MyPromptsSection";
+import { ProfileSection } from "./components/ProfileSection";
+import { RecentlyCopiedSection } from "./components/RecentlyCopiedSection";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -31,7 +37,11 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const user = await requireUser();
-  const rows = await listOwnedPrompts(user.id);
+  const [rows, recentCopies, creator] = await Promise.all([
+    listOwnedPrompts(user.id),
+    listRecentCopiedPrompts(user.id, 12),
+    getCreatorById(user.id),
+  ]);
 
   const prompts = rows.map((p) => ({
     id: p.id,
@@ -143,6 +153,18 @@ export default async function AccountPage() {
                   hint="Saved prompts"
                 />
                 <NavRow
+                  href="/account/collections"
+                  icon={<FolderIcon className="size-4" />}
+                  label="Collections"
+                  hint="My boards"
+                />
+                <NavRow
+                  href="/account/searches"
+                  icon={<BellIcon className="size-4" />}
+                  label="Saved searches"
+                  hint="Email alerts"
+                />
+                <NavRow
                   href="/submit"
                   icon={<PlusIcon className="size-4" />}
                   label="Submit"
@@ -191,6 +213,16 @@ export default async function AccountPage() {
           </aside>
 
           <div className="reveal delay-3 min-w-0">
+            {creator && (
+              <ProfileSection
+                initial={{
+                  handle: creator.handle,
+                  fullName: creator.fullName,
+                  bio: creator.bio,
+                }}
+              />
+            )}
+            <RecentlyCopiedSection initial={recentCopies} />
             <MyPromptsSection initialPrompts={prompts} />
           </div>
         </div>

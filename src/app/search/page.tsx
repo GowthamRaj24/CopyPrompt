@@ -2,6 +2,7 @@ import { ArrowRightIcon, SearchIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PromptCard } from "@/components/prompt/PromptCard";
+import { SaveSearchButton } from "@/components/search/SaveSearchButton";
 import { SearchBox } from "@/components/search/SearchBox";
 import { SearchPagination } from "@/components/search/SearchPagination";
 import { PAGINATION } from "@/server/config/constants";
@@ -102,7 +103,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </p>
           </div>
 
-          <FilterTabs query={query} type={type} sort={sort} />
+          <div className="flex flex-wrap items-center gap-2 md:flex-row-reverse md:items-end">
+            <SaveSearchButton
+              query={query}
+              type={type}
+              sort={sort}
+              total={total}
+            />
+            <FilterTabs query={query} type={type} sort={sort} />
+          </div>
         </header>
 
         {/* Grid */}

@@ -3,6 +3,10 @@ import { revalidatePath } from "next/cache";
 import { pageOffset, slicePage } from "@/lib/pagination";
 import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
+import {
+  sendSubmissionApprovedEmail,
+  sendSubmissionRejectedEmail,
+} from "@/server/lib/email";
 import { probeImageDimensions } from "@/server/lib/image-dimensions";
 import { categories } from "@/server/models/category.model";
 import { images } from "@/server/models/image.model";
@@ -11,6 +15,8 @@ import { promptTags } from "@/server/models/prompt-tag.model";
 import { prompts } from "@/server/models/prompt.model";
 import { submissions } from "@/server/models/submission.model";
 import { tags } from "@/server/models/tag.model";
+import { users } from "@/server/models/user.model";
+import { incrementAuthorPublishedCount } from "@/server/services/contributor.service";
 
 /**
  * Admin business logic. All these functions assume the caller has already
@@ -31,6 +37,8 @@ export interface PendingSubmissionListItem {
     negativePrompt?: string | null;
     imageUrls?: string[];
     params?: Record<string, unknown>;
+    /** Optional UUID of the source prompt this submission was remixed from. */
+    remixSourceId?: string | null;
   };
   email: string | null;
   createdAt: Date;
@@ -152,6 +160,23 @@ export async function approveSubmission(
   // Generate a unique slug from the title
   const slug = await generateUniqueSlug(data.title);
 
+  // Validate optional remix source — must be an existing published, public prompt.
+  let validRemixSourceId: string | null = null;
+  if (data.remixSourceId) {
+    const [source] = await db
+      .select({ id: prompts.id })
+      .from(prompts)
+      .where(
+        and(
+          eq(prompts.id, data.remixSourceId),
+          eq(prompts.status, "published"),
+          eq(prompts.visibility, "public"),
+        ),
+      )
+      .limit(1);
+    validRemixSourceId = source?.id ?? null;
+  }
+
   // Probe image dimensions BEFORE the transaction — network calls inside
   // a DB transaction can hold connections open too long. We do this in
   // parallel for speed.
@@ -164,7 +189,8 @@ export async function approveSubmission(
 
   // Transaction: insert prompt + images + tags atomically
   await db.transaction(async (tx) => {
-    // 1. Insert prompt
+    // 1. Insert prompt — attribute to the submitting user (if any) so the
+    // creator profile + leaderboard show real authorship.
     const [newPrompt] = await tx
       .insert(prompts)
       .values({
@@ -175,11 +201,13 @@ export async function approveSubmission(
         expectedOutcome: data.expectedOutcome ?? null,
         modelId: model.id,
         categoryId: category.id,
+        authorId: submission.userId ?? null,
         params: stripUndefined(data.params ?? {}),
         tips: data.tips ?? null,
         status: "published",
         visibility: "public",
         shareToken: null,
+        remixSourceId: validRemixSourceId,
       })
       .returning({ id: prompts.id });
 
@@ -254,6 +282,14 @@ export async function approveSubmission(
       .where(eq(models.id, model.id));
   });
 
+  // 6. Bump the author's contributor stats so /contributors + badges
+  // refresh immediately, not on the daily cron.
+  if (submission.userId) {
+    void incrementAuthorPublishedCount(submission.userId).catch((err) => {
+      console.error("[contributor-stats] bump failed:", err);
+    });
+  }
+
   // Revalidate caches outside the transaction
   revalidatePath("/");
   revalidatePath(`/category/${data.categorySlug}`);
@@ -268,7 +304,47 @@ export async function approveSubmission(
     });
   }
 
+  // Notify the contributor — best effort. Resolve recipient from the
+  // submission's userId (preferred, has name + verified email) and fall
+  // back to the email captured at submit time for anonymous submitters.
+  void notifyApproval({
+    userId: submission.userId,
+    fallbackEmail: submission.email,
+    promptTitle: data.title,
+    promptSlug: slug,
+  }).catch((err) => {
+    console.error("[email] approval notify failed:", err);
+  });
+
   return { slug };
+}
+
+async function notifyApproval(opts: {
+  userId: string | null;
+  fallbackEmail: string | null;
+  promptTitle: string;
+  promptSlug: string;
+}): Promise<void> {
+  let email = opts.fallbackEmail ?? null;
+  let name: string | null = null;
+  if (opts.userId) {
+    const [u] = await db
+      .select({ email: users.email, fullName: users.fullName })
+      .from(users)
+      .where(eq(users.id, opts.userId))
+      .limit(1);
+    if (u) {
+      email = u.email;
+      name = u.fullName;
+    }
+  }
+  if (!email) return;
+  await sendSubmissionApprovedEmail({
+    to: email,
+    name,
+    promptTitle: opts.promptTitle,
+    promptSlug: opts.promptSlug,
+  });
 }
 
 export async function rejectSubmission(
@@ -276,25 +352,74 @@ export async function rejectSubmission(
   reviewerId: string,
   reason: string,
 ): Promise<void> {
-  const result = await db
-    .update(submissions)
-    .set({
-      status: "rejected",
-      reviewerId,
-      rejectionReason: reason.trim() || null,
-      reviewedAt: new Date(),
-    })
+  // Fetch enough context to email the submitter — same trip as the
+  // status update would have cost on its own.
+  const [submission] = await db
+    .select()
+    .from(submissions)
     .where(
       and(
         eq(submissions.id, submissionId),
         eq(submissions.status, "pending"),
       ),
     )
-    .returning({ id: submissions.id });
+    .limit(1);
 
-  if (result.length === 0) {
+  if (!submission) {
     throw new Error("Submission not found or already processed");
   }
+
+  const trimmedReason = reason.trim() || null;
+
+  await db
+    .update(submissions)
+    .set({
+      status: "rejected",
+      reviewerId,
+      rejectionReason: trimmedReason,
+      reviewedAt: new Date(),
+    })
+    .where(eq(submissions.id, submissionId));
+
+  const data = submission.promptData as PendingSubmissionListItem["promptData"];
+
+  // Notify the contributor — best effort.
+  void notifyRejection({
+    userId: submission.userId,
+    fallbackEmail: submission.email,
+    promptTitle: data.title,
+    reason: trimmedReason,
+  }).catch((err) => {
+    console.error("[email] rejection notify failed:", err);
+  });
+}
+
+async function notifyRejection(opts: {
+  userId: string | null;
+  fallbackEmail: string | null;
+  promptTitle: string;
+  reason: string | null;
+}): Promise<void> {
+  let email = opts.fallbackEmail ?? null;
+  let name: string | null = null;
+  if (opts.userId) {
+    const [u] = await db
+      .select({ email: users.email, fullName: users.fullName })
+      .from(users)
+      .where(eq(users.id, opts.userId))
+      .limit(1);
+    if (u) {
+      email = u.email;
+      name = u.fullName;
+    }
+  }
+  if (!email) return;
+  await sendSubmissionRejectedEmail({
+    to: email,
+    name,
+    promptTitle: opts.promptTitle,
+    reason: opts.reason,
+  });
 }
 
 /* ── Helpers ─────────────────────────────────────────────── */

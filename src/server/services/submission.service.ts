@@ -88,6 +88,7 @@ export async function createSubmission(
     categorySlug: input.categorySlug,
     tags: input.tags ?? [],
     tips: input.tips || null,
+    remixSourceId: input.remixSourceId ?? null,
     submittedFromIp: meta.ipAddress,
     submittedUserAgent: meta.userAgent,
   };

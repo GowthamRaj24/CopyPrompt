@@ -16,3 +16,5 @@ export * from "./collection.model";
 export * from "./collection-prompt.model";
 export * from "./submission.model";
 export * from "./prompt-rating.model";
+export * from "./prompt-copy.model";
+export * from "./saved-search.model";

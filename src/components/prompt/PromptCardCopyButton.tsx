@@ -3,10 +3,14 @@
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { type MouseEvent, useState } from "react";
 import { toast } from "sonner";
+import { notifyGuestCopy } from "@/lib/guest-funnel";
+import { getModelLauncher } from "@/lib/model-launchers";
 
 interface PromptCardCopyButtonProps {
   promptId: string;
   promptText: string;
+  /** When provided, the copy toast offers an "Open in <Model>" action. */
+  modelSlug?: string;
 }
 
 /**
@@ -25,9 +29,12 @@ interface PromptCardCopyButtonProps {
 export function PromptCardCopyButton({
   promptId,
   promptText,
+  modelSlug,
 }: PromptCardCopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const [animating, setAnimating] = useState(false);
+
+  const launcher = getModelLauncher(modelSlug);
 
   async function handleClick(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -39,9 +46,22 @@ export function PromptCardCopyButton({
       setAnimating(true);
       toast.success("Prompt copied", {
         description: "Paste it into your AI tool.",
+        action: launcher
+          ? {
+              label: launcher.label,
+              onClick: () => {
+                window.open(
+                  launcher.build(promptText),
+                  "_blank",
+                  "noopener",
+                );
+              },
+            }
+          : undefined,
       });
-      // fire-and-forget telemetry
+      // fire-and-forget telemetry + guest-funnel signal
       fetch(`/api/prompts/${promptId}/copy`, { method: "POST" }).catch(() => {});
+      void notifyGuestCopy();
       setTimeout(() => setCopied(false), 1800);
       setTimeout(() => setAnimating(false), 550);
     } catch {

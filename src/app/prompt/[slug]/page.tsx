@@ -3,6 +3,7 @@ import {
   ChevronRightIcon,
   ImageIcon,
   MessageSquareIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -278,7 +279,58 @@ export default async function PromptDetailPage({ params }: PageProps) {
               ·
             </span>
             <span>{formatRelativeTime(prompt.createdAt)}</span>
+            {prompt.author && (
+              <>
+                <span aria-hidden className="text-muted-foreground/25">
+                  ·
+                </span>
+                <span>
+                  by{" "}
+                  <Link
+                    href={`/u/${prompt.author.handle}`}
+                    className="font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    {prompt.author.fullName ?? `@${prompt.author.handle}`}
+                  </Link>
+                </span>
+              </>
+            )}
           </div>
+
+          {(prompt.remixSource || prompt.remixCount > 0) && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+              <RefreshCwIcon
+                className="size-3 text-primary/60"
+                strokeWidth={2}
+                aria-hidden
+              />
+              {prompt.remixSource && (
+                <>
+                  <span>Remixed from</span>
+                  <Link
+                    href={`/prompt/${prompt.remixSource.slug}`}
+                    className="font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    {prompt.remixSource.title}
+                  </Link>
+                </>
+              )}
+              {prompt.remixSource && prompt.remixCount > 0 && (
+                <span aria-hidden className="text-muted-foreground/25">
+                  ·
+                </span>
+              )}
+              {prompt.remixCount > 0 && (
+                <Link
+                  href={`/prompt/${prompt.slug}/remixes`}
+                  className="font-medium text-foreground transition-colors hover:text-primary"
+                >
+                  {prompt.remixCount}{" "}
+                  {prompt.remixCount === 1 ? "remix" : "remixes"}
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Stats */}
           <p className="mt-4 text-[12px] text-muted-foreground">
@@ -304,6 +356,8 @@ export default async function PromptDetailPage({ params }: PageProps) {
               promptId={prompt.id}
               promptText={prompt.promptText}
               withParams={prompt.params}
+              modelSlug={prompt.model.slug}
+              modelName={prompt.model.name}
             />
           </div>
 

@@ -10,7 +10,9 @@ import {
 import Link from "next/link";
 import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
 import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
+import { RecentlyCopiedRail } from "@/components/home/RecentlyCopiedRail";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
+import { listCuratedCollections } from "@/server/services/collection.service";
 import { PromptCarousel } from "@/components/prompt/PromptCarousel";
 import { HeroSearchForm } from "@/components/search/HeroSearchForm";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -111,25 +113,54 @@ const HOMEPAGE_FAQS = [
   },
 ];
 
+/**
+ * Wrap optional homepage queries so a single failure (e.g. a pending
+ * migration on the deployed DB) never breaks the entire landing page.
+ * Errors are logged; the section that depends on the data renders empty.
+ */
+async function safeHomeQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[home] ${label} failed:`, err);
+    return fallback;
+  }
+}
+
 export default async function HomePage() {
-  // Five parallel queries — each indexed and capped at 8 rows so total
-  // dominant time is the slowest one (~25-40ms on Supabase free tier).
-  const [topCategories, rails, publishedCountRows, indexableModels, indexableTags] =
-    await Promise.all([
-      db
-        .select()
-        .from(categories)
-        .where(isNull(categories.parentId))
-        .orderBy(asc(categories.name))
-        .limit(12),
-      getHomepageRails(),
-      db
-        .select({ c: count() })
-        .from(prompts)
-        .where(publicPublishedWhere()),
-      getIndexableModels(),
-      getIndexableTags(24),
-    ]);
+  // Six parallel queries — each indexed and capped so total dominant
+  // time is the slowest one (~25-40ms on Supabase free tier).
+  const [
+    topCategories,
+    rails,
+    publishedCountRows,
+    indexableModels,
+    indexableTags,
+    curatedCollections,
+  ] = await Promise.all([
+    db
+      .select()
+      .from(categories)
+      .where(isNull(categories.parentId))
+      .orderBy(asc(categories.name))
+      .limit(12),
+    getHomepageRails(),
+    db
+      .select({ c: count() })
+      .from(prompts)
+      .where(publicPublishedWhere()),
+    getIndexableModels(),
+    getIndexableTags(24),
+    safeHomeQuery(
+      "curatedCollections",
+      () => listCuratedCollections(6),
+      [] as Awaited<ReturnType<typeof listCuratedCollections>>,
+    ),
+  ]);
 
   const { trending, recent, mostViewed, topRated } = rails;
 
@@ -243,6 +274,10 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* "For you" rail — only for signed-in users with copy history.
+         Client-rendered so the homepage HTML stays ISR-cacheable. */}
+      <RecentlyCopiedRail />
+
       {/* ════════════════════════════════════════════════════
          PROMPT RAILS — four sections, all using <PromptRail>
          for identical typography, padding and ornament.
@@ -312,7 +347,16 @@ export default async function HomePage() {
          Same heading rhythm as the rails so nothing breaks
          the page's vertical typography pace.
          ════════════════════════════════════════════════════ */}
-      <BrowseSeoSection models={indexableModels} tags={indexableTags} />
+      <BrowseSeoSection
+        models={indexableModels}
+        tags={indexableTags}
+        curatedCollections={curatedCollections.map((c) => ({
+          slug: c.slug,
+          name: c.name,
+          description: c.description,
+          promptCount: c.promptCount,
+        }))}
+      />
 
       {topCategories.length > 0 && (
         <section className="cv-below-fold border-t border-border/40">

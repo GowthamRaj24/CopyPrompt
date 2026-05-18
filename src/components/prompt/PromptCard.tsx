@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { formatCount } from "@/lib/format";
 import { HeartButton } from "./HeartButton";
 import { PromptCardCopyButton } from "./PromptCardCopyButton";
@@ -16,6 +17,8 @@ export interface PromptCardData {
   slug: string;
   title: string;
   modelName: string;
+  /** Optional — when provided, the copy toast offers a deep-link to that AI tool. */
+  modelSlug?: string;
   modelType: "image" | "text";
   promptText: string;
   expectedOutcome: string | null;
@@ -132,9 +135,11 @@ export function PromptCard({
               initialFavorited={initialFavorited}
               className="press grid size-8 place-items-center rounded-lg text-muted-foreground transition-all duration-150 hover:bg-primary/8 hover:text-primary"
             />
+            <SaveToCollectionButton promptId={prompt.id} variant="icon" />
             <PromptCardCopyButton
               promptId={prompt.id}
               promptText={prompt.promptText}
+              modelSlug={prompt.modelSlug}
             />
           </div>
         </div>

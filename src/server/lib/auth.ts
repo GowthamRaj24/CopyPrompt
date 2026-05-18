@@ -5,6 +5,7 @@ import { cache } from "react";
 import { db } from "@/server/lib/db";
 import { createClient } from "@/server/lib/supabase-server";
 import { users } from "@/server/models/user.model";
+import { welcomeIfFirstSignIn } from "@/server/services/welcome.service";
 
 /**
  * Auth helpers for server components and route handlers.
@@ -55,6 +56,7 @@ export const getCurrentUser = cache(
         fullName: users.fullName,
         avatarUrl: users.avatarUrl,
         plan: users.plan,
+        welcomedAt: users.welcomedAt,
       })
       .from(users)
       .where(eq(users.id, user.id))
@@ -70,6 +72,16 @@ export const getCurrentUser = cache(
         avatarUrl: (user.user_metadata?.avatar_url as string) ?? null,
         plan: "free",
       };
+    }
+
+    // Fire welcome email exactly once. Atomic claim inside the service
+    // makes this safe to call from every authenticated render.
+    if (!row.welcomedAt && row.email) {
+      void welcomeIfFirstSignIn({
+        userId: row.id,
+        email: row.email,
+        fullName: row.fullName,
+      });
     }
 
     return {

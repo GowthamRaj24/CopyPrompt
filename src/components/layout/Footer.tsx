@@ -32,6 +32,7 @@ export function Footer() {
               links={[
                 { href: "/search", label: "All prompts" },
                 { href: "/models", label: "By AI model" },
+                { href: "/collections", label: "Collections" },
                 { href: "/search?type=image", label: "Image" },
                 { href: "/search?type=text", label: "Text" },
               ]}
@@ -40,6 +41,7 @@ export function Footer() {
               title="Product"
               links={[
                 { href: "/submit", label: "Submit" },
+                { href: "/contributors", label: "Contributors" },
                 { href: "/about", label: "About" },
                 { href: "/changelog", label: "Changelog" },
               ]}

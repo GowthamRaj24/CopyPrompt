@@ -171,6 +171,335 @@ If you didn't sign up, you can safely ignore this email.`;
   await sendEmail({ to: email, subject, text, html });
 }
 
+function appUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    `https://${SITE_BRAND.domain}`
+  );
+}
+
+/** Greeting helper — uses a name when we have one, generic salutation otherwise. */
+function greeting(name?: string | null): string {
+  const trimmed = (name ?? "").trim();
+  if (!trimmed) return "Hi there,";
+  // Keep first name only so the email feels human, not formal.
+  const firstName = trimmed.split(/\s+/)[0];
+  return `Hi ${firstName},`;
+}
+
+/**
+ * Sent when an admin approves a submission and the prompt goes live.
+ *
+ * Tone: celebratory + actionable. Single CTA → view the published prompt.
+ */
+export async function sendSubmissionApprovedEmail(opts: {
+  to: string;
+  name?: string | null;
+  promptTitle: string;
+  promptSlug: string;
+}): Promise<void> {
+  const url = `${appUrl()}/prompt/${opts.promptSlug}`;
+  const subject = `Your prompt is live on ${SITE_BRAND.name}`;
+
+  const text = `${greeting(opts.name)}
+
+Great news — your submission "${opts.promptTitle}" was approved and is now live in the public catalog.
+
+View it: ${url}
+
+Thanks for contributing — every prompt makes the library more useful for the next person.
+
+— The ${SITE_BRAND.name} team`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${subject}</title></head>
+<body style="${baseStyle}">
+  <div style="${cardStyle}">
+    ${brandHeader()}
+
+    <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 12px 0; text-align: center;">
+      Your prompt is live
+    </h1>
+
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 8px 0;">
+      ${greeting(opts.name)}
+    </p>
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+      Great news — your submission "<strong style="color: ${COLOR_TEXT};">${opts.promptTitle}</strong>" was approved and is now live in the public catalog.
+    </p>
+
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${url}" style="${buttonStyle}">View your prompt</a>
+    </div>
+
+    <p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; line-height: 1.6; margin: 0;">
+      Or open this link:<br>
+      <a href="${url}" style="color: ${COLOR_PRIMARY}; word-break: break-all;">${url}</a>
+    </p>
+
+    <p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; text-align: center; margin: 24px 0 0 0;">
+      Thanks for contributing — every prompt makes the library more useful for the next person.
+    </p>
+  </div>
+  ${footer()}
+</body>
+</html>`;
+
+  await sendEmail({ to: opts.to, subject, text, html });
+}
+
+/**
+ * Sent when an admin rejects a submission. Includes the rejection reason
+ * verbatim (admin already saw + edited it) and a CTA to revise.
+ */
+export async function sendSubmissionRejectedEmail(opts: {
+  to: string;
+  name?: string | null;
+  promptTitle: string;
+  reason: string | null;
+}): Promise<void> {
+  const submitUrl = `${appUrl()}/submit`;
+  const subject = `Update on your submission to ${SITE_BRAND.name}`;
+  const reasonLine = (opts.reason ?? "").trim() ||
+    "It didn't quite fit the catalog this time.";
+
+  const text = `${greeting(opts.name)}
+
+Thanks for submitting "${opts.promptTitle}" to ${SITE_BRAND.name}.
+
+Unfortunately we couldn't add this one to the public catalog.
+
+Reason: ${reasonLine}
+
+You can revise and submit again any time:
+${submitUrl}
+
+— The ${SITE_BRAND.name} team`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${subject}</title></head>
+<body style="${baseStyle}">
+  <div style="${cardStyle}">
+    ${brandHeader()}
+
+    <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 12px 0; text-align: center;">
+      Update on your submission
+    </h1>
+
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 8px 0;">
+      ${greeting(opts.name)}
+    </p>
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
+      Thanks for submitting "<strong style="color: ${COLOR_TEXT};">${opts.promptTitle}</strong>" to ${SITE_BRAND.name}. Unfortunately we couldn't add this one to the public catalog.
+    </p>
+
+    <div style="background: rgba(255,255,255,0.04); border-left: 3px solid ${COLOR_PRIMARY}; padding: 12px 14px; border-radius: 6px; margin: 0 0 24px 0;">
+      <p style="color: ${COLOR_TEXT_DIM}; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 6px 0;">Reason</p>
+      <p style="color: ${COLOR_TEXT}; font-size: 13px; line-height: 1.55; margin: 0;">${reasonLine}</p>
+    </div>
+
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${submitUrl}" style="${buttonStyle}">Revise and resubmit</a>
+    </div>
+
+    <p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; text-align: center; margin: 24px 0 0 0;">
+      No hard feelings — quality bar protects everyone who copies from the catalog.
+    </p>
+  </div>
+  ${footer()}
+</body>
+</html>`;
+
+  await sendEmail({ to: opts.to, subject, text, html });
+}
+
+/**
+ * Sent the first time a user is recognised on the site after signup.
+ *
+ * Includes the 3 most-copied prompts so the user has a one-click way to
+ * experience the library's value within the first email.
+ */
+export async function sendWelcomeEmail(opts: {
+  to: string;
+  name?: string | null;
+  starterPrompts: Array<{ title: string; slug: string; modelName: string }>;
+}): Promise<void> {
+  const url = appUrl();
+  const subject = `Welcome to ${SITE_BRAND.name}`;
+
+  const promptsText = opts.starterPrompts
+    .map(
+      (p, i) =>
+        `${i + 1}. ${p.title} (${p.modelName}) — ${url}/prompt/${p.slug}`,
+    )
+    .join("\n");
+
+  const text = `${greeting(opts.name)}
+
+Welcome to ${SITE_BRAND.name} — the fastest way to find, copy, and paste AI prompts that actually work.
+
+You don't need to "learn AI". You just need the right words. Here are 3 community favourites to try right now:
+
+${promptsText}
+
+Browse the full catalog: ${url}
+
+Free forever. No paywall. Real prompts, by real creators.
+
+— The ${SITE_BRAND.name} team`;
+
+  const promptCards = opts.starterPrompts
+    .map((p) => {
+      const promptUrl = `${url}/prompt/${p.slug}`;
+      return `<a href="${promptUrl}" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid ${COLOR_BORDER}; border-radius: 8px; padding: 12px 14px; margin: 0 0 8px 0; text-decoration: none;">
+        <div style="font-size: 11px; color: ${COLOR_TEXT_DIM}; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 4px 0;">${p.modelName}</div>
+        <div style="color: ${COLOR_TEXT}; font-size: 14px; font-weight: 600;">${p.title}</div>
+        <div style="color: ${COLOR_PRIMARY}; font-size: 12px; margin-top: 6px;">Copy this prompt &rarr;</div>
+      </a>`;
+    })
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${subject}</title></head>
+<body style="${baseStyle}">
+  <div style="${cardStyle}">
+    ${brandHeader()}
+
+    <h1 style="font-size: 22px; font-weight: 700; margin: 0 0 12px 0; text-align: center; letter-spacing: -0.02em;">
+      Welcome aboard
+    </h1>
+
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 8px 0;">
+      ${greeting(opts.name)}
+    </p>
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+      You don't need to learn AI. You just need the right words. Here are three community favourites to try right now:
+    </p>
+
+    ${promptCards}
+
+    <div style="text-align: center; margin: 32px 0 16px 0;">
+      <a href="${url}" style="${buttonStyle}">Browse the catalog</a>
+    </div>
+
+    <p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; text-align: center; margin: 24px 0 0 0;">
+      Free forever. No paywall. Real prompts by real creators.
+    </p>
+  </div>
+  ${footer()}
+</body>
+</html>`;
+
+  await sendEmail({ to: opts.to, subject, text, html });
+}
+
+/**
+ * Daily digest of new prompts matching the user's saved searches.
+ *
+ * `groups` is one block per saved search (label + up to 5 matches each).
+ * The cron skips the send entirely when every group is empty.
+ */
+export async function sendSavedSearchDigestEmail(opts: {
+  to: string;
+  name?: string | null;
+  groups: Array<{
+    label: string;
+    searchHref: string;
+    matches: Array<{
+      title: string;
+      slug: string;
+      modelName: string;
+      modelType: "image" | "text";
+      primaryImageUrl: string | null;
+    }>;
+  }>;
+}): Promise<void> {
+  const url = appUrl();
+  const totalMatches = opts.groups.reduce(
+    (n, g) => n + g.matches.length,
+    0,
+  );
+  const subject =
+    totalMatches === 1
+      ? `1 new prompt matches your alert`
+      : `${totalMatches} new prompts match your alerts`;
+
+  const textGroups = opts.groups
+    .map((g) => {
+      const lines = g.matches
+        .map((m) => `  • ${m.title} (${m.modelName}) — ${url}/prompt/${m.slug}`)
+        .join("\n");
+      return `${g.label}\n${lines}`;
+    })
+    .join("\n\n");
+
+  const text = `${greeting(opts.name)}
+
+Here's what's new in the catalog since your last digest:
+
+${textGroups}
+
+Manage your alerts: ${url}/account/searches
+
+— The ${SITE_BRAND.name} team`;
+
+  const htmlGroups = opts.groups
+    .map((g) => {
+      const cards = g.matches
+        .map((m) => {
+          const href = `${url}/prompt/${m.slug}`;
+          return `<a href="${href}" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid ${COLOR_BORDER}; border-radius: 8px; padding: 12px 14px; margin: 0 0 8px 0; text-decoration: none;">
+        <div style="font-size: 11px; color: ${COLOR_TEXT_DIM}; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 4px 0;">${m.modelName}</div>
+        <div style="color: ${COLOR_TEXT}; font-size: 14px; font-weight: 600;">${m.title}</div>
+        <div style="color: ${COLOR_PRIMARY}; font-size: 12px; margin-top: 6px;">Open prompt &rarr;</div>
+      </a>`;
+        })
+        .join("");
+      return `<div style="margin: 0 0 24px 0;">
+      <a href="${g.searchHref.startsWith("http") ? g.searchHref : url + g.searchHref}" style="display: inline-block; color: ${COLOR_PRIMARY}; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; margin: 0 0 8px 0;">${g.label} &rarr;</a>
+      ${cards}
+    </div>`;
+    })
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${subject}</title></head>
+<body style="${baseStyle}">
+  <div style="${cardStyle}">
+    ${brandHeader()}
+
+    <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 12px 0; text-align: center;">
+      New prompts for you
+    </h1>
+
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 8px 0;">
+      ${greeting(opts.name)}
+    </p>
+    <p style="color: ${COLOR_TEXT_MUTED}; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+      Here&apos;s what&apos;s new in the catalog since your last digest.
+    </p>
+
+    ${htmlGroups}
+
+    <div style="text-align: center; margin: 32px 0 16px 0;">
+      <a href="${url}/account/searches" style="${buttonStyle}">Manage alerts</a>
+    </div>
+
+    <p style="color: ${COLOR_TEXT_DIM}; font-size: 12px; text-align: center; margin: 24px 0 0 0;">
+      You&apos;re receiving this because you saved a search on ${SITE_BRAND.name}.
+    </p>
+  </div>
+  ${footer()}
+</body>
+</html>`;
+
+  await sendEmail({ to: opts.to, subject, text, html });
+}
+
 /**
  * Email sent when a user requests a password reset.
  */

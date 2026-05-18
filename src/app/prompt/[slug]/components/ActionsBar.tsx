@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { createClient } from "@/lib/supabase-client";
 import { buildPromptShareUrl } from "@/lib/utm";
 
@@ -136,6 +137,7 @@ export function ActionsBar({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      <SaveToCollectionButton promptId={promptId} variant="inline" />
       <ActionButton
         onClick={handleShare}
         icon={<Share2Icon className="size-3" />}

@@ -85,6 +85,11 @@ export const prompts = pgTable(
       .default("public"),
     /** Unguessable token for private share URLs — null when public. */
     shareToken: text("share_token"),
+    /**
+     * Source prompt this one was remixed from (if any). `ON DELETE SET NULL`
+     * so deleting an original does not cascade-destroy its remixes.
+     */
+    remixSourceId: uuid("remix_source_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

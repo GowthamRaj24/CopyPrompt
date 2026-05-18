@@ -9,6 +9,9 @@ import {
   useMemo,
   useState,
 } from "react";
+import { SoftSignupModal } from "@/components/auth/SoftSignupModal";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 
 /**
  * FavoritesProvider
@@ -120,6 +123,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   return (
     <FavoritesContext.Provider value={value}>
       {children}
+      {/* Global soft-signup nudge — listens for the `mcp:show-soft-signup`
+          window event triggered by guest copy / favorite attempts.
+          Lives here so it mounts once across the whole app. */}
+      <SoftSignupModal />
+      {/* PWA: register service worker (prod only) + render the soft
+          install banner once the user is a return visitor. */}
+      <ServiceWorkerRegister />
+      <InstallPrompt />
     </FavoritesContext.Provider>
   );
 }

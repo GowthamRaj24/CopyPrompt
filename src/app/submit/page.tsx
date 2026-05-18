@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 import { requireUser } from "@/server/lib/auth";
+import { getPromptBySlug } from "@/server/services/prompt.service";
 import {
   getCategoriesForSelect,
   getModelsForSelect,
   getPopularTags,
 } from "@/server/services/submission.service";
-import { SubmitForm } from "./components/SubmitForm";
+import { SubmitForm, type RemixSource } from "./components/SubmitForm";
 import { SubmitStepNav } from "./components/SubmitStepNav";
 
 export const metadata: Metadata = {
@@ -33,14 +34,37 @@ const STARTER_TAGS = [
   "writing",
 ];
 
-export default async function SubmitPage() {
-  const user = await requireUser();
+interface SubmitPageProps {
+  searchParams: Promise<{ remix_from?: string }>;
+}
 
-  const [models, categories, dbTags] = await Promise.all([
+export default async function SubmitPage({ searchParams }: SubmitPageProps) {
+  const user = await requireUser();
+  const { remix_from: remixFromSlug } = await searchParams;
+
+  const [models, categories, dbTags, remixCandidate] = await Promise.all([
     getModelsForSelect(),
     getCategoriesForSelect(),
     getPopularTags(),
+    remixFromSlug ? getPromptBySlug(remixFromSlug) : Promise.resolve(null),
   ]);
+
+  // Build the RemixSource payload only if we found a published, public prompt.
+  const remixSource: RemixSource | null = remixCandidate
+    ? {
+        id: remixCandidate.id,
+        slug: remixCandidate.slug,
+        title: remixCandidate.title,
+        type: remixCandidate.model.type,
+        promptText: remixCandidate.promptText,
+        expectedOutcome: remixCandidate.expectedOutcome,
+        modelSlug: remixCandidate.model.slug,
+        categorySlug: remixCandidate.category.slug,
+        tips: remixCandidate.tips,
+        negativePrompt: remixCandidate.negativePrompt,
+        params: remixCandidate.params,
+      }
+    : null;
 
   const tagSuggestions = Array.from(new Set([...dbTags, ...STARTER_TAGS]));
   const displayName = user.fullName ?? user.email.split("@")[0];
@@ -97,6 +121,7 @@ export default async function SubmitPage() {
             models={models}
             categories={categories}
             tagSuggestions={tagSuggestions}
+            remixSource={remixSource}
           />
         </div>
       </div>

@@ -16,6 +16,7 @@ import { categories } from "@/server/models/category.model";
 import { images } from "@/server/models/image.model";
 import { models } from "@/server/models/model.model";
 import { prompts } from "@/server/models/prompt.model";
+import { users } from "@/server/models/user.model";
 
 /**
  * Business logic for prompts. Controllers call into here.
@@ -551,6 +552,17 @@ export interface PromptDetail {
     position: number;
     isPrimary: boolean;
   }>;
+  /** Source prompt this one was remixed from, or null. */
+  remixSource: { id: string; slug: string; title: string } | null;
+  /** How many published, public remixes point at THIS prompt. */
+  remixCount: number;
+  /** Public author attribution. Null when authorless or author was deleted. */
+  author: {
+    id: string;
+    handle: string;
+    fullName: string | null;
+    avatarUrl: string | null;
+  } | null;
 }
 
 /**
@@ -613,6 +625,7 @@ async function fetchPromptDetailById(
       downvotes: prompts.downvotes,
       viewCount: prompts.viewCount,
       createdAt: prompts.createdAt,
+      remixSourceId: prompts.remixSourceId,
       modelId: models.id,
       modelSlug: models.slug,
       modelName: models.name,
@@ -620,18 +633,23 @@ async function fetchPromptDetailById(
       categoryId: categories.id,
       categorySlug: categories.slug,
       categoryName: categories.name,
+      authorId: users.id,
+      authorHandle: users.handle,
+      authorFullName: users.fullName,
+      authorAvatarUrl: users.avatarUrl,
     })
     .from(prompts)
     .innerJoin(models, eq(models.id, prompts.modelId))
     .innerJoin(categories, eq(categories.id, prompts.categoryId))
+    .leftJoin(users, eq(users.id, prompts.authorId))
     .where(eq(prompts.id, promptId))
     .limit(1);
 
   if (!row) return null;
 
-  const imageRows =
+  const [imageRows, remixSource, remixCountRow] = await Promise.all([
     row.modelType === "image"
-      ? await db
+      ? db
           .select({
             id: images.id,
             cdnUrl: images.cdnUrl,
@@ -644,7 +662,25 @@ async function fetchPromptDetailById(
           .from(images)
           .where(eq(images.promptId, row.id))
           .orderBy(asc(images.position))
-      : [];
+      : Promise.resolve([]),
+    row.remixSourceId
+      ? db
+          .select({
+            id: prompts.id,
+            slug: prompts.slug,
+            title: prompts.title,
+          })
+          .from(prompts)
+          .where(and(eq(prompts.id, row.remixSourceId), publicPublishedWhere()))
+          .limit(1)
+          .then((rows) => rows[0] ?? null)
+      : Promise.resolve(null),
+    db
+      .select({ value: sql<number>`COUNT(*)::int` })
+      .from(prompts)
+      .where(and(eq(prompts.remixSourceId, row.id), publicPublishedWhere()))
+      .then((rows) => rows[0] ?? { value: 0 }),
+  ]);
 
   return {
     id: row.id,
@@ -673,7 +709,38 @@ async function fetchPromptDetailById(
       name: row.categoryName,
     },
     images: imageRows,
+    remixSource,
+    remixCount: remixCountRow.value ?? 0,
+    author:
+      row.authorId && row.authorHandle
+        ? {
+            id: row.authorId,
+            handle: row.authorHandle,
+            fullName: row.authorFullName,
+            avatarUrl: row.authorAvatarUrl,
+          }
+        : null,
   };
+}
+
+/**
+ * Public remixes that descend from a given prompt id.
+ * Used by `/prompt/[slug]/remixes` and the API endpoint.
+ */
+export async function listRemixesOfPrompt(
+  sourceId: string,
+  limit = 24,
+): Promise<PromptListItem[]> {
+  const rows = await db
+    .select(listColumns)
+    .from(prompts)
+    .innerJoin(models, eq(models.id, prompts.modelId))
+    .where(and(eq(prompts.remixSourceId, sourceId), publicPublishedWhere()))
+    .orderBy(desc(prompts.createdAt))
+    .limit(limit);
+  if (rows.length === 0) return [];
+  const imageMap = await batchFetchPrimaryImages(rows);
+  return toListItems(rows, imageMap);
 }
 
 /**

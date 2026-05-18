@@ -27,6 +27,7 @@ export default function AdminLayout({
           </span>
           <NavLink href="/admin">Dashboard</NavLink>
           <NavLink href="/admin/queue">Queue</NavLink>
+          <NavLink href="/admin/collections">Collections</NavLink>
           <NavLink href="/admin/analytics">Analytics</NavLink>
         </div>
       </div>

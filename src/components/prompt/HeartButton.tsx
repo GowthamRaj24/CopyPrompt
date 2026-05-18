@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type MouseEvent, useState } from "react";
 import { toast } from "sonner";
 import { useFavorites } from "@/components/favorites/FavoritesProvider";
+import { notifyGuestFavoriteAttempt } from "@/lib/guest-funnel";
 import { createClient } from "@/lib/supabase-client";
 
 interface HeartButtonProps {
@@ -61,6 +62,9 @@ export function HeartButton({
     } = await supabase.auth.getUser();
 
     if (!user) {
+      // Surface the soft-signup nudge at peak intent. If it has already
+      // been shown (or dismissed), fall through to the full sign-in page.
+      void notifyGuestFavoriteAttempt();
       const next = encodeURIComponent(
         window.location.pathname + window.location.search,
       );

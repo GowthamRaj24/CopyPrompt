@@ -7,9 +7,12 @@ import {
   Loader2Icon,
   MessageSquareIcon,
   PlusIcon,
+  RefreshCwIcon,
   RocketIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 import { type Resolver, useForm } from "react-hook-form";
@@ -34,23 +37,48 @@ import { StudioPanel } from "./StudioPanel";
 import { TagInput } from "./TagInput";
 import { VisibilityChoice } from "./VisibilityChoice";
 
+/**
+ * Snapshot of a source prompt used to pre-fill the submit form when the
+ * user clicks "Remix" on an existing prompt. Loaded server-side in
+ * [submit/page.tsx](./page.tsx) so the form hydrates with values already
+ * present — no client fetch round-trip on mount.
+ */
+export interface RemixSource {
+  id: string;
+  slug: string;
+  title: string;
+  type: "image" | "text";
+  promptText: string;
+  expectedOutcome: string | null;
+  modelSlug: string;
+  categorySlug: string;
+  tips: string | null;
+  negativePrompt: string | null;
+  params: Record<string, unknown>;
+}
+
 interface SubmitFormProps {
   models: Array<{ slug: string; name: string; type: "image" | "text" }>;
   categories: Array<{ slug: string; name: string }>;
   tagSuggestions: string[];
+  /** When set, the form pre-fills from this source and tags the submission. */
+  remixSource?: RemixSource | null;
 }
 
 export function SubmitForm({
   models,
   categories,
   tagSuggestions,
+  remixSource,
 }: SubmitFormProps) {
   const router = useRouter();
-  const [type, setType] = useState<"image" | "text">("image");
+  const initialType: "image" | "text" = remixSource?.type ?? "image";
+  const [type, setType] = useState<"image" | "text">(initialType);
   const [imageUrls, setImageUrls] = useState<string[]>([""]);
   const [submitting, setSubmitting] = useState(false);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [remixActive, setRemixActive] = useState<boolean>(Boolean(remixSource));
   const captchaRequired = isTurnstileEnabled();
 
   const defaultCategory = useMemo(() => {
@@ -67,6 +95,25 @@ export function SubmitForm({
 
   type SubmissionFormValues = z.input<typeof submissionSchema>;
 
+  // Pre-fill defaults from the remix source when present. Image URLs are
+  // intentionally NOT copied — a remix usually produces different images.
+  const remixDefaults: Partial<SubmissionFormValues> = remixSource
+    ? {
+        type: remixSource.type,
+        title: `${remixSource.title} (remix)`.slice(0, 80),
+        promptText: remixSource.promptText,
+        modelSlug: remixSource.modelSlug,
+        categorySlug: remixSource.categorySlug,
+        tips: remixSource.tips ?? undefined,
+        ...(remixSource.type === "image"
+          ? { negativePrompt: remixSource.negativePrompt ?? undefined }
+          : {}),
+        ...(remixSource.type === "text" && remixSource.expectedOutcome
+          ? { expectedOutcome: remixSource.expectedOutcome }
+          : {}),
+      }
+    : {};
+
   const {
     register,
     handleSubmit,
@@ -81,12 +128,13 @@ export function SubmitForm({
       SubmissionInput
     >,
     defaultValues: {
-      type: "image",
+      type: initialType,
       title: "",
       promptText: "",
       modelSlug: "",
       categorySlug: defaultCategory,
       tags: [],
+      ...remixDefaults,
     },
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -139,12 +187,16 @@ export function SubmitForm({
     setSubmitting(true);
     try {
       const isPrivate = visibility === "private";
+      const payload: Record<string, unknown> = { ...data, captchaToken };
+      if (remixActive && remixSource) {
+        payload.remixSourceId = remixSource.id;
+      }
       const res = await fetch(
         isPrivate ? "/api/prompts/private" : "/api/submit",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, captchaToken }),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -191,6 +243,26 @@ export function SubmitForm({
         noValidate
         className="space-y-8 pb-28 lg:pb-8"
       >
+        {remixActive && remixSource && (
+          <RemixBanner
+            source={remixSource}
+            onClear={() => {
+              setRemixActive(false);
+              // Cast through `as never` because react-hook-form's `reset`
+              // requires a value that matches one branch of the
+              // discriminated union; the runtime shape is fine.
+              reset({
+                type: initialType,
+                title: "",
+                promptText: "",
+                modelSlug: "",
+                categorySlug: defaultCategory,
+                tags: [],
+              } as never);
+            }}
+          />
+        )}
+
         <StudioPanel
           id="step-distribution"
           step="01"
@@ -422,6 +494,44 @@ export function SubmitForm({
         />
       </div>
     </>
+  );
+}
+
+function RemixBanner({
+  source,
+  onClear,
+}: {
+  source: RemixSource;
+  onClear: () => void;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/[0.06] px-4 py-3">
+      <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
+        <RefreshCwIcon className="size-3.5" strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-semibold text-foreground">
+          Remixing from{" "}
+          <Link
+            href={`/prompt/${source.slug}`}
+            className="text-primary hover:underline"
+          >
+            {source.title}
+          </Link>
+        </p>
+        <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+          Fields are pre-filled from the original. Edit them — when this remix is approved, the source prompt will credit you as a remix.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onClear}
+        aria-label="Cancel remix"
+        className="press grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+      >
+        <XIcon className="size-3.5" />
+      </button>
+    </div>
   );
 }
 
