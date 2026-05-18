@@ -57,7 +57,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    async function loadFavorites() {
       try {
         const res = await fetch("/api/favorites/me", {
           method: "GET",
@@ -74,14 +74,25 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           setLoaded(true);
         }
       } catch {
-        // Silent — unauthenticated visitors and network errors both
-        // resolve to "no favorites", which is the correct default.
         if (!cancelled) setLoaded(true);
       }
-    })();
+    }
 
+    // Defer until the browser is idle — keeps TBT lower on first paint.
+    if (typeof requestIdleCallback !== "undefined") {
+      const id = requestIdleCallback(() => void loadFavorites(), {
+        timeout: 2500,
+      });
+      return () => {
+        cancelled = true;
+        cancelIdleCallback(id);
+      };
+    }
+
+    const t = setTimeout(() => void loadFavorites(), 1);
     return () => {
       cancelled = true;
+      clearTimeout(t);
     };
   }, []);
 

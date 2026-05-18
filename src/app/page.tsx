@@ -12,7 +12,7 @@ import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
 import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
 import { PromptCarousel } from "@/components/prompt/PromptCarousel";
-import { SearchBox } from "@/components/search/SearchBox";
+import { HeroSearchForm } from "@/components/search/HeroSearchForm";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { faqJsonLd, itemListJsonLd } from "@/lib/seo/jsonld";
 import { db } from "@/server/lib/db";
@@ -190,11 +190,7 @@ export default async function HomePage() {
 
           {/* HERO SEARCH */}
           <div className="reveal delay-3 mt-8 w-full max-w-xl md:mt-10">
-            <SearchBox
-              autoFocus
-              size="hero"
-              placeholder="Search prompts…"
-            />
+            <HeroSearchForm placeholder="Search prompts…" />
           </div>
 
           {/* Try suggestions — refined pills */}
@@ -319,7 +315,7 @@ export default async function HomePage() {
       <BrowseSeoSection models={indexableModels} tags={indexableTags} />
 
       {topCategories.length > 0 && (
-        <section className="border-t border-border/40">
+        <section className="cv-below-fold border-t border-border/40">
           <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
             <SectionHeader
               eyebrow="Browse"
@@ -439,7 +435,7 @@ function PromptRail({
   return (
     <section
       id={id}
-      className={`relative scroll-mt-20 ${
+      className={`cv-below-fold relative scroll-mt-20 ${
         tone === "muted" ? "border-y border-border/40 bg-card/30" : ""
       }`}
     >

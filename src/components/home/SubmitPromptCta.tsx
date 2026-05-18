@@ -93,7 +93,10 @@ export function SubmitPromptCta() {
   const quote = ROTATING_QUOTES[index];
 
   return (
-    <section className="border-t border-border/40" aria-labelledby="submit-cta-heading">
+    <section
+      className="cv-below-fold border-t border-border/40"
+      aria-labelledby="submit-cta-heading"
+    >
       <div className="container mx-auto px-4 py-14 sm:px-6 md:py-20">
         <div
           className="reveal relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 shadow-card backdrop-blur-sm"

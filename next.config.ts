@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const PRODUCTION_HOST = "mycopyprompt.in";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ["lucide-react", "sonner"],
+  },
   async redirects() {
     // Only redirect the old Vercel hostname. Do NOT redirect www here —
     // Vercel → Domains should handle www ↔ apex in one place, or you get

@@ -19,7 +19,7 @@ export function BrowseSeoSection({ models, tags }: BrowseSeoSectionProps) {
   if (topModels.length === 0 && topTags.length === 0) return null;
 
   return (
-    <section className="border-t border-border/40 bg-card/10">
+    <section className="cv-below-fold border-t border-border/40 bg-card/10">
       <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
         {topModels.length > 0 && (
           <div className="mb-10">

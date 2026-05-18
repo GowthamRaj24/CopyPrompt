@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
@@ -8,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HiddenOnAuth } from "@/components/layout/HiddenOnAuth";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { VercelTelemetry } from "@/components/layout/VercelTelemetry";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Toaster } from "@/components/ui/sonner";
 import { SITE_BRAND } from "@/lib/site-brand";
@@ -184,8 +183,7 @@ export default function RootLayout({
             />
           </FavoritesProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        <VercelTelemetry />
       </body>
     </html>
   );

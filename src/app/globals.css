@@ -794,6 +794,12 @@ summary {
   animation: reveal-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Below-fold sections — skip layout/paint until near viewport */
+.cv-below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+}
+
 /* Fade in blur — for modal/overlay content */
 @keyframes fade-in-blur {
   from {
@@ -852,11 +858,17 @@ summary {
     oklch(0.54 0.225 270) 88%,
     oklch(0.62 0.2 255) 100%
   );
-  background-size: 220% auto;
+  background-size: 100% auto;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  animation: text-gradient-flow 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .text-gradient-flow {
+    background-size: 220% auto;
+    animation: text-gradient-flow 5s ease-in-out infinite;
+  }
 }
 
 /* Hero search — soft back-glow pulse */
@@ -872,8 +884,12 @@ summary {
   }
 }
 
-.search-hero-glow-wrap > span:first-of-type {
-  animation: search-glow-breathe 4.5s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .search-hero-glow-wrap > span:first-of-type {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    animation: search-glow-breathe 4.5s ease-in-out infinite;
+  }
 }
 
 .search-hero-glow-wrap:focus-within > span:first-of-type {
