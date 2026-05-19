@@ -14,8 +14,8 @@
  * Re-run any time. Existing prompts (matched by slug) are skipped, so
  * the only cost is a few SELECTs.
  */
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { resolve, join } from "node:path";
 import { eq, sql as drizzleSql } from "drizzle-orm";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -53,12 +53,27 @@ interface CuratedPrompt {
   params?: Record<string, unknown>;
 }
 
-const DATA_PATH = resolve(
-  process.cwd(),
-  "scripts",
-  "data",
-  "curated-prompts.json",
-);
+const DATA_DIR = resolve(process.cwd(), "scripts", "data");
+
+/**
+ * Discover every curated-prompt data file in /scripts/data.
+ * Picks up:
+ *   - curated-prompts.json            (original catalog)
+ *   - curated-prompts-extra-*.json    (expansion packs, alphabetically)
+ *
+ * Each pack is independent — slugs are deduped against the DB at insert,
+ * so packs can ship piecemeal as 100-prompt batches.
+ */
+function listDataFiles(): string[] {
+  return readdirSync(DATA_DIR)
+    .filter(
+      (f) =>
+        f === "curated-prompts.json" ||
+        (f.startsWith("curated-prompts-extra-") && f.endsWith(".json")),
+    )
+    .sort()
+    .map((f) => join(DATA_DIR, f));
+}
 
 const pg = postgres(process.env.DATABASE_URL, { max: 1, prepare: false });
 const db = drizzle(pg);
@@ -73,10 +88,15 @@ function picsumUrl(seed: string, size = 800): string {
 }
 
 async function main() {
-  console.log(`→ Reading curated catalog from ${DATA_PATH}`);
-  const raw = readFileSync(DATA_PATH, "utf8");
-  const data = JSON.parse(raw) as CuratedPrompt[];
-  console.log(`  ✓ Parsed ${data.length} prompts`);
+  const files = listDataFiles();
+  console.log(`→ Reading ${files.length} curated catalog file(s):`);
+  const data: CuratedPrompt[] = [];
+  for (const file of files) {
+    const parsed = JSON.parse(readFileSync(file, "utf8")) as CuratedPrompt[];
+    console.log(`  • ${file.split(/[\\/]/).pop()} → ${parsed.length} prompts`);
+    data.push(...parsed);
+  }
+  console.log(`  ✓ Parsed ${data.length} prompts across ${files.length} file(s)`);
 
   // Resolve all model + category slugs upfront so we don't hit the DB
   // for every row. One pass, one cache.
