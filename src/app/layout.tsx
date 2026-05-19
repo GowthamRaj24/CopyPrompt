@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { Footer } from "@/components/layout/Footer";
@@ -12,6 +13,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { SITE_BRAND } from "@/lib/site-brand";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
+
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 /* ─────────────────────────────────────────────────────────────
    Type system — modern, premium, neutral.
@@ -144,6 +147,14 @@ export default function RootLayout({
             Sitelinks Search Box action). Both are emitted on every
             page so engines can build a coherent identity graph. */}
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
+
+        {/* Google AdSense site verification — the meta-tag method.
+            Identical pub-ID to the loader script below; AdSense
+            accepts any one (code snippet / ads.txt / meta tag) for
+            verification, we provide all three for redundancy. */}
+        {ADSENSE_CLIENT && (
+          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+        )}
       </head>
       <body className="flex min-h-full flex-col">
         {/* Five colored orbs floating slowly behind every page —
@@ -184,6 +195,20 @@ export default function RootLayout({
           </FavoritesProvider>
         </ThemeProvider>
         <VercelTelemetry />
+
+        {/* Google AdSense loader. `afterInteractive` keeps it out of
+            the critical render path so LCP / TBT stay healthy.
+            Renders only when NEXT_PUBLIC_ADSENSE_CLIENT is set, so
+            local dev + preview deploys never accidentally serve ads. */}
+        {ADSENSE_CLIENT && (
+          <Script
+            id="adsense-loader"
+            async
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          />
+        )}
       </body>
     </html>
   );
