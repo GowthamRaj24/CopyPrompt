@@ -55,19 +55,24 @@ export const getCreatorByHandle = cache(
 
 export const getCreatorById = cache(
   async (userId: string): Promise<CreatorProfile | null> => {
-    const [row] = await db
-      .select({
-        id: users.id,
-        handle: users.handle,
-        fullName: users.fullName,
-        avatarUrl: users.avatarUrl,
-        bio: users.bio,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-    return row ?? null;
+    try {
+      const [row] = await db
+        .select({
+          id: users.id,
+          handle: users.handle,
+          fullName: users.fullName,
+          avatarUrl: users.avatarUrl,
+          bio: users.bio,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      return row ?? null;
+    } catch (err) {
+      console.error("[creator] getCreatorById failed:", err);
+      return null;
+    }
   },
 );
 

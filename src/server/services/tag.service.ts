@@ -168,6 +168,11 @@ export async function getIndexableTags(limit = 48): Promise<
   return rows;
 }
 
+/**
+ * Slugs of tags worth indexing. Excludes tags with fewer than 3 published
+ * prompts — those tag pages look like thin duplicates of the prompt page
+ * itself to Google and waste crawl budget.
+ */
 export async function getAllTagSlugsForSitemap(): Promise<
   Array<{ slug: string }>
 > {
@@ -177,7 +182,8 @@ export async function getAllTagSlugsForSitemap(): Promise<
     .innerJoin(promptTags, eq(promptTags.tagId, tags.id))
     .innerJoin(prompts, eq(prompts.id, promptTags.promptId))
     .where(publicPublishedWhere())
-    .groupBy(tags.id, tags.slug);
+    .groupBy(tags.id, tags.slug)
+    .having(sql`count(${prompts.id}) >= 3`);
 
   return rows;
 }

@@ -21,7 +21,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { buildShareUrl } from "@/lib/share-token";
 import { SITE_BRAND } from "@/lib/site-brand";
+import type { AppUser } from "@/server/lib/auth";
 import { requireUser } from "@/server/lib/auth";
+import { slugifyHandleSuggestion } from "@/server/lib/handle";
 import { getCreatorById } from "@/server/services/creator.service";
 import { listOwnedPrompts } from "@/server/services/private-prompt.service";
 import { listRecentCopiedPrompts } from "@/server/services/recent-copies.service";
@@ -35,13 +37,55 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+export const dynamic = "force-dynamic";
+
+async function safeAccountQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[account] ${label} failed:`, err);
+    return fallback;
+  }
+}
+
+function profileFallback(user: AppUser): {
+  handle: string;
+  fullName: string | null;
+  bio: string | null;
+} {
+  const fromEmail = slugifyHandleSuggestion(user.email.split("@")[0] ?? "");
+  const handle =
+    fromEmail.length >= 3 ? fromEmail : `user-${user.id.slice(0, 8)}`;
+  return {
+    handle,
+    fullName: user.fullName,
+    bio: null,
+  };
+}
+
 export default async function AccountPage() {
   const user = await requireUser();
   const [rows, recentCopies, creator] = await Promise.all([
-    listOwnedPrompts(user.id),
-    listRecentCopiedPrompts(user.id, 12),
-    getCreatorById(user.id),
+    safeAccountQuery("ownedPrompts", () => listOwnedPrompts(user.id), []),
+    safeAccountQuery(
+      "recentCopies",
+      () => listRecentCopiedPrompts(user.id, 12),
+      [],
+    ),
+    safeAccountQuery("creator", () => getCreatorById(user.id), null),
   ]);
+
+  const profileInitial = creator
+    ? {
+        handle: creator.handle,
+        fullName: creator.fullName,
+        bio: creator.bio,
+      }
+    : profileFallback(user);
 
   const prompts = rows.map((p) => ({
     id: p.id,
@@ -213,15 +257,7 @@ export default async function AccountPage() {
           </aside>
 
           <div className="reveal delay-3 min-w-0">
-            {creator && (
-              <ProfileSection
-                initial={{
-                  handle: creator.handle,
-                  fullName: creator.fullName,
-                  bio: creator.bio,
-                }}
-              />
-            )}
+            <ProfileSection initial={profileInitial} />
             <RecentlyCopiedSection initial={recentCopies} />
             <MyPromptsSection initialPrompts={prompts} />
           </div>

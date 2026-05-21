@@ -45,6 +45,18 @@ export async function listRecentCopiedPrompts(
   userId: string,
   limit = 8,
 ): Promise<PromptListItem[]> {
+  try {
+    return await listRecentCopiedPromptsInner(userId, limit);
+  } catch (err) {
+    console.error("[recent-copies] list failed:", err);
+    return [];
+  }
+}
+
+async function listRecentCopiedPromptsInner(
+  userId: string,
+  limit = 8,
+): Promise<PromptListItem[]> {
   // Step 1: pick the latest copy event per prompt for this user.
   // Using DISTINCT ON keeps this to a single index scan on
   // (user_id, created_at DESC). Cap aggressively so dense users with

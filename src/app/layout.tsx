@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import { SiteAds } from "@/components/ads/SiteAds";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { Footer } from "@/components/layout/Footer";
@@ -180,6 +181,9 @@ export default function RootLayout({
             <main id="main-content" className="flex-1">
               {children}
             </main>
+            <HiddenOnAuth>
+              <SiteAds />
+            </HiddenOnAuth>
             <HiddenOnAuth>
               <Footer />
             </HiddenOnAuth>
