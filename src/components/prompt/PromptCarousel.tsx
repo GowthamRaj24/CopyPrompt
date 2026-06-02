@@ -9,6 +9,12 @@ interface PromptCarouselProps {
   prompts: PromptListItem[];
   /** Accessibility label for the scroll region — usually mirrors the section heading. */
   ariaLabel: string;
+  /**
+   * Number of leading cards to mark `priority` (eager + fetchpriority="high").
+   * Set on the homepage's first carousel so the LCP image isn't lazy-loaded.
+   * Default 0 = all cards lazy.
+   */
+  priorityCount?: number;
 }
 
 /**
@@ -37,7 +43,11 @@ interface PromptCarouselProps {
  *   • Arrow buttons are pure CSS until the user touches them; the
  *     scroll() call is the only JS at runtime.
  */
-export function PromptCarousel({ prompts, ariaLabel }: PromptCarouselProps) {
+export function PromptCarousel({
+  prompts,
+  ariaLabel,
+  priorityCount = 0,
+}: PromptCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -152,6 +162,7 @@ export function PromptCarousel({ prompts, ariaLabel }: PromptCarouselProps) {
               unoptimizedImage={
                 p.primaryImage?.cdnUrl.includes("picsum.photos") ?? false
               }
+              priority={idx < priorityCount}
             />
           </div>
         ))}

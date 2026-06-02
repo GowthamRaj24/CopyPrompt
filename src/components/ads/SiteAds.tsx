@@ -46,20 +46,29 @@ export function SiteAds() {
   if (HIDE_PREFIXES.some((p) => pathname.startsWith(p))) return null;
   if (allUnfilled) return null;
 
+  /*
+   * IMPORTANT: We cannot collapse the container to `sr-only` (width: 1px)
+   * while waiting for fill status. AdSense reads the slot's available
+   * width on push and rejects with `No slot size for availableWidth=1`
+   * when the container is sr-only. Instead we keep the strip at full
+   * container width and only hide the visual chrome (padding, border,
+   * "Sponsored" label) until at least one slot reports filled.
+   */
   return (
     <aside
       aria-label="Advertisement"
       className={
         anyFilled
           ? "site-ads cv-below-fold border-t border-border/30 bg-card/10"
-          : "sr-only h-0 overflow-hidden"
+          : "site-ads-pending overflow-hidden"
       }
+      style={anyFilled ? undefined : { contentVisibility: "auto" }}
     >
       <div
         className={
           anyFilled
             ? "container mx-auto space-y-6 px-4 py-8 sm:px-6 md:py-10"
-            : "h-0 overflow-hidden"
+            : "container mx-auto px-4 sm:px-6"
         }
       >
         <div className="mx-auto w-full max-w-3xl">

@@ -40,6 +40,12 @@ interface PromptCardProps {
   unoptimizedImage?: boolean;
   /** Server-fetched initial favorite state */
   initialFavorited?: boolean;
+  /**
+   * Mark this card's image as LCP-eligible. The first 3-4 cards of the
+   * homepage's leading carousel should set `priority` so the browser
+   * preloads the image with `fetchpriority="high"` instead of lazy-loading.
+   */
+  priority?: boolean;
 }
 
 const TRENDING_THRESHOLD = 1000;
@@ -61,6 +67,7 @@ export function PromptCard({
   index,
   unoptimizedImage,
   initialFavorited,
+  priority = false,
 }: PromptCardProps) {
   const isImage = prompt.modelType === "image";
   const isTrending = prompt.copyCount >= TRENDING_THRESHOLD;
@@ -78,7 +85,11 @@ export function PromptCard({
 
       {/* ── Visual region ── */}
       {isImage ? (
-        <ImageVisual prompt={prompt} unoptimized={unoptimizedImage} />
+        <ImageVisual
+          prompt={prompt}
+          unoptimized={unoptimizedImage}
+          priority={priority}
+        />
       ) : (
         <CodeVisual prompt={prompt} />
       )}
@@ -161,12 +172,29 @@ export function PromptCard({
    Full-bleed photo with vignette, scale-on-hover, overlay gradient
    ═══════════════════════════════════════════════════════════════ */
 
+/**
+ * Picsum placeholder URLs come in `/seed/<seed>/800/800` form, which is
+ * far larger than the card displays (~360px wide). Rewrite the trailing
+ * `/W/H` to a card-appropriate size so the browser downloads ~6-8x less.
+ * Real CDN URLs are passed through untouched.
+ */
+function rewritePicsumSize(url: string, w: number, h: number): string {
+  if (!url.includes("picsum.photos")) return url;
+  // Match /<width>/<height> or /<width>/<height>.jpg at the end.
+  return url.replace(
+    /\/(\d+)\/(\d+)(\.\w+)?(\?.*)?$/,
+    `/${w}/${h}$3$4`,
+  );
+}
+
 function ImageVisual({
   prompt,
   unoptimized,
+  priority,
 }: {
   prompt: PromptCardData;
   unoptimized?: boolean;
+  priority?: boolean;
 }) {
   if (!prompt.primaryImage) {
     return (
@@ -176,14 +204,24 @@ function ImageVisual({
     );
   }
 
+  // Card width steps: 300/320/340/360. 16:10 aspect → height ~ width × 0.625.
+  // Request 720x450 from picsum so retina screens stay sharp without
+  // pulling the original 800x800 (which Lighthouse flagged as oversized).
+  const isPicsum = prompt.primaryImage.cdnUrl.includes("picsum.photos");
+  const src = isPicsum
+    ? rewritePicsumSize(prompt.primaryImage.cdnUrl, 720, 450)
+    : prompt.primaryImage.cdnUrl;
+
   return (
     <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
       <Image
-        src={prompt.primaryImage.cdnUrl}
+        src={src}
         alt={prompt.primaryImage.alt ?? prompt.title}
-        width={prompt.primaryImage.width}
-        height={prompt.primaryImage.height}
+        width={isPicsum ? 720 : prompt.primaryImage.width}
+        height={isPicsum ? 450 : prompt.primaryImage.height}
         unoptimized={unoptimized}
+        priority={priority}
+        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, (max-width: 1280px) 33vw, 360px"
         className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:scale-[1.05]"
       />
 

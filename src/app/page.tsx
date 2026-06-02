@@ -292,6 +292,10 @@ export default async function HomePage() {
           viewAllHref="/search?sort=popular"
           prompts={trending}
           id="trending"
+          /* First carousel — first 4 cards are above the fold on
+             desktop and are the LCP candidates. Mark them priority so
+             Next/Image emits `fetchpriority="high"` + eager loading. */
+          priorityCount={4}
         />
       )}
 
@@ -466,6 +470,7 @@ function PromptRail({
   prompts,
   tone = "plain",
   id,
+  priorityCount = 0,
 }: {
   eyebrow: string;
   title: string;
@@ -475,6 +480,7 @@ function PromptRail({
   prompts: PromptListItem[];
   tone?: "plain" | "muted";
   id?: string;
+  priorityCount?: number;
 }) {
   return (
     <section
@@ -502,7 +508,11 @@ function PromptRail({
             </Link>
           }
         />
-        <PromptCarousel prompts={prompts} ariaLabel={title} />
+        <PromptCarousel
+          prompts={prompts}
+          ariaLabel={title}
+          priorityCount={priorityCount}
+        />
       </div>
     </section>
   );

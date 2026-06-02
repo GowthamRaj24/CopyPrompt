@@ -3,7 +3,18 @@ import type { NextConfig } from "next";
 const PRODUCTION_HOST = "mycopyprompt.in";
 
 const nextConfig: NextConfig = {
+  // Strip console.* calls (except errors / warnings) from production
+  // bundles — saves a few KB and removes the parser cost of every
+  // console statement, helping TBT on lower-end devices.
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
   experimental: {
+    // Tree-shake imports from these packages so we only ship the
+    // icons / utilities we actually use, not the whole barrel file.
     optimizePackageImports: ["lucide-react", "sonner"],
   },
   async redirects() {

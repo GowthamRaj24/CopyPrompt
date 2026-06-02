@@ -777,11 +777,18 @@ summary {
    ANIMATIONS — buttery smooth, 60fps, GPU-friendly
    ═══════════════════════════════════════════════════════════════ */
 
-/* Reveal up — generic entry */
+/* Reveal up — generic entry.
+ *
+ * NOTE: the `from` state intentionally starts at opacity: 0.85 (not 0)
+ * so Lighthouse's LCP detector sees the content as "painted" on the
+ * first frame. The lift + subtle fade still reads as an entry without
+ * making the page invisible until JS runs. The delayed siblings
+ * (`.delay-N`) still stagger nicely.
+ */
 @keyframes reveal-up {
   from {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
+    opacity: 0.85;
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
@@ -789,9 +796,20 @@ summary {
   }
 }
 
+/*
+ * `reveal` is the page-wide entry animation. It used to start at
+ * opacity: 0 which hid content from Lighthouse's LCP measurement until
+ * the animation finished (~500ms). Now we start at opacity: 1 so the
+ * paint counts immediately for LCP, and animate the lift-in subtly on
+ * top — same visual effect, no LCP penalty.
+ */
 .reveal {
-  opacity: 0;
-  animation: reveal-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: reveal-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
 }
 
 /* Below-fold sections — skip layout/paint until near viewport */
@@ -818,22 +836,33 @@ summary {
   animation: fade-in-blur 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Hero headline entrance — refined blur dissolve */
+/* Hero headline entrance — refined blur dissolve.
+ *
+ * Lighthouse measures LCP as the FIRST paint of the largest in-viewport
+ * element. The H1 *is* the LCP element here, so the entry animation
+ * cannot start from opacity: 0 — otherwise LCP is pinned to the end
+ * of the animation (700ms+ penalty). We start at opacity: 1 and apply
+ * the lift/blur ON TOP of the visible H1 — same visual feel, LCP fires
+ * on the first frame instead of the last.
+ */
 @keyframes hero-enter {
   from {
-    opacity: 0;
-    transform: translate3d(0, 16px, 0);
-    filter: blur(6px);
+    transform: translate3d(0, 10px, 0);
+    filter: blur(3px);
   }
   to {
-    opacity: 1;
     transform: translate3d(0, 0, 0);
     filter: blur(0);
   }
 }
 
 .hero-enter {
-  animation: hero-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: hero-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter {
+    animation: none;
+  }
 }
 
 /* Hero headline — animated indigo → blue → violet gradient fill */
