@@ -1603,3 +1603,14 @@ select:focus-visible,
   );
   backdrop-filter: blur(16px);
 }
+
+/* ─── Google AdSense ───────────────────────────────────────────
+   Hide unfilled slots so users never see empty white rectangles
+   while the account is under review or inventory is low. */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+
+.site-ads ins.adsbygoogle iframe {
+  border-radius: 0.5rem;
+}
