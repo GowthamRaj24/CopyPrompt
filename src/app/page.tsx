@@ -9,10 +9,26 @@ import {
 } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
-import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
 import { RecentlyCopiedRail } from "@/components/home/RecentlyCopiedRail";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
+
+/**
+ * The FAQ section is below the fold on every device and adds its own
+ * JS chunk (IntersectionObserver + accordion state). Splitting it into
+ * its own dynamic import shrinks the homepage's main bundle and lets
+ * the browser parse the FAQ chunk in parallel rather than as part of
+ * the initial parse-and-execute pass that dominates mobile TBT.
+ * `ssr: true` keeps the FAQ HTML in the document for SEO.
+ */
+const HomepageFaqSection = dynamic(
+  () =>
+    import("@/components/home/HomepageFaqSection").then(
+      (m) => m.HomepageFaqSection,
+    ),
+  { ssr: true },
+);
 import { listCuratedCollections } from "@/server/services/collection.service";
 import { PromptCarousel } from "@/components/prompt/PromptCarousel";
 import { HeroSearchForm } from "@/components/search/HeroSearchForm";

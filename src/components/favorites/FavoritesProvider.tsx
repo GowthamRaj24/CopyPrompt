@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
   createContext,
   type ReactNode,
@@ -9,9 +10,38 @@ import {
   useMemo,
   useState,
 } from "react";
-import { SoftSignupModal } from "@/components/auth/SoftSignupModal";
-import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+
+/*
+ * Lazy-mount the three auxiliary components that used to be statically
+ * imported here. Together they were dragging ~60 KiB of JS into the
+ * main chunk (sonner-style modal, install-prompt UI, SW registration)
+ * even though:
+ *   - SoftSignupModal only renders on a `mcp:show-soft-signup` event
+ *     fired by guest copy / favorite attempts.
+ *   - InstallPrompt only renders for return visitors (visit count ≥ 2)
+ *     on browsers that support `beforeinstallprompt`.
+ *   - ServiceWorkerRegister has no UI and is gated behind `production`.
+ * Splitting them with `next/dynamic({ ssr: false })` keeps them out of
+ * the initial bundle and lets the browser fetch them in parallel after
+ * first paint. SSR is disabled because none of them render to HTML
+ * anyway — they all return null on first render.
+ */
+const SoftSignupModal = dynamic(
+  () =>
+    import("@/components/auth/SoftSignupModal").then((m) => m.SoftSignupModal),
+  { ssr: false },
+);
+const InstallPrompt = dynamic(
+  () => import("@/components/pwa/InstallPrompt").then((m) => m.InstallPrompt),
+  { ssr: false },
+);
+const ServiceWorkerRegister = dynamic(
+  () =>
+    import("@/components/pwa/ServiceWorkerRegister").then(
+      (m) => m.ServiceWorkerRegister,
+    ),
+  { ssr: false },
+);
 
 /**
  * FavoritesProvider

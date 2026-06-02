@@ -5,13 +5,13 @@ import { LazyMount } from "@/components/ads/LazyMount";
 import { SiteAds } from "@/components/ads/SiteAds";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
+import { DeferredToaster } from "@/components/layout/DeferredToaster";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { HiddenOnAuth } from "@/components/layout/HiddenOnAuth";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { VercelTelemetry } from "@/components/layout/VercelTelemetry";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { Toaster } from "@/components/ui/sonner";
 import { SITE_BRAND } from "@/lib/site-brand";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
@@ -219,7 +219,7 @@ export default function RootLayout({
             <HiddenOnAuth>
               <Footer />
             </HiddenOnAuth>
-            <Toaster
+            <DeferredToaster
               richColors
               position="bottom-right"
               toastOptions={{
