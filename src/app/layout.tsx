@@ -18,21 +18,6 @@ import "./globals.css";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
-/**
- * Origin of the Supabase Storage CDN that serves prompt images. We
- * `preconnect` to it so the TCP/TLS handshake completes in parallel
- * with HTML parsing — image LCP wins ~100-200ms on cold loads.
- */
-const SUPABASE_ORIGIN = (() => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return null;
-  try {
-    return new URL(url).origin;
-  } catch {
-    return null;
-  }
-})();
-
 /* ─────────────────────────────────────────────────────────────
    Type system — modern, premium, neutral.
 
@@ -165,29 +150,14 @@ export default function RootLayout({
             page so engines can build a coherent identity graph. */}
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
 
-        {/* Warm the TCP/TLS handshake to Supabase Storage so the
-            first prompt-card image (often the LCP candidate) doesn't
-            stall on DNS + TLS during initial render. */}
-        {SUPABASE_ORIGIN && (
-          <>
-            <link rel="dns-prefetch" href={SUPABASE_ORIGIN} />
-            <link
-              rel="preconnect"
-              href={SUPABASE_ORIGIN}
-              crossOrigin="anonymous"
-            />
-          </>
-        )}
-
-        {/* Picsum hosts the placeholder images for seeded prompts; it
-            redirects to fastly.picsum.photos. Preconnecting both saves
-            ~170ms on the LCP candidate image (Lighthouse-flagged). */}
-        <link rel="dns-prefetch" href="https://picsum.photos" />
-        <link
-          rel="preconnect"
-          href="https://picsum.photos"
-          crossOrigin="anonymous"
-        />
+        {/* Image hosts on the public surface area:
+              - fastly.picsum.photos serves the actual placeholder JPGs
+                (picsum.photos redirects there, so we only preconnect
+                the destination — Lighthouse flagged the picsum origin
+                as an unused preconnect)
+            We avoid preconnecting Supabase storage from the root layout
+            because not every page renders Supabase-hosted images; the
+            pages that do can opt-in individually. */}
         <link rel="dns-prefetch" href="https://fastly.picsum.photos" />
         <link
           rel="preconnect"

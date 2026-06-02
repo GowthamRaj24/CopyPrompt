@@ -55,23 +55,41 @@ export function PromptCarousel({
   const [progress, setProgress] = useState(0); // 0..1
   const [visibleRatio, setVisibleRatio] = useState(1); // 0..1
 
+  // rAF-batched edge reader.
+  //
+  // Reading `scrollWidth`, `clientWidth`, `scrollLeft` forces a layout
+  // (forced reflow). Lighthouse flagged this as ~160ms of TBT across
+  // 4 carousels. Batching every scroll event into the next animation
+  // frame collapses N reads per second into ~60 max, and lets the
+  // browser bundle them with paint work — eliminating the forced reflow.
+  const rafRef = useRef<number | null>(null);
   const updateEdges = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const overflow = el.scrollWidth - el.clientWidth;
-    setCanScroll(overflow > 4);
-    setAtStart(el.scrollLeft <= 4);
-    setAtEnd(el.scrollLeft >= overflow - 4);
-    setProgress(overflow > 0 ? el.scrollLeft / overflow : 0);
-    setVisibleRatio(
-      el.scrollWidth > 0 ? Math.min(1, el.clientWidth / el.scrollWidth) : 1,
-    );
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const el = scrollRef.current;
+      if (!el) return;
+      const overflow = el.scrollWidth - el.clientWidth;
+      setCanScroll(overflow > 4);
+      setAtStart(el.scrollLeft <= 4);
+      setAtEnd(el.scrollLeft >= overflow - 4);
+      setProgress(overflow > 0 ? el.scrollLeft / overflow : 0);
+      setVisibleRatio(
+        el.scrollWidth > 0 ? Math.min(1, el.clientWidth / el.scrollWidth) : 1,
+      );
+    });
   }, []);
 
   useEffect(() => {
     updateEdges();
     window.addEventListener("resize", updateEdges, { passive: true });
-    return () => window.removeEventListener("resize", updateEdges);
+    return () => {
+      window.removeEventListener("resize", updateEdges);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
   }, [updateEdges]);
 
   const scrollBy = useCallback((direction: "prev" | "next") => {

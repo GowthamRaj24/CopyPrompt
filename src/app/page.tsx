@@ -1,4 +1,4 @@
-import { asc, count, eq, isNull } from "drizzle-orm";
+import { asc, count, isNull } from "drizzle-orm";
 import {
   ArrowRightIcon,
   EyeIcon,
@@ -7,6 +7,7 @@ import {
   SparklesIcon,
   StarIcon,
 } from "lucide-react";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
 import { HomepageFaqSection } from "@/components/home/HomepageFaqSection";
@@ -52,10 +53,63 @@ import { getIndexableTags } from "@/server/services/tag.service";
  *
  * Caching
  * ───────
- *   5-minute ISR — busted by `revalidatePath("/")` in
- *   `admin.service.approveSubmission()` when content changes.
+ *   30-minute ISR + per-query `unstable_cache` with named tags.
+ *   Both layers are busted by `revalidatePath("/")` (route) and
+ *   `revalidateTag("home:*")` (query) in `admin.service.approveSubmission()`
+ *   when content changes. Pre-Round 4 we paid ~1.3s of cold-render time
+ *   on revalidation; the per-query cache lets each rail render from
+ *   memory in single-digit ms.
  */
-export const revalidate = 300;
+export const revalidate = 1800;
+
+// Cached, tagged versions of the per-rail queries. The TTL on each is
+// the same as the route revalidate so they expire together — but tags
+// let us bust an individual rail without rebuilding the whole route.
+const getCategoriesCached = unstable_cache(
+  () =>
+    db
+      .select()
+      .from(categories)
+      .where(isNull(categories.parentId))
+      .orderBy(asc(categories.name))
+      .limit(12),
+  ["home:top-categories"],
+  { revalidate: 1800, tags: ["home:top-categories", "home"] },
+);
+
+const getRailsCached = unstable_cache(
+  () => getHomepageRails(),
+  ["home:rails"],
+  { revalidate: 1800, tags: ["home:rails", "home"] },
+);
+
+const getPublishedCountCached = unstable_cache(
+  () =>
+    db
+      .select({ c: count() })
+      .from(prompts)
+      .where(publicPublishedWhere()),
+  ["home:published-count"],
+  { revalidate: 1800, tags: ["home:count", "home"] },
+);
+
+const getIndexableModelsCached = unstable_cache(
+  () => getIndexableModels(),
+  ["home:indexable-models"],
+  { revalidate: 1800, tags: ["home:models", "home"] },
+);
+
+const getIndexableTagsCached = unstable_cache(
+  () => getIndexableTags(24),
+  ["home:indexable-tags"],
+  { revalidate: 1800, tags: ["home:tags", "home"] },
+);
+
+const getCuratedCollectionsCached = unstable_cache(
+  () => listCuratedCollections(6),
+  ["home:curated-collections"],
+  { revalidate: 1800, tags: ["home:collections", "home"] },
+);
 
 const TRY_SUGGESTIONS = [
   "cinematic portrait",
@@ -133,7 +187,10 @@ async function safeHomeQuery<T>(
 
 export default async function HomePage() {
   // Six parallel queries — each indexed and capped so total dominant
-  // time is the slowest one (~25-40ms on Supabase free tier).
+  // time is the slowest one (~25-40ms on Supabase free tier). Every
+  // query is wrapped in `unstable_cache` so the route render path
+  // touches the DB only on cache miss / revalidation, not on every
+  // ISR cold start.
   const [
     topCategories,
     rails,
@@ -142,22 +199,21 @@ export default async function HomePage() {
     indexableTags,
     curatedCollections,
   ] = await Promise.all([
-    db
-      .select()
-      .from(categories)
-      .where(isNull(categories.parentId))
-      .orderBy(asc(categories.name))
-      .limit(12),
-    getHomepageRails(),
-    db
-      .select({ c: count() })
-      .from(prompts)
-      .where(publicPublishedWhere()),
-    getIndexableModels(),
-    getIndexableTags(24),
+    safeHomeQuery("topCategories", () => getCategoriesCached(), []),
+    safeHomeQuery("rails", () => getRailsCached(), {
+      trending: [],
+      recent: [],
+      mostViewed: [],
+      topRated: [],
+    } as Awaited<ReturnType<typeof getHomepageRails>>),
+    safeHomeQuery("publishedCount", () => getPublishedCountCached(), [
+      { c: 0 },
+    ] as Array<{ c: number }>),
+    safeHomeQuery("indexableModels", () => getIndexableModelsCached(), []),
+    safeHomeQuery("indexableTags", () => getIndexableTagsCached(), []),
     safeHomeQuery(
       "curatedCollections",
-      () => listCuratedCollections(6),
+      () => getCuratedCollectionsCached(),
       [] as Awaited<ReturnType<typeof listCuratedCollections>>,
     ),
   ]);

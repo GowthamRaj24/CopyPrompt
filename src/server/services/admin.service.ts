@@ -1,5 +1,5 @@
 import { and, asc, eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { pageOffset, slicePage } from "@/lib/pagination";
 import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
@@ -290,10 +290,17 @@ export async function approveSubmission(
     });
   }
 
-  // Revalidate caches outside the transaction
+  // Revalidate caches outside the transaction. We bust both the page-
+  // level ISR (`revalidatePath`) AND the per-query `unstable_cache`
+  // wrappers (`revalidateTag("home", …)`) — the latter is required for
+  // the homepage rails/categories cache added in the Round 4 perf
+  // pass to actually pick up the new prompt. Next 16's `revalidateTag`
+  // requires a cache-life profile; `{ expire: 0 }` forces immediate
+  // invalidation across all entries with the tag.
   revalidatePath("/");
   revalidatePath(`/category/${data.categorySlug}`);
   revalidatePath(`/model/${data.modelSlug}`);
+  revalidateTag("home", { expire: 0 });
 
   if (approvedPromptId) {
     const { refreshPromptEmbedding } = await import(

@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentUser } from "@/server/lib/auth";
 import { publishPrivateToCatalog } from "@/server/services/private-prompt.service";
 
@@ -20,6 +20,11 @@ export async function POST(
     revalidatePath("/");
     revalidatePath(`/prompt/${slug}`);
     revalidatePath("/search");
+    // Bust the per-query `unstable_cache` wrappers on the homepage
+    // (rails / categories / counts) so the newly published prompt
+    // appears immediately rather than at the next revalidation.
+    // Next 16 requires a cache-life profile; `expire: 0` = invalidate now.
+    revalidateTag("home", { expire: 0 });
     return new Response(JSON.stringify({ slug, url: `/prompt/${slug}` }), {
       headers: { "Content-Type": "application/json" },
     });

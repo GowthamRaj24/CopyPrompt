@@ -204,12 +204,12 @@ function ImageVisual({
     );
   }
 
-  // Card width steps: 300/320/340/360. 16:10 aspect → height ~ width × 0.625.
-  // Request 720x450 from picsum so retina screens stay sharp without
-  // pulling the original 800x800 (which Lighthouse flagged as oversized).
+  // Card display width steps at 300/320/340/360 px; 16:10 → 224 px tall.
+  // Request 540x340 from picsum (~1.5x display for retina) — Lighthouse
+  // flagged 720x450 as still oversized for the actual 358x224 render.
   const isPicsum = prompt.primaryImage.cdnUrl.includes("picsum.photos");
   const src = isPicsum
-    ? rewritePicsumSize(prompt.primaryImage.cdnUrl, 720, 450)
+    ? rewritePicsumSize(prompt.primaryImage.cdnUrl, 540, 340)
     : prompt.primaryImage.cdnUrl;
 
   return (
@@ -217,8 +217,8 @@ function ImageVisual({
       <Image
         src={src}
         alt={prompt.primaryImage.alt ?? prompt.title}
-        width={isPicsum ? 720 : prompt.primaryImage.width}
-        height={isPicsum ? 450 : prompt.primaryImage.height}
+        width={isPicsum ? 540 : prompt.primaryImage.width}
+        height={isPicsum ? 340 : prompt.primaryImage.height}
         unoptimized={unoptimized}
         priority={priority}
         sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, (max-width: 1280px) 33vw, 360px"
