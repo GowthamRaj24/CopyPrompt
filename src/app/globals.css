@@ -1907,6 +1907,113 @@ select:focus-visible,
   }
 }
 
+/* ─── Hero "Generate with AI" CTA ────────────────────────────
+   Premium Google AI-style call-to-action that lives in the homepage
+   hero. Three independent animations layered: a rotating conic-gradient
+   halo behind the pill, a pulsing 4-point Gemini star, and a
+   gradient-painted text that shimmers L→R. */
+
+@keyframes hero-gen-halo-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes hero-gen-halo-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.hero-gen-halo {
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    var(--gemini-blue),
+    var(--gemini-purple),
+    var(--gemini-pink),
+    var(--gemini-yellow),
+    var(--gemini-green),
+    var(--gemini-blue)
+  );
+  filter: blur(8px);
+  z-index: 0;
+  pointer-events: none;
+  animation:
+    hero-gen-halo-rotate 7s linear infinite,
+    hero-gen-halo-pulse 3.6s ease-in-out infinite;
+}
+.hero-gen-wrap:hover .hero-gen-halo {
+  filter: blur(11px);
+  inset: -5px;
+}
+
+/* Inner pill must sit above the halo */
+.hero-gen-pill {
+  z-index: 1;
+}
+
+/* 4-point star gentle pulse + tilt */
+@keyframes hero-gen-star-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 6px rgba(155, 114, 203, 0.45));
+  }
+  50% {
+    transform: scale(1.18) rotate(20deg);
+    filter: drop-shadow(0 0 10px rgba(217, 101, 112, 0.55));
+  }
+}
+.hero-gen-star {
+  animation: hero-gen-star-pulse 2.6s ease-in-out infinite;
+  transform-origin: center;
+}
+.hero-gen-wrap:hover .hero-gen-star {
+  animation-duration: 1.4s;
+}
+
+/* Text shimmer L→R using the Gemini gradient */
+@keyframes hero-gen-text-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.hero-gen-text {
+  background-image: linear-gradient(
+    90deg,
+    var(--gemini-blue),
+    var(--gemini-purple),
+    var(--gemini-pink),
+    var(--gemini-yellow),
+    var(--gemini-blue)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-gen-text-shimmer 5s linear infinite;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gen-halo,
+  .hero-gen-star,
+  .hero-gen-text {
+    animation: none !important;
+  }
+  .hero-gen-text {
+    color: var(--gemini-purple);
+  }
+}
+
 /* ─── Result card's prompt scroller — custom thin scrollbar */
 .result-prompt-scroll {
   scrollbar-width: thin;

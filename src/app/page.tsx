@@ -11,6 +11,7 @@ import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
+import { HeroGenerateCta } from "@/components/home/HeroGenerateCta";
 import { RecentlyCopiedRail } from "@/components/home/RecentlyCopiedRail";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
 
@@ -294,6 +295,17 @@ export default async function HomePage() {
           {/* HERO SEARCH */}
           <div className="reveal delay-3 mt-8 w-full max-w-xl md:mt-10">
             <HeroSearchForm placeholder="Search prompts…" />
+          </div>
+
+          {/* Hero "Generate with AI" CTA — the secondary path with the
+              Gemini-style rotating gradient halo + pulsing star + text
+              shimmer animations. Always visible regardless of catalog
+              size since it's a flagship feature. */}
+          <div className="reveal delay-3 mt-5 flex items-center justify-center gap-2 text-[12px] text-muted-foreground/80">
+            <span aria-hidden className="font-mono uppercase tracking-wider">
+              or
+            </span>
+            <HeroGenerateCta />
           </div>
 
           {/* Try suggestions — refined pills */}

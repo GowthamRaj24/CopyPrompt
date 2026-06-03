@@ -3,7 +3,6 @@ import {
   CheckCircle2Icon,
   ImageIcon,
   MessageSquareIcon,
-  SparklesIcon,
   WandIcon,
   ZapIcon,
 } from "lucide-react";
@@ -93,14 +92,7 @@ export default async function GeneratePage({
       <div className="container relative mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-16">
         {/* ── Hero ─────────────────────────────────────── */}
         <header className="hero-enter mx-auto mb-12 max-w-2xl text-center md:mb-16">
-          <div className="reveal mx-auto inline-flex items-center gap-1.5 rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-[11.5px] font-semibold tracking-[-0.005em] text-primary backdrop-blur-md">
-            <SparklesIcon className="size-3" strokeWidth={2.4} />
-            Powered by Google Gemini 2.5 Flash
-            <span className="ml-0.5 rounded-full bg-primary/25 px-1.5 py-px text-[8.5px] font-bold uppercase tracking-wider">
-              New
-            </span>
-          </div>
-          <h1 className="reveal delay-2 mt-5 text-balance text-[clamp(2rem,5vw,3.25rem)] font-bold leading-[1.05] tracking-[-0.045em]">
+          <h1 className="reveal delay-2 text-balance text-[clamp(2rem,5vw,3.25rem)] font-bold leading-[1.05] tracking-[-0.045em]">
             Describe what you need.
             <br />
             We&apos;ll write{" "}
