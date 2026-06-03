@@ -1,5 +1,7 @@
-import { GoogleGenAI, type GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, type GenerateContentResponse, Type } from "@google/genai";
 import { env } from "@/server/config/env";
+
+export { Type };
 
 /**
  * Google Gemini client — single cached instance per server runtime.

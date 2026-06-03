@@ -8,6 +8,7 @@ import {
   geminiText,
   getGemini,
   getGeminiModelName,
+  Type,
 } from "@/server/lib/gemini";
 import { promptGenerations } from "@/server/models/generation.model";
 
@@ -208,23 +209,82 @@ interface GeminiPromptOutput {
   tips: string;
 }
 
-function parseGeminiJson(raw: string): GeminiPromptOutput | null {
-  // Gemini occasionally wraps JSON in ```json fences despite the
-  // system instruction. Strip them defensively.
-  const cleaned = raw
-    .replace(/^[\s\S]*?(\{[\s\S]*\})\s*$/m, "$1")
-    .replace(/^```(?:json)?/i, "")
-    .replace(/```$/i, "")
-    .trim();
+/**
+ * Try multiple strategies to extract a JSON object from Gemini's text.
+ * Even with `responseSchema` + `responseMimeType: application/json`
+ * set, occasional responses still arrive with prose, markdown fences,
+ * or trailing commentary. We try them in order:
+ *
+ *   1. Direct parse of the raw text.
+ *   2. Strip ```json … ``` fences and parse.
+ *   3. Find the FIRST balanced { … } block in the string and parse that.
+ *
+ * Returns the first parse that yields an object, or null if all fail.
+ */
+function extractJsonObject(raw: string): Record<string, unknown> | null {
+  const tryParse = (s: string): Record<string, unknown> | null => {
+    try {
+      const v = JSON.parse(s);
+      return v && typeof v === "object" && !Array.isArray(v)
+        ? (v as Record<string, unknown>)
+        : null;
+    } catch {
+      return null;
+    }
+  };
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    return null;
+  // 1. Direct parse.
+  const direct = tryParse(raw.trim());
+  if (direct) return direct;
+
+  // 2. Strip code fences.
+  const fenced = raw
+    .replace(/^[^`]*```(?:json)?\s*/i, "")
+    .replace(/\s*```[^`]*$/i, "")
+    .trim();
+  const afterFence = tryParse(fenced);
+  if (afterFence) return afterFence;
+
+  // 3. Find the first balanced JSON object substring. Walk the string
+  //    tracking brace depth, ignoring braces inside string literals.
+  const firstBrace = raw.indexOf("{");
+  if (firstBrace >= 0) {
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    for (let i = firstBrace; i < raw.length; i++) {
+      const ch = raw[i];
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escape = true;
+        continue;
+      }
+      if (ch === '"') {
+        inString = !inString;
+        continue;
+      }
+      if (inString) continue;
+      if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) {
+          const slice = raw.slice(firstBrace, i + 1);
+          const parsed = tryParse(slice);
+          if (parsed) return parsed;
+          break;
+        }
+      }
+    }
   }
-  if (!parsed || typeof parsed !== "object") return null;
-  const obj = parsed as Record<string, unknown>;
+  return null;
+}
+
+function parseGeminiJson(raw: string): GeminiPromptOutput | null {
+  const obj = extractJsonObject(raw);
+  if (!obj) return null;
   if (
     typeof obj.title !== "string" ||
     typeof obj.prompt !== "string" ||
@@ -234,9 +294,10 @@ function parseGeminiJson(raw: string): GeminiPromptOutput | null {
   ) {
     return null;
   }
-  // Clamp + sanity-check.
-  if (obj.title.length > 200 || obj.prompt.length > 4_000) return null;
-  if (obj.prompt.length < 80) return null;
+  // Sanity bounds — relaxed so short-but-valid prompts (e.g. quick
+  // image prompts) aren't rejected.
+  if (obj.title.length < 3 || obj.title.length > 240) return null;
+  if (obj.prompt.length < 40 || obj.prompt.length > 6_000) return null;
   // Coerce unknown slugs back to safe defaults so the UI never shows
   // a "category-not-found" link.
   const modelSlug = ALLOWED_MODELS.has(obj.modelSlug)
@@ -253,6 +314,32 @@ function parseGeminiJson(raw: string): GeminiPromptOutput | null {
     tips: obj.tips.trim().slice(0, 280),
   };
 }
+
+/**
+ * Gemini's structured-output schema for the generator. Setting this
+ * (paired with `responseMimeType: application/json`) makes Gemini
+ * return a JSON object guaranteed to match the structure — eliminating
+ * the "model returned prose instead of JSON" failure mode that was
+ * showing up as `model_returned_invalid_json` in our audit log.
+ */
+const RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    title: { type: Type.STRING },
+    prompt: { type: Type.STRING },
+    modelSlug: { type: Type.STRING },
+    categorySlug: { type: Type.STRING },
+    tips: { type: Type.STRING },
+  },
+  required: ["title", "prompt", "modelSlug", "categorySlug", "tips"],
+  propertyOrdering: [
+    "title",
+    "prompt",
+    "modelSlug",
+    "categorySlug",
+    "tips",
+  ],
+} as const;
 
 /* ════════════════════════════════════════════════════════════════
    MAIN ENTRY POINT
@@ -340,9 +427,13 @@ export async function generatePrompt(
         ],
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
+          // `responseMimeType` + `responseSchema` together force the
+          // model into structured JSON mode — much more reliable than
+          // prompting for JSON in the system instruction alone.
           responseMimeType: "application/json",
+          responseSchema: RESPONSE_SCHEMA,
           temperature: 0.7,
-          maxOutputTokens: 1_400,
+          maxOutputTokens: 2_000,
           abortSignal: controller.signal,
         },
       });
@@ -353,11 +444,20 @@ export async function generatePrompt(
 
     const parsed = parseGeminiJson(textOut);
     if (!parsed) {
+      // Store the actual raw response (truncated) so we can debug
+      // model-side regressions later from the audit log, instead of
+      // burning a generic "model_returned_invalid_json" with no clue
+      // about what came back.
+      const snippet = (textOut ?? "").slice(0, 480);
+      console.error(
+        "[generate] Failed to parse Gemini response. Raw output (truncated):",
+        snippet,
+      );
       await db.insert(promptGenerations).values({
         userId: input.userId,
         description,
         status: "error",
-        error: "model_returned_invalid_json",
+        error: `parse_failed: ${snippet}`.slice(0, 500),
         model: modelName,
         durationMs: Date.now() - startedAt,
         ipHash,
