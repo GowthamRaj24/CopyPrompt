@@ -1,8 +1,14 @@
 "use client";
 
-import { ArrowRightIcon, SearchIcon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon, SearchIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 
 interface SearchBoxProps {
   autoFocus?: boolean;
@@ -33,6 +39,10 @@ export function SearchBox({
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(defaultValue ?? "");
   const [focused, setFocused] = useState(false);
+  // `useTransition` keeps `isPending` true from the moment we navigate
+  // until the destination route fully renders + hydrates. That window
+  // is exactly when we want the loader visible.
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (!autoFocus) return;
@@ -47,8 +57,10 @@ export function SearchBox({
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = query.trim();
-    if (!trimmed) return;
-    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    if (!trimmed || isPending) return;
+    startTransition(() => {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    });
   }
 
   const isHero = size === "hero";
@@ -78,15 +90,30 @@ export function SearchBox({
   }`;
 
   const form = (
-    <form onSubmit={handleSubmit} className={formClassName}>
-      {/* Leading search icon */}
+    <form
+      onSubmit={handleSubmit}
+      aria-busy={isPending}
+      className={formClassName}
+    >
+      {/* Leading icon — spinner during pending, search otherwise */}
       <span
         aria-hidden
         className={`pointer-events-none absolute left-4 transition-colors duration-150 ${
-          focused ? "text-primary" : "text-muted-foreground"
+          isPending
+            ? "text-primary"
+            : focused
+              ? "text-primary"
+              : "text-muted-foreground"
         }`}
       >
-        <SearchIcon className={iconSize} strokeWidth={1.8} />
+        {isPending ? (
+          <Loader2Icon
+            className={`${iconSize} animate-spin`}
+            strokeWidth={2}
+          />
+        ) : (
+          <SearchIcon className={iconSize} strokeWidth={1.8} />
+        )}
       </span>
 
       <input
@@ -100,7 +127,8 @@ export function SearchBox({
         autoComplete="off"
         spellCheck={false}
         aria-label="Search prompts"
-        className={`h-full w-full appearance-none border-0 bg-transparent font-medium tracking-[-0.01em] outline-none ring-0 placeholder:font-normal placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 ${
+        disabled={isPending}
+        className={`h-full w-full appearance-none border-0 bg-transparent font-medium tracking-[-0.01em] outline-none ring-0 placeholder:font-normal placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 disabled:cursor-wait disabled:opacity-70 ${
           isHero
             ? "pr-14 pl-11 md:pr-16 md:pl-[52px]"
             : "pr-3 pl-11"
@@ -111,31 +139,48 @@ export function SearchBox({
       {isHero && (
         <button
           type="submit"
-          aria-label="Search"
-          disabled={!query.trim()}
+          aria-label={isPending ? "Searching" : "Search"}
+          disabled={!query.trim() || isPending}
           className={`magnetic absolute right-2 grid place-items-center rounded-lg bg-primary text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.15),inset_0_1px_0_0_oklch(1_0_0/0.1)] transition-all duration-150 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none ${
             isHero ? "size-9 md:size-10" : "size-8"
           }`}
         >
-          <ArrowRightIcon
-            className={isHero ? "size-4 md:size-[17px]" : "size-4"}
-            strokeWidth={2.2}
-          />
+          {isPending ? (
+            <Loader2Icon
+              className={`${isHero ? "size-4 md:size-[17px]" : "size-4"} animate-spin`}
+              strokeWidth={2.2}
+            />
+          ) : (
+            <ArrowRightIcon
+              className={isHero ? "size-4 md:size-[17px]" : "size-4"}
+              strokeWidth={2.2}
+            />
+          )}
         </button>
       )}
 
       {/* Trailing kbd hint — non-hero, when empty */}
-      {!isHero && query.length === 0 && (
+      {!isHero && !isPending && query.length === 0 && (
         <kbd className="kbd absolute right-3 hidden sm:inline-flex">
           ⌘K
         </kbd>
       )}
 
       {/* Trailing kbd hint — non-hero, when typing */}
-      {!isHero && query.length > 0 && (
+      {!isHero && !isPending && query.length > 0 && (
         <kbd className="kbd absolute right-3 hidden sm:inline-flex">
           ↵
         </kbd>
+      )}
+
+      {/* Slim top progress bar — slides while the route is pending */}
+      {isPending && (
+        <span
+          aria-hidden
+          className="search-progress-bar pointer-events-none absolute inset-x-0 top-0 h-[2px] overflow-hidden"
+        >
+          <span className="search-progress-bar-thumb block h-full bg-gradient-to-r from-transparent via-primary to-transparent" />
+        </span>
       )}
     </form>
   );
