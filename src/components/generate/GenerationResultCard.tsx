@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowRightIcon,
   CheckIcon,
   CopyIcon,
   ExternalLinkIcon,
@@ -9,6 +8,7 @@ import {
   LightbulbIcon,
   MessageSquareIcon,
   RefreshCwIcon,
+  RocketIcon,
   SparklesIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +16,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getModelLauncher } from "@/lib/model-launchers";
+import { SubmitToCatalogDialog } from "./SubmitToCatalogDialog";
 import type { GenerationResult } from "./useGenerator";
 
 /**
@@ -45,6 +46,7 @@ export function GenerationResultCard({
   onReset,
 }: GenerationResultCardProps) {
   const [copied, setCopied] = useState(false);
+  const [submitOpen, setSubmitOpen] = useState(false);
   const launcher = getModelLauncher(result.modelSlug);
   const isImageModel = isImageModelSlug(result.modelSlug);
 
@@ -58,8 +60,6 @@ export function GenerationResultCard({
       toast.error("Couldn't copy");
     }
   }
-
-  const submitHref = `/submit?title=${encodeURIComponent(result.title)}&promptText=${encodeURIComponent(result.prompt)}&modelSlug=${encodeURIComponent(result.modelSlug)}&categorySlug=${encodeURIComponent(result.categorySlug)}&tips=${encodeURIComponent(result.tips)}`;
 
   return (
     <article
@@ -193,13 +193,14 @@ export function GenerationResultCard({
             {launcher.label}
           </a>
         )}
-        <Link
-          href={submitHref}
-          className="press inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3.5 text-[13px] font-medium transition-colors hover:border-foreground/30 hover:bg-muted"
+        <button
+          type="button"
+          onClick={() => setSubmitOpen(true)}
+          className="press inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3.5 text-[13px] font-medium transition-colors hover:border-primary/40 hover:bg-primary/[0.04]"
         >
+          <RocketIcon className="size-3.5" strokeWidth={2.2} />
           Submit to catalog
-          <ArrowRightIcon className="size-3.5" />
-        </Link>
+        </button>
         {showReset && onReset && (
           <Button
             type="button"
@@ -213,6 +214,22 @@ export function GenerationResultCard({
           </Button>
         )}
       </div>
+
+      {/* Inline submission dialog — opens on "Submit to catalog" click.
+          Pre-fills everything from the generation and only asks for the
+          one missing required field (sample output for text prompts;
+          image URLs for image prompts). Posts to /api/submit. */}
+      <SubmitToCatalogDialog
+        open={submitOpen}
+        onOpenChange={setSubmitOpen}
+        initial={{
+          title: result.title,
+          prompt: result.prompt,
+          modelSlug: result.modelSlug,
+          categorySlug: result.categorySlug,
+          tips: result.tips,
+        }}
+      />
     </article>
   );
 }

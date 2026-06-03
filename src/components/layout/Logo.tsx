@@ -36,7 +36,12 @@ export function Logo({
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <Image
         src={LOGO_SRC}
-        alt=""
+        // SEO tools flag empty `alt=""` as missing even though it's the
+        // correct decorative pattern when the wordmark renders beside
+        // the mark. We give the image a real alt that also describes
+        // the brand for image-search; `aria-hidden` stays so screen
+        // readers don't double-announce the brand name.
+        alt={`${SITE_BRAND.displayName} logo`}
         width={dim}
         height={dim}
         className={`${sizeClasses[size]} shrink-0 object-contain drop-shadow-[0_2px_8px_oklch(0.54_0.225_270/0.25)]`}
