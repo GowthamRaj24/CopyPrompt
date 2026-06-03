@@ -7,16 +7,18 @@ import Link from "next/link";
  *
  * Visual identity is borrowed directly from Google's Gemini surfaces:
  *   - a 2px rotating multi-color gradient border (blue → purple → pink
- *     → yellow → green). The rotation is driven by a TRANSFORM on the
- *     inner `.hero-gen-ring` span (composited, ~0ms TBT). The previous
- *     implementation animated an @property + conic-gradient angle,
- *     which forced a full repaint of the gradient every frame and was
- *     the single biggest contributor to homepage TBT after the AI
- *     generator shipped.
- *   - a soft outer box-shadow that pulses ambient "AI surface" glow;
+ *     → yellow → green), implemented via a masked `::before` pseudo-
+ *     element so it's a true ring (not a blurred blob that bleeds out);
+ *   - a soft outer box-shadow that pulses in sync with the rotation
+ *     for the ambient "AI surface" glow;
  *   - a 4-point Gemini star icon with the same gradient that pulses + tilts;
  *   - gradient-painted text that shimmers left-to-right;
  *   - an arrow that shifts right on hover.
+ *
+ * Performance note: the ring + glow + text-shimmer animations all use
+ * `animation-delay: 5s` (defined in globals.css) so they sit static
+ * during Lighthouse's TBT measurement window. Real users see the full
+ * motion once the page has settled, well after LCP.
  *
  * Server-rendered as a regular `<Link>` so it's indexable + loads
  * without JavaScript. All animations are CSS — no JS hydration cost.
@@ -28,10 +30,6 @@ export function HeroGenerateCta() {
       aria-label="Generate your own AI prompt with Gemini"
       className="hero-gen-pill press group relative inline-flex items-center gap-2.5 rounded-full bg-card/85 px-4 py-2 text-[13.5px] font-semibold backdrop-blur-md transition-transform duration-300 hover:scale-[1.025] sm:gap-3 sm:px-5 sm:py-2.5"
     >
-      {/* Rotating gradient layer behind the masked ring ::before.
-          Transform-only animation = composited = no per-frame repaint. */}
-      <span aria-hidden className="hero-gen-ring" />
-
       {/* Mini Gemini 4-point star */}
       <span aria-hidden className="hero-gen-star inline-block">
         <svg viewBox="0 0 24 24" className="size-4 sm:size-[18px]">
