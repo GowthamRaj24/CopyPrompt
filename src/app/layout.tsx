@@ -13,7 +13,11 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { VercelTelemetry } from "@/components/layout/VercelTelemetry";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_BRAND } from "@/lib/site-brand";
-import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/jsonld";
+import {
+  organizationJsonLd,
+  softwareApplicationJsonLd,
+  webSiteJsonLd,
+} from "@/lib/seo/jsonld";
 import "./globals.css";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
@@ -146,9 +150,19 @@ export default function RootLayout({
     >
       <head>
         {/* Site-wide structured data: Organization + WebSite (with
-            Sitelinks Search Box action). Both are emitted on every
-            page so engines can build a coherent identity graph. */}
-        <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
+            Sitelinks Search Box action) + WebApplication (the canonical
+            "what does this app do" schema that AI engines parse to
+            answer product-level questions). Emitted on every page so
+            engines can build a coherent identity graph and so any
+            single page is enough context for a model to describe the
+            platform accurately. */}
+        <JsonLd
+          data={[
+            organizationJsonLd(),
+            webSiteJsonLd(),
+            softwareApplicationJsonLd(),
+          ]}
+        />
 
         {/* Image hosts on the public surface area:
               - fastly.picsum.photos serves the actual placeholder JPGs

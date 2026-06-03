@@ -54,7 +54,11 @@ export async function generateMetadata({
       siteName: SITE_BRAND.name,
     },
     twitter: {
-      card: "summary",
+      // We have a sibling `twitter-image.tsx` that emits the rich
+      // 1200×675 share card, so upgrade from "summary" to
+      // "summary_large_image" — otherwise X falls back to a tiny
+      // square thumbnail and the file-based image is wasted.
+      card: "summary_large_image",
       title,
       description,
     },

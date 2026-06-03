@@ -7,7 +7,7 @@ import { Suspense, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SITE_BRAND } from "@/lib/site-brand";
+import { buildOwnPromptShareMessage } from "@/lib/utm";
 
 function SharedSuccessContent() {
   const searchParams = useSearchParams();
@@ -15,12 +15,19 @@ function SharedSuccessContent() {
   const title = searchParams.get("title") ?? "Your prompt";
   const [copied, setCopied] = useState(false);
 
+  const shareMessage = shareUrl
+    ? buildOwnPromptShareMessage({ url: shareUrl, title })
+    : null;
+
   async function copyLink() {
-    if (!shareUrl) return;
+    if (!shareUrl || !shareMessage) return;
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      // Copy the full marketing blurb + URL, not just the bare URL —
+      // so when the user pastes into WhatsApp / Slack / DM their
+      // recipient sees a 1-line value prop above the link.
+      await navigator.clipboard.writeText(shareMessage.clipboard);
       setCopied(true);
-      toast.success("Link copied");
+      toast.success("Share message copied");
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Could not copy — select the link and copy manually");
@@ -28,15 +35,16 @@ function SharedSuccessContent() {
   }
 
   async function shareNative() {
-    if (!shareUrl || !navigator.share) {
+    if (!shareUrl || !shareMessage) return;
+    if (!navigator.share) {
       await copyLink();
       return;
     }
     try {
       await navigator.share({
         title,
-        text: `Check out my prompt on ${SITE_BRAND.displayName}`,
-        url: shareUrl,
+        text: shareMessage.text,
+        url: shareMessage.url,
       });
     } catch {
       /* cancelled */

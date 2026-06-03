@@ -94,6 +94,116 @@ export function webSiteJsonLd() {
   };
 }
 
+/**
+ * SoftwareApplication / WebApplication — the single most important
+ * schema for AI engines answering "what does this app do?"
+ *
+ * Why
+ * ───
+ * When ChatGPT browse / Claude with vision / Perplexity / Gemini fetch
+ * a homepage to answer a generic question about the product, they look
+ * for `SoftwareApplication` or `WebApplication` JSON-LD as the
+ * canonical machine-readable feature inventory. Without it, the engine
+ * has to guess from the visible HTML headlines — and as the user
+ * discovered, guesses are usually outdated or wrong.
+ *
+ * What goes here
+ * ──────────────
+ * - `featureList` — the actual shipped features (not roadmap items).
+ * - `applicationCategory` — keeps engines from mis-classifying us.
+ * - `aggregateRating` — placeholder for future review aggregation.
+ * - `offers` — explicit "free" signal so engines stop saying paywall.
+ *
+ * Update this list as features ship — it's the AI-facing changelog.
+ */
+export function softwareApplicationJsonLd() {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": `${base}/#webapp`,
+    name: SITE_NAME,
+    alternateName: "MyCopyPrompt",
+    url: base,
+    description:
+      "A free, curated AI prompt library + execution platform. Search 297+ human-reviewed prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion and 20+ other AI tools. Built-in save / collection / favorite / remix / one-click open-in-model.",
+    applicationCategory: "ProductivityApplication",
+    applicationSubCategory: "AI Prompt Library",
+    operatingSystem: "Web (any modern browser)",
+    inLanguage: "en",
+    isAccessibleForFree: true,
+    publisher: { "@id": `${base}/#organization` },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      eligibleRegion: { "@type": "Place", name: "Worldwide" },
+    },
+    audience: {
+      "@type": "Audience",
+      audienceType:
+        "Anyone using generative AI tools — casual users, builders, marketers, engineers, designers, students.",
+    },
+    featureList: [
+      // Discovery
+      "Full-text search across 297+ curated prompts",
+      "Semantic search via vector embeddings",
+      "Filter by AI model (27 supported) and category (16 top-level)",
+      "Trending, just-added, most-viewed, and top-rated rails on the homepage",
+      "Programmatic per-model, per-category, and per-tag indexable pages",
+      // Per-prompt
+      "One-click copy with built-in 'open in ChatGPT / Claude / Gemini / Mistral / Pi / Perplexity' deep links",
+      "Sample expected output included with every text prompt",
+      "Reference images + negative prompts + parameters for every image prompt",
+      "Curator notes and usage tips on each prompt",
+      "Aggregate copy count, view count, and thumbs-up/down rating per prompt",
+      "Similar-prompt recommendations via semantic search",
+      // Accounts
+      "Free account with email + Google sign-in",
+      "Public creator profiles at /u/<handle> with bio, stats, and contributor badges",
+      "Favorites (heart any prompt)",
+      "Collections — private or public boards, sharable at /c/<slug>",
+      "Personal copy history (last 30 days)",
+      "Saved searches with daily email digests of new matching prompts",
+      // Creator economy
+      "Public contributor leaderboard ranked by total copies received",
+      "Prompt remix — fork any prompt with permanent attribution chain back to the original author",
+      "Submit prompts publicly (admin reviewed within 24h) or privately (instant unlisted share URL)",
+      // Sharing
+      "Per-route social share cards (Open Graph + Twitter Large Card) generated at request time",
+      "Web Share API with marketing blurb above the URL on supported platforms",
+      // PWA + offline
+      "Installable PWA with offline caching of prompt-detail pages",
+      "Push install prompt for return visitors; iOS Add-to-Home-Screen hint",
+      // Transactional
+      "Welcome email on first sign-in; submission approved / rejected emails; saved-search digests",
+    ],
+    keywords: [
+      "AI prompts",
+      "ChatGPT prompts",
+      "Claude prompts",
+      "Midjourney prompts",
+      "Flux prompts",
+      "Gemini prompts",
+      "DALL-E prompts",
+      "Stable Diffusion prompts",
+      "free AI prompts",
+      "prompt library",
+      "prompt engineering",
+      "copy paste prompts",
+      "prompt sharing",
+      "prompt collections",
+      "prompt remix",
+    ].join(", "),
+    softwareVersion: "1.0",
+    softwareHelp: { "@type": "CreativeWork", url: abs("/about") },
+    // Citation hints for AI engines that look for documentation
+    sameAs: [],
+    mainEntityOfPage: base,
+  };
+}
+
 /* ════════════════════════════════════════════════════════════════
    Page-level schemas
    ════════════════════════════════════════════════════════════════ */

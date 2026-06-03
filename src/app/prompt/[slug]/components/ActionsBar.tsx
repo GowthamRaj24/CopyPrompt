@@ -11,12 +11,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SaveToCollectionButton } from "@/components/collections/SaveToCollectionButton";
 import { createClient } from "@/lib/supabase-client";
-import { buildPromptShareUrl } from "@/lib/utm";
+import { buildPromptShareMessage } from "@/lib/utm";
 
 interface ActionsBarProps {
   promptId: string;
   promptSlug: string;
   promptTitle: string;
+  /** Model name shown in the share message ("Claude Sonnet", "Midjourney", …). */
+  modelName: string;
+  /** Image vs text changes the emoji + noun in the share blurb. */
+  modelType: "image" | "text";
   /**
    * Optional override. When omitted the bar hydrates its rating
    * client-side via `GET /api/prompts/[id]/rate`, which lets the parent
@@ -31,6 +35,8 @@ export function ActionsBar({
   promptId,
   promptSlug,
   promptTitle,
+  modelName,
+  modelType,
   initialRating,
 }: ActionsBarProps) {
   const router = useRouter();
@@ -81,20 +87,36 @@ export function ActionsBar({
   }
 
   async function handleShare() {
-    const url = buildPromptShareUrl(promptSlug, "share");
+    const message = buildPromptShareMessage({
+      slug: promptSlug,
+      title: promptTitle,
+      modelName,
+      modelType,
+    });
+    // Web Share API (mobile + modern desktop): the OS combines `text`
+    // and `url` cleanly in the target app, so WhatsApp shows the
+    // marketing blurb above the URL and the URL still unfurls to our
+    // OG card below.
     if (navigator.share) {
       try {
-        await navigator.share({ title: promptTitle, url });
+        await navigator.share({
+          title: promptTitle,
+          text: message.text,
+          url: message.url,
+        });
       } catch {
         // cancelled — silent
       }
       return;
     }
+    // Desktop fallback: copy the blurb + URL together so pasting into
+    // any chat / email / doc surfaces both pieces — not just a bare
+    // tracking URL like before.
     try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied to clipboard");
+      await navigator.clipboard.writeText(message.clipboard);
+      toast.success("Share message copied — paste anywhere");
     } catch {
-      toast.error("Couldn't copy link");
+      toast.error("Couldn't copy share message");
     }
   }
 

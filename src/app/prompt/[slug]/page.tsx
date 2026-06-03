@@ -74,16 +74,10 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: desc,
-      images: prompt.images[0]
-        ? [
-            {
-              url: prompt.images[0].cdnUrl,
-              width: prompt.images[0].width,
-              height: prompt.images[0].height,
-              alt: prompt.images[0].alt ?? prompt.title,
-            },
-          ]
-        : undefined,
+      // We intentionally do NOT specify `images` here — the file-based
+      // `opengraph-image.tsx` sibling auto-generates a branded card per
+      // prompt and Next.js injects the correct `<meta property="og:image">`
+      // tags for us. Setting `images` manually would override it.
       type: "article",
       publishedTime: prompt.createdAt.toISOString(),
       tags: [prompt.category.name, prompt.model.name, prompt.model.type],
@@ -92,7 +86,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description: desc,
-      images: prompt.images[0] ? [prompt.images[0].cdnUrl] : undefined,
+      // Same as above: `twitter-image.tsx` sibling handles the image.
     },
     alternates: { canonical: `/prompt/${prompt.slug}` },
   };
@@ -436,6 +430,8 @@ export default async function PromptDetailPage({ params }: PageProps) {
               promptId={prompt.id}
               promptSlug={prompt.slug}
               promptTitle={prompt.title}
+              modelName={prompt.model.name}
+              modelType={prompt.model.type}
             />
           </div>
         </div>
