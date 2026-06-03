@@ -1909,30 +1909,55 @@ select:focus-visible,
 
 /* ─── Hero "Generate with AI" CTA ────────────────────────────
    Premium Google AI-style call-to-action that lives in the homepage
-   hero. Three independent animations layered: a rotating conic-gradient
-   halo behind the pill, a pulsing 4-point Gemini star, and a
-   gradient-painted text that shimmers L→R. */
+   hero. Three independent animations layered:
+     1. Rotating conic-gradient ring AROUND the pill (masked so only the
+        2px border is visible — no bleeding outside the button shape).
+     2. Soft box-shadow glow that pulses in opacity.
+     3. Pulsing 4-point Gemini star + L→R gradient text shimmer.
+   The earlier blurred-conic-halo approach bled into a vertical rainbow
+   ray on small elements; the masked ring fixes that. */
 
-@keyframes hero-gen-halo-rotate {
+/* Rotating gradient BORDER — uses background + mask to keep the
+   visible band as a 2px ring instead of a blurred blob. */
+@property --hero-gen-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes hero-gen-ring-spin {
   to {
-    transform: rotate(360deg);
+    --hero-gen-angle: 360deg;
   }
 }
-@keyframes hero-gen-halo-pulse {
+@keyframes hero-gen-glow-pulse {
   0%,
   100% {
-    opacity: 0.55;
+    box-shadow:
+      0 0 0 1px rgba(155, 114, 203, 0.22),
+      0 4px 18px -2px rgba(66, 133, 244, 0.28),
+      0 0 28px -4px rgba(217, 101, 112, 0.32);
   }
   50% {
-    opacity: 0.85;
+    box-shadow:
+      0 0 0 1px rgba(217, 101, 112, 0.3),
+      0 4px 22px -2px rgba(155, 114, 203, 0.42),
+      0 0 36px -4px rgba(66, 133, 244, 0.38);
   }
 }
-.hero-gen-halo {
+.hero-gen-pill {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  animation: hero-gen-glow-pulse 3.4s ease-in-out infinite;
+}
+.hero-gen-pill::before {
+  content: "";
   position: absolute;
-  inset: -3px;
-  border-radius: 9999px;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
   background: conic-gradient(
-    from 0deg,
+    from var(--hero-gen-angle, 0deg),
     var(--gemini-blue),
     var(--gemini-purple),
     var(--gemini-pink),
@@ -1940,21 +1965,32 @@ select:focus-visible,
     var(--gemini-green),
     var(--gemini-blue)
   );
-  filter: blur(8px);
-  z-index: 0;
+  /* Mask trick: subtract the inner area so only the 1.5px border ring
+     remains visible. Works in all evergreen browsers. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
   pointer-events: none;
-  animation:
-    hero-gen-halo-rotate 7s linear infinite,
-    hero-gen-halo-pulse 3.6s ease-in-out infinite;
+  z-index: -1;
+  animation: hero-gen-ring-spin 5s linear infinite;
 }
-.hero-gen-wrap:hover .hero-gen-halo {
-  filter: blur(11px);
-  inset: -5px;
-}
-
-/* Inner pill must sit above the halo */
-.hero-gen-pill {
-  z-index: 1;
+@supports not (background: conic-gradient(from 0deg, red, blue)) {
+  .hero-gen-pill::before {
+    background: linear-gradient(
+      90deg,
+      var(--gemini-blue),
+      var(--gemini-purple),
+      var(--gemini-pink),
+      var(--gemini-yellow),
+      var(--gemini-blue)
+    );
+    animation: none;
+  }
 }
 
 /* 4-point star gentle pulse + tilt */
@@ -1962,19 +1998,22 @@ select:focus-visible,
   0%,
   100% {
     transform: scale(1) rotate(0deg);
-    filter: drop-shadow(0 0 6px rgba(155, 114, 203, 0.45));
+    filter: drop-shadow(0 0 5px rgba(155, 114, 203, 0.5));
   }
   50% {
-    transform: scale(1.18) rotate(20deg);
-    filter: drop-shadow(0 0 10px rgba(217, 101, 112, 0.55));
+    transform: scale(1.15) rotate(18deg);
+    filter: drop-shadow(0 0 9px rgba(217, 101, 112, 0.6));
   }
 }
 .hero-gen-star {
   animation: hero-gen-star-pulse 2.6s ease-in-out infinite;
   transform-origin: center;
 }
-.hero-gen-wrap:hover .hero-gen-star {
+.hero-gen-pill:hover .hero-gen-star {
   animation-duration: 1.4s;
+}
+.hero-gen-pill:hover::before {
+  animation-duration: 2s;
 }
 
 /* Text shimmer L→R using the Gemini gradient */
@@ -2004,10 +2043,19 @@ select:focus-visible,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-gen-halo,
+  .hero-gen-pill,
+  .hero-gen-pill::before,
   .hero-gen-star,
   .hero-gen-text {
     animation: none !important;
+  }
+  .hero-gen-pill::before {
+    background: linear-gradient(
+      90deg,
+      var(--gemini-blue),
+      var(--gemini-purple),
+      var(--gemini-pink)
+    );
   }
   .hero-gen-text {
     color: var(--gemini-purple);

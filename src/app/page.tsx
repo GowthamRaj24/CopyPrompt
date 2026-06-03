@@ -297,11 +297,12 @@ export default async function HomePage() {
             <HeroSearchForm placeholder="Search prompts…" />
           </div>
 
-          {/* Hero "Generate with AI" CTA — the secondary path with the
-              Gemini-style rotating gradient halo + pulsing star + text
-              shimmer animations. Always visible regardless of catalog
-              size since it's a flagship feature. */}
-          <div className="reveal delay-3 mt-5 flex items-center justify-center gap-2 text-[12px] text-muted-foreground/80">
+          {/* Hero "Generate with AI" CTA — the secondary path with a
+              rotating Gemini-color gradient border + pulsing glow +
+              shimmering text. Always visible since it's a flagship
+              feature. Extra vertical padding lets the box-shadow halo
+              breathe without being clipped by the adjacent rows. */}
+          <div className="reveal delay-3 mt-5 flex flex-wrap items-center justify-center gap-2 px-2 py-2 text-[12px] text-muted-foreground/80">
             <span aria-hidden className="font-mono uppercase tracking-wider">
               or
             </span>
