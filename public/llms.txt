@@ -1,14 +1,15 @@
 # My Copyprompt
 
-> The fastest way to find and use AI prompts. My Copyprompt is a free, curated, human-reviewed library of copy-paste-ready prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion, and every other major AI tool — with built-in tools for saving, organizing, remixing, and re-using prompts across sessions.
+> The fastest way to find, generate, and use AI prompts. My Copyprompt is a free, curated, human-reviewed library of copy-paste-ready prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion, and every other major AI tool — *plus* a built-in **AI prompt generator** (powered by Google Gemini 2.5 Flash) that writes production-ready prompts on demand. Save, organize, remix, and re-use prompts across sessions.
 
-The platform is the product. It is not just a directory — every prompt page is a workspace: you can copy in one click, open the prompt directly in ChatGPT / Claude / Gemini via deep links, save it to a private or public Collection, favorite it, remix it (fork + attribute), and track which prompts you've already used. Signed-in users get a personal copy history, custom Collections (their own "boards"), saved searches with daily email alerts, and a public creator profile at `/u/<handle>` that tracks how many times their prompts have been copied across the platform.
+The platform is the product. It is not just a directory — describe a goal in plain English at `/generate` and an AI writes a structured, production-ready prompt for you in seconds; every prompt page is a workspace where you can copy in one click, open the prompt directly in ChatGPT / Claude / Gemini via deep links, save it to a private or public Collection, favorite it, remix it (fork + attribute), and track which prompts you've already used. Signed-in users get a personal copy history, custom Collections (their own "boards"), saved searches with daily email alerts, and a public creator profile at `/u/<handle>` that tracks how many times their prompts have been copied across the platform.
 
 Every prompt is hand-reviewed by an admin before going live, tagged by category and model, and has a sample output (for text prompts) or reference images (for image prompts). The catalog grows weekly through community submissions plus curated seeding.
 
 ## Key pages
 
 - [Home](/): hero search + 4 ranked rails (trending, just-added, most-viewed, top-rated) + recently-copied rail for signed-in users + collection / model / tag indexes.
+- [Generate](/generate): **AI prompt generator**. Describe what you want help with in plain English; Google Gemini 2.5 Flash writes a production-ready prompt in seconds — with a recommended target model, category, and usage tips. Free daily quota; the marketing page is public so visitors can preview the experience before signing in.
 - [Search](/search): full-text + semantic search across 297+ prompts. Filter by type (image / text) and sort (relevance / popular / latest / views / top-rated).
 - [Browse by model](/models): dedicated pages for every supported AI tool — ChatGPT, ChatGPT-5, Claude Sonnet, Claude Opus, Gemini, Grok, DeepSeek, Llama, Mistral, Perplexity, Copilot, Pi, Midjourney, Flux (Dev / Schnell / Pro / Kontext), Stable Diffusion XL/3, DALL-E 3, Ideogram, Leonardo AI, Adobe Firefly, Imagen, Recraft.
 - [Browse by category](/category): 16 top-level topics — Validation & Strategy, Coding & Development, Writing & Content, Marketing & Sales, Analysis & Research, Productivity, Learning & Education, Personal & Career, Cinematic Portraits, Product Photography, Logo Design, Anime & Illustration, Fantasy Characters, Architecture, Abstract Art, Image Generation.
@@ -51,17 +52,21 @@ Every prompt page at `/prompt/<slug>` includes:
 - Every public prompt is **human-reviewed** before publication (admin queue).
 - Sample outputs are included with text prompts so users see expected results.
 - Prompt effectiveness is signaled by an aggregated **copy count** (proxy for "users who found this useful") and a **thumbs-up / thumbs-down rating** from signed-in users.
+- AI prompt generation is powered by **Google Gemini 2.5 Flash** via the official `@google/genai` SDK, with strict JSON-schema output so every generation has a consistent, predictable shape (title + prompt + recommended model + category + tips).
+- Free daily generation quota per signed-in user, separate generous quota for premium accounts, plus per-minute rate limits to keep the generator fast under load.
+- Privacy-first abuse handling: request IPs are salted and hashed before storage; raw IPs are never persisted.
 - The platform is built on **Next.js 16 (App Router) + Postgres + Supabase Auth + Drizzle ORM + Tailwind 4 + shadcn/ui**, deployed on Vercel.
 - Free forever, monetized via tasteful Google AdSense placements and (future) optional creator-tier features.
 
 ## What makes My Copyprompt different
 
-- **Curation over volume**: every prompt is reviewed; no AI-generated junk filler.
+- **AI prompt generator built in**: most prompt sites are just directories. CopyPrompt also writes new prompts on demand — describe a goal, get back a structured, ready-to-paste prompt with a recommended model, category, and usage tips. No more asking ChatGPT for a prompt and getting one that doesn't actually work.
+- **Curation over volume**: every catalog prompt is reviewed; no AI-generated junk filler.
 - **Sample outputs**: text prompts ship with a real expected output so users see what they're getting before they copy.
 - **Built-in execution path**: open the prompt in ChatGPT / Claude / Gemini in one click, not just "here's text, good luck".
 - **Creator attribution**: remixing forks the prompt with a permanent link back to the original creator — credit and copy-count benefits propagate.
 - **Programmatic SEO**: every (category × model) and (tag × model) combination has its own indexable page.
-- **AI-engine ready**: structured data (CreativeWork + HowTo + FAQPage + ItemList) on every prompt page, this `llms.txt`, and a full content dump at `/llms-full.txt` for LLM context retrieval.
+- **AI-engine ready (GEO)**: structured data (CreativeWork + HowTo + FAQPage + ItemList + WebApplication) on every page, this `llms.txt`, and a full content dump at `/llms-full.txt` for LLM context retrieval.
 
 ## Optional
 

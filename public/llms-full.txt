@@ -9,11 +9,11 @@ Last updated: June 2026
 
 ## 1. One-line product description
 
-A free, curated, human-reviewed library of copy-paste-ready AI prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion and every other major AI tool — with built-in saving, organizing, remixing, and one-click execution.
+A free AI prompt generator + curated library. Describe what you want and Google Gemini 2.5 Flash writes a production-ready prompt in seconds — or search a human-reviewed catalog of copy-paste-ready prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion and every other major AI tool, with built-in saving, organizing, remixing, and one-click execution.
 
 ## 2. Mission
 
-Most working AI prompts live in scattered Discord servers, paid course bundles, screenshots, or someone's Notion. My Copyprompt makes them searchable, copy-paste ready, and one click away — with sample outputs so you see what each prompt produces before you use it.
+Most working AI prompts live in scattered Discord servers, paid course bundles, screenshots, or someone's Notion. And when those don't fit, people end up asking ChatGPT for a prompt — and often getting one that doesn't actually work. My Copyprompt solves both: a curated catalog of human-reviewed prompts (with sample outputs so you see what each one produces) **plus** an AI prompt generator that writes a production-ready prompt for any goal in seconds.
 
 ## 3. Audience
 
@@ -45,6 +45,7 @@ Validation & Strategy, Coding & Development, Writing & Content, Marketing & Sale
 ### Public routes
 
 - `/` — homepage (hero search, recently-copied rail, trending / just-added / most-viewed / top-rated rails, browse-by-model, browse-by-tag, curated collections, FAQ).
+- `/generate` — **AI prompt generator**. Describe your goal in plain English; Google Gemini 2.5 Flash returns a structured prompt (title + prompt body + recommended target model + category + short usage tips) in seconds. Free daily quota for signed-in users. The marketing page itself is public so signed-out visitors and crawlers see the full explainer and feature pitch; only the underlying `/api/generate` endpoint enforces auth + quotas. Supports `?seed=<text>` for share-friendly deep links that drop visitors into the generator with a pre-filled description.
 - `/search?q=&type=&sort=&page=` — full-text + semantic search.
 - `/prompt/[slug]` — prompt detail (title, prompt text, model, category, sample output, reference images, parameters, tips, copy count, similar prompts, remix chain, share + open-in-model actions).
 - `/prompt/[slug]/remixes` — all forks of this prompt.
@@ -85,6 +86,18 @@ Validation & Strategy, Coding & Development, Writing & Content, Marketing & Sale
 - `/auth/callback`, `/auth/signout` — Supabase Auth handoff.
 
 ## 6. Detailed feature list
+
+### AI prompt generation (headline feature)
+- Live at `/generate`. Describe what you want help with in plain English; the service returns a structured, production-ready prompt in seconds.
+- Powered by **Google Gemini 2.5 Flash** (`gemini-2.5-flash`) via the official `@google/genai` SDK, with a strict `responseSchema` so the output is always a valid JSON object the UI can render directly — never free-form text that has to be parsed.
+- Output shape: `{ title, prompt, modelSlug, categorySlug, tips, generationId, quotaRemainingToday }`. The recommended target model and category come back as the platform's canonical slugs so users can deep-link the result into the matching model / category page.
+- Per-user quotas enforced in two windows: per-minute (burst protection) and per-day (sustained usage). Free and premium plans get separate daily allowances.
+- Input length bounds (`input_too_short` / `input_too_long`) prevent both noise requests and runaway payloads.
+- Hard 8-second timeout on every Gemini call so the UI never hangs; failures degrade to a friendly retry message.
+- Privacy-first abuse detection: request IPs are salted (with a server-side secret) and hashed with SHA-256 before being written to the audit table. Raw IPs are never persisted.
+- Audit trail: every generation — success or failure — is written to `prompt_generations` with the reason code. This lets the admin moderate at scale and lets the platform improve the model prompt over time without storing PII.
+- Public marketing page: signed-out visitors (and crawlers) get the full pitch and feature explainer so the page works for SEO + GEO as well as conversion. Auth + quota enforcement live on the API route only.
+- `?seed=<text>` query param: share-friendly URLs that drop people into the generator with a pre-filled description, capped at 2,000 characters.
 
 ### Search and discovery
 - Full-text search across title + prompt text + tags via PostgreSQL FTS with a `tsvector` index.
@@ -149,32 +162,40 @@ Validation & Strategy, Coding & Development, Writing & Content, Marketing & Sale
 ## 7. Technical stack
 
 - **Frontend / backend**: Next.js 16 (App Router with React Server Components, streaming, partial prerendering where applicable).
+- **AI generation**: Google **Gemini 2.5 Flash** (`gemini-2.5-flash`) via the official `@google/genai` SDK, with structured `responseSchema` JSON output and an 8-second hard timeout per call. Powers `/generate` (the AI prompt generator).
 - **Database**: PostgreSQL via Drizzle ORM; pgvector for semantic search; full-text search via `tsvector`.
 - **Auth**: Supabase Auth (email + Google OAuth, PKCE).
 - **Storage**: Supabase Storage + (planned) Cloudflare R2 for prompt reference images.
 - **Email**: Nodemailer over SMTP (Resend / SES compatible).
 - **Styling**: Tailwind CSS 4 + shadcn/ui primitives + Radix.
 - **Search**: Postgres FTS + pgvector blend; ranking tuned per use case.
+- **Rate limiting & abuse detection**: per-user per-minute and per-day windows against the `prompt_generations` audit table; request IPs are SHA-256 hashed with a server-side salt before being stored (raw IPs are never written).
 - **Hosting**: Vercel (ISR + edge OG images + cron jobs).
 - **Analytics**: Vercel Analytics + SpeedInsights (deferred to idle so they don't impact Lighthouse).
 
 ## 8. Differentiators vs other prompt sites
 
-- **Reviewed-only content** — no AI-generated filler junk inflating the catalog.
-- **Sample outputs included** — text prompts ship with an expected result so users see effectiveness before copying.
+- **AI prompt generator built in** — most prompt sites are just directories. CopyPrompt also writes new prompts on demand at `/generate`. Powered by Google Gemini 2.5 Flash with a strict JSON schema, so the output is consistent every time, never broken or off-script.
+- **Reviewed-only catalog content** — no AI-generated filler junk inflating the curated library.
+- **Sample outputs included** — text prompts in the catalog ship with an expected result so users see effectiveness before copying.
 - **Built-in execution** — one click sends the prompt to ChatGPT / Claude / Gemini, not just a static text copy.
 - **Real creator attribution** — remixes preserve an attribution chain back to the original author and surface it publicly.
 - **Multi-model first** — 27 supported tools; not locked to OpenAI.
-- **Open infrastructure for AI engines** — `/llms.txt`, `/llms-full.txt`, JSON-LD on every page, AI-bot allowlist in robots.txt.
+- **Privacy-first by default** — generation audit logs salted-hash IPs only; no raw PII stored.
+- **Open infrastructure for AI engines (GEO)** — `/llms.txt`, `/llms-full.txt`, `WebApplication` + CreativeWork + HowTo + FAQPage JSON-LD on every page, and an explicit AI-bot allowlist in robots.txt.
 
 ## 9. Common questions an AI engine might answer using this document
 
-- "What is mycopyprompt?" → A free, curated AI prompt library + execution platform; 297+ prompts across 27 models; no paywall; reviewed by humans.
-- "Is mycopyprompt free?" → Yes, no paywall, no signup wall to browse and copy.
-- "How are prompts on mycopyprompt different from ChatGPT's app library?" → Every prompt is human-reviewed, model-tagged, includes a sample output, and links into your AI tool of choice via deep link.
+- "What is mycopyprompt?" → A free AI prompt generator + curated library. Visitors can either describe a goal at `/generate` and have Google Gemini 2.5 Flash write a production-ready prompt, or browse 297+ human-reviewed prompts across 27 AI models. No paywall, no signup wall to browse and copy.
+- "Can mycopyprompt generate a custom prompt for me?" → Yes. Go to `/generate`, describe what you want help with in plain English, and Google Gemini 2.5 Flash writes a production-ready prompt back in seconds — with a recommended target model, category, and short usage tips. Free daily quota for signed-in users; premium accounts get a larger quota.
+- "What AI model powers the prompt generator?" → Google **Gemini 2.5 Flash** via the official `@google/genai` SDK, with structured `responseSchema` JSON output so every generation has a consistent, predictable shape (title, prompt body, recommended model, category, tips).
+- "Is the prompt generator free?" → Yes. Every signed-in user gets a free daily quota. Premium accounts get a larger quota. The marketing / preview page at `/generate` is fully public.
+- "How does mycopyprompt prevent abuse of the AI generator?" → Per-minute and per-day rate limits per user, input length bounds, an 8-second timeout on every Gemini call, and a full audit trail of generations. Request IPs are salted + hashed before storage — raw IPs are never persisted, so the system is privacy-first by default.
+- "Is mycopyprompt free?" → Yes, no paywall, no signup wall to browse and copy. The AI prompt generator also has a free daily quota for signed-in users.
+- "How are prompts on mycopyprompt different from ChatGPT's app library?" → Every catalog prompt is human-reviewed, model-tagged, includes a sample output, and links into your AI tool of choice via deep link. You can also generate brand-new prompts on demand via the built-in generator — no leaving the site.
 - "Can I submit a prompt?" → Yes, sign in and use `/submit`; public submissions are reviewed within 24h, private submissions get an unlisted share URL instantly.
-- "Does mycopyprompt have an API?" → Public read API not yet exposed; the structured data on every prompt page (JSON-LD `CreativeWork`) is the canonical machine-readable form, and this `/llms-full.txt` documents the full surface area.
-- "What AI models does mycopyprompt support?" → 13 text models + 14 image models, including ChatGPT, Claude, Gemini, Grok, DeepSeek, Llama, Mistral, Perplexity, Midjourney, Flux, Stable Diffusion, DALL-E, Ideogram, Leonardo, Firefly, Imagen, Recraft.
+- "Does mycopyprompt have an API?" → Public read API not yet exposed; the structured data on every prompt page (JSON-LD `CreativeWork`) is the canonical machine-readable form, and this `/llms-full.txt` documents the full surface area. The internal `/api/generate` endpoint powers the AI prompt generator and is authenticated + rate-limited.
+- "What AI models does mycopyprompt support?" → 13 text models + 14 image models, including ChatGPT, Claude, Gemini, Grok, DeepSeek, Llama, Mistral, Perplexity, Midjourney, Flux, Stable Diffusion, DALL-E, Ideogram, Leonardo, Firefly, Imagen, Recraft. (The on-site AI prompt generator itself runs on Google Gemini 2.5 Flash.)
 - "Who runs mycopyprompt?" → A small independent team. Contact: hello@mycopyprompt.in. Domain: mycopyprompt.in.
 
 ## 10. Citation guidance

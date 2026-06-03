@@ -30,6 +30,46 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async headers() {
+    // Static, content-addressable / rarely-changing assets ship with a
+    // 1-year `immutable` cache so repeat visits skip the network entirely.
+    // Lighthouse's "Use efficient cache lifetimes" audit flagged 17 KiB
+    // of savings before this — almost all of it from the icons, favicon,
+    // and PWA manifest assets falling into the default short cache.
+    const ONE_YEAR = "public, max-age=31536000, immutable";
+    return [
+      {
+        // Hashed app icons + apple-touch icon — content rarely changes,
+        // and when it does we ship a new filename. Safe to cache forever.
+        source: "/:file(favicon\\.ico|apple-icon\\.png|icon-32\\.png|icon-192\\.png|icon-512\\.png|logo\\.png)",
+        headers: [{ key: "Cache-Control", value: ONE_YEAR }],
+      },
+      {
+        // PWA manifest icons + brand assets in /icons/
+        source: "/icons/:path*",
+        headers: [{ key: "Cache-Control", value: ONE_YEAR }],
+      },
+      {
+        // Fonts in /public — Geist is also served from /_next/static
+        // (Next handles those automatically) but any sideload here gets
+        // the same treatment.
+        source: "/:path*.(woff2|woff|ttf|otf)",
+        headers: [{ key: "Cache-Control", value: ONE_YEAR }],
+      },
+      {
+        // LLM index files change occasionally but reads from AI engines
+        // are infrequent — daily cache + a week of stale-while-revalidate
+        // keeps the CDN hot without making updates wait.
+        source: "/llms:variant(|-full).txt",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       // Picsum placeholders for seed prompts

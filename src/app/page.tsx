@@ -567,12 +567,19 @@ function PromptRail({
   id?: string;
   priorityCount?: number;
 }) {
+  // Skip `content-visibility: auto` on the rail that contains the
+  // LCP candidate (any rail rendering priority-loaded images). cv:auto
+  // can defer the initial layout of its subtree, which delays the
+  // moment the browser hands those <img> tags to the network — pushing
+  // LCP back by 100-400ms on slow connections. Below-fold rails still
+  // benefit from the layout/paint skip, so we keep the class there.
+  const isAboveFold = priorityCount > 0;
   return (
     <section
       id={id}
-      className={`cv-below-fold relative scroll-mt-20 ${
-        tone === "muted" ? "border-y border-border/40 bg-card/30" : ""
-      }`}
+      className={`relative scroll-mt-20 ${
+        isAboveFold ? "" : "cv-below-fold "
+      }${tone === "muted" ? "border-y border-border/40 bg-card/30" : ""}`}
     >
       <div className="container mx-auto px-4 py-10 sm:px-6 md:py-14">
         <SectionHeader

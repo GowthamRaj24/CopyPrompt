@@ -126,9 +126,9 @@ export function softwareApplicationJsonLd() {
     alternateName: "MyCopyPrompt",
     url: base,
     description:
-      "A free, curated AI prompt library + execution platform. Search 297+ human-reviewed prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion and 20+ other AI tools. Built-in save / collection / favorite / remix / one-click open-in-model.",
+      "A free AI prompt generator + curated prompt library. Describe your goal in plain English and our generator (powered by Google Gemini 2.5 Flash) writes a production-ready prompt in seconds — or search 297+ human-reviewed prompts for ChatGPT, Claude, Gemini, Midjourney, Flux, DALL-E, Stable Diffusion and 20+ other AI tools. Built-in save / collection / favorite / remix / one-click open-in-model.",
     applicationCategory: "ProductivityApplication",
-    applicationSubCategory: "AI Prompt Library",
+    applicationSubCategory: "AI Prompt Generator and Library",
     operatingSystem: "Web (any modern browser)",
     inLanguage: "en",
     isAccessibleForFree: true,
@@ -146,6 +146,13 @@ export function softwareApplicationJsonLd() {
         "Anyone using generative AI tools — casual users, builders, marketers, engineers, designers, students.",
     },
     featureList: [
+      // AI prompt generation (headline feature)
+      "AI prompt generator — describe your goal in plain English and get a production-ready prompt back in seconds, powered by Google Gemini 2.5 Flash",
+      "Generated prompts include a title, recommended target AI model, category tag, and short usage tips — not just raw text",
+      "Structured JSON schema output guarantees the same predictable shape every time (no parsing failures, no broken responses)",
+      "Free daily quota per signed-in user, with separate generous quotas for premium accounts and per-minute rate limits to keep the generator fast under load",
+      "Privacy-first abuse handling — request IPs are salted and hashed before storage; raw IPs are never persisted",
+      "Every generation is audit-logged (success and failure) so the platform can keep results high-quality over time",
       // Discovery
       "Full-text search across 297+ curated prompts",
       "Semantic search via vector embeddings",
@@ -180,6 +187,15 @@ export function softwareApplicationJsonLd() {
       "Welcome email on first sign-in; submission approved / rejected emails; saved-search digests",
     ],
     keywords: [
+      "AI prompt generator",
+      "free AI prompt generator",
+      "ChatGPT prompt generator",
+      "Claude prompt generator",
+      "Midjourney prompt generator",
+      "Gemini prompt generator",
+      "prompt writer",
+      "prompt builder",
+      "prompt engineering tool",
       "AI prompts",
       "ChatGPT prompts",
       "Claude prompts",
