@@ -4,6 +4,7 @@ import {
   FileTextIcon,
   ImageIcon,
   LayoutGridIcon,
+  SparklesIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -12,6 +13,7 @@ const LINKS = [
   { href: "/search", label: "Browse", type: null, icon: LayoutGridIcon },
   { href: "/search?type=image", label: "Image", type: "image", icon: ImageIcon },
   { href: "/search?type=text", label: "Text", type: "text", icon: FileTextIcon },
+  { href: "/generate", label: "Generate", type: "generate", icon: SparklesIcon },
 ] as const;
 
 /**
@@ -24,6 +26,8 @@ export function HeaderNav() {
 
   const onSearch =
     pathname === "/search" || pathname.startsWith("/search/");
+  const onGenerate =
+    pathname === "/generate" || pathname.startsWith("/generate/");
 
   return (
     <nav
@@ -32,10 +36,12 @@ export function HeaderNav() {
     >
       {LINKS.map(({ href, label, type: linkType, icon: Icon }) => {
         const active =
-          onSearch &&
-          (linkType === null
-            ? !type || type === "all"
-            : type === linkType);
+          linkType === "generate"
+            ? onGenerate
+            : onSearch &&
+              (linkType === null
+                ? !type || type === "all"
+                : type === linkType);
 
         return (
           <Link

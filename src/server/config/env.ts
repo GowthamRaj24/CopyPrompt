@@ -44,6 +44,15 @@ const envSchema = z.object({
   // ── OPTIONAL: Together AI (Flux images + BGE embeddings) ───
   TOGETHER_API_KEY: optionalString,
 
+  // ── OPTIONAL: Google Gemini (prompt-generation feature) ────
+  // Get a free key at https://aistudio.google.com/api-keys
+  // When unset, the /generate page returns a friendly "not configured"
+  // message so deploys without the key keep building.
+  GEMINI_API_KEY: optionalString,
+  // Defaults to "gemini-2.5-flash" — fast, capable, and on the free
+  // tier in AI Studio. Override only if you need a different model.
+  GEMINI_MODEL: optionalString,
+
   // ── OPTIONAL: Hugging Face (free BGE embeddings fallback) ───
   // Fine-grained token with Inference Providers — see .env.example
   HF_TOKEN: optionalString,

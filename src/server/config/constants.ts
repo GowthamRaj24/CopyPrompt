@@ -56,6 +56,13 @@ export const RATE_LIMITS = {
   USER_SUBMIT_PER_DAY: 20,
   PRIVATE_PROMPT_PER_DAY: 10,
   UPLOAD_PER_MINUTE: 5,
+  // AI prompt-generation quotas. Two layers:
+  //   - per-minute caps burst abuse (one rapid spammer ≠ all users blocked)
+  //   - per-day caps daily cost while still feeling generous to humans
+  // Premium users get a higher per-day cap; admins are uncapped.
+  GENERATE_PER_MINUTE: 10,
+  GENERATE_FREE_PER_DAY: 30,
+  GENERATE_PREMIUM_PER_DAY: 200,
 };
 
 export const PRICING = {
