@@ -1660,93 +1660,254 @@ select:focus-visible,
 }
 
 /* ─── Prompt-generator surface ───────────────────────────────
-   Skeleton + result card support classes. Each one is keyed to a
-   specific spot in the GenerateInputCard / Skeleton / Result trio so
-   visual tweaks live next to each other instead of scattered in tsx. */
+   Gemini-style loader + result card support classes. The loader
+   borrows the multi-color brand gradient Google uses on its own
+   generative surfaces (blue → purple → pink → yellow → green). */
 
-/* Generic shimmer block used by GenerationSkeleton placeholders. */
-@keyframes shimmer-pan {
+/* Brand-color stops reused across every gemini-* rule so a future
+   theme tweak only needs to touch one line. */
+:root {
+  --gemini-blue: #4285f4;
+  --gemini-purple: #9b72cb;
+  --gemini-pink: #d96570;
+  --gemini-yellow: #f4b400;
+  --gemini-green: #34a853;
+}
+
+/* ── 1. Flowing rainbow bar at the top ─────────────────────── */
+@keyframes gemini-bar-flow {
   0% {
-    background-position: -200% 0;
+    background-position: 200% 50%;
   }
   100% {
-    background-position: 200% 0;
+    background-position: -200% 50%;
   }
 }
-.bg-shimmer {
-  background-image: linear-gradient(
-    100deg,
-    oklch(0.96 0 0 / 0.05) 30%,
-    oklch(0.96 0 0 / 0.18) 50%,
-    oklch(0.96 0 0 / 0.05) 70%
-  );
-  background-size: 200% 100%;
-  animation: shimmer-pan 1.6s ease-in-out infinite;
-}
-:root:not(.dark) .bg-shimmer {
-  background-image: linear-gradient(
-    100deg,
-    oklch(0.6 0.02 270 / 0.08) 30%,
-    oklch(0.6 0.02 270 / 0.18) 50%,
-    oklch(0.6 0.02 270 / 0.08) 70%
-  );
-}
-@media (prefers-reduced-motion: reduce) {
-  .bg-shimmer {
-    animation: none;
-    opacity: 0.55;
-  }
-}
-
-/* Skeleton icon — gentle pulsing of the sparkle while generating. */
-@keyframes skeleton-icon-spin-anim {
-  0%,
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(8deg) scale(1.08);
-  }
-}
-.skeleton-icon-spin {
-  animation: skeleton-icon-spin-anim 1.8s ease-in-out infinite;
-}
-
-/* Skeleton corner glow pulses to feel alive. */
-@keyframes skeleton-glow-pulse-anim {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 0.95;
-  }
-}
-.skeleton-glow-pulse {
-  animation: skeleton-glow-pulse-anim 2.4s ease-in-out infinite;
-}
-
-/* The narrow progress thumb in the skeleton's top-right corner. */
-@keyframes skeleton-progress-anim {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(200%);
-  }
-}
-.skeleton-progress {
-  width: 40%;
+.gemini-rainbow-bar {
   background: linear-gradient(
     90deg,
-    transparent,
-    oklch(0.66 0.21 270 / 0.85),
-    transparent
+    transparent 0%,
+    var(--gemini-blue) 14%,
+    var(--gemini-purple) 28%,
+    var(--gemini-pink) 42%,
+    var(--gemini-yellow) 56%,
+    var(--gemini-green) 70%,
+    var(--gemini-blue) 84%,
+    transparent 100%
   );
-  animation: skeleton-progress-anim 1.3s ease-in-out infinite;
+  background-size: 200% 100%;
+  animation: gemini-bar-flow 3.2s linear infinite;
 }
 
-/* Result card's prompt scroller — custom thin scrollbar. */
+/* ── 2. Conic ambient glow ─────────────────────────────────── */
+@keyframes gemini-ambient-rotate {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+.gemini-ambient-glow {
+  background: conic-gradient(
+    from 0deg,
+    var(--gemini-blue),
+    var(--gemini-purple),
+    var(--gemini-pink),
+    var(--gemini-yellow),
+    var(--gemini-green),
+    var(--gemini-blue)
+  );
+  animation: gemini-ambient-rotate 9s linear infinite;
+}
+
+/* ── 3. Gemini star — pulses + rotates softly ──────────────── */
+@keyframes gemini-star-pulse {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 14px rgba(155, 114, 203, 0.5));
+  }
+  50% {
+    transform: scale(1.12) rotate(22deg);
+    filter: drop-shadow(0 0 20px rgba(217, 101, 112, 0.65));
+  }
+}
+.gemini-star {
+  animation: gemini-star-pulse 2.6s ease-in-out infinite;
+}
+
+/* Halo behind the star */
+@keyframes gemini-halo-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.18);
+  }
+}
+.gemini-star-halo {
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(155, 114, 203, 0.42),
+    rgba(66, 133, 244, 0.18) 55%,
+    transparent 75%
+  );
+  animation: gemini-halo-pulse 2.6s ease-in-out infinite;
+}
+
+/* ── 4. Rotating status text — gradient-filled ─────────────── */
+@keyframes gemini-text-fade {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes gemini-text-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.gemini-status-text {
+  background-image: linear-gradient(
+    90deg,
+    var(--gemini-blue),
+    var(--gemini-purple),
+    var(--gemini-pink),
+    var(--gemini-blue)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    gemini-text-fade 0.35s ease-out,
+    gemini-text-shimmer 3.6s linear infinite;
+}
+
+/* ── 5. Bouncing dots after the text ───────────────────────── */
+@keyframes gemini-dot-bounce {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.gemini-dots > span {
+  background: linear-gradient(
+    135deg,
+    var(--gemini-blue),
+    var(--gemini-purple)
+  );
+}
+.gemini-dots > span:nth-child(1) {
+  animation: gemini-dot-bounce 1.4s ease-in-out infinite;
+}
+.gemini-dots > span:nth-child(2) {
+  animation: gemini-dot-bounce 1.4s ease-in-out 0.16s infinite;
+  background: linear-gradient(
+    135deg,
+    var(--gemini-purple),
+    var(--gemini-pink)
+  );
+}
+.gemini-dots > span:nth-child(3) {
+  animation: gemini-dot-bounce 1.4s ease-in-out 0.32s infinite;
+  background: linear-gradient(
+    135deg,
+    var(--gemini-pink),
+    var(--gemini-yellow)
+  );
+}
+
+/* ── 6. Streaming text lines — fade-in left-to-right ───────── */
+@keyframes gemini-stream-shimmer {
+  0% {
+    background-position: -200% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+@keyframes gemini-stream-reveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.gemini-stream-line {
+  background-color: oklch(0.95 0 0 / 0.06);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(66, 133, 244, 0.18) 22%,
+    rgba(155, 114, 203, 0.22) 50%,
+    rgba(217, 101, 112, 0.18) 78%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation:
+    gemini-stream-reveal 0.5s ease-out both,
+    gemini-stream-shimmer 2.4s ease-in-out infinite;
+}
+:root:not(.dark) .gemini-stream-line {
+  background-color: oklch(0.6 0.02 270 / 0.08);
+}
+
+/* ── 7. Footer "live" pulse dot ────────────────────────────── */
+@keyframes gemini-pulse-dot {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+    box-shadow: 0 0 0 0 rgba(52, 168, 83, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 8px 2px rgba(52, 168, 83, 0.4);
+  }
+}
+.gemini-pulse-dot {
+  background: var(--gemini-green);
+  animation: gemini-pulse-dot 1.8s ease-in-out infinite;
+}
+
+/* ── Reduced motion: silence everything but keep visible ──── */
+@media (prefers-reduced-motion: reduce) {
+  .gemini-rainbow-bar,
+  .gemini-ambient-glow,
+  .gemini-star,
+  .gemini-star-halo,
+  .gemini-status-text,
+  .gemini-dots > span,
+  .gemini-stream-line,
+  .gemini-pulse-dot {
+    animation: none !important;
+  }
+  .gemini-status-text {
+    color: var(--gemini-purple);
+  }
+}
+
+/* ─── Result card's prompt scroller — custom thin scrollbar */
 .result-prompt-scroll {
   scrollbar-width: thin;
   scrollbar-color: oklch(0.66 0.21 270 / 0.4) transparent;
