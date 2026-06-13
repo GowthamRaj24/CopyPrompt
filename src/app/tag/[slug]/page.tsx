@@ -8,14 +8,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoadMorePromptGrid } from "@/components/prompt/LoadMorePromptGrid";
+import { EditorialIntro } from "@/components/seo/EditorialIntro";
 import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  getModelEditorial,
+  getTagEditorial,
+  MIN_TAG_PROMPTS_FOR_INDEX,
+} from "@/lib/seo/editorial";
 import {
   breadcrumbListJsonLd,
   collectionPageJsonLd,
   itemListJsonLd,
 } from "@/lib/seo/jsonld";
 import { PAGINATION } from "@/server/config/constants";
-import { getPromptsByTagPage, getTagBySlug } from "@/server/services/tag.service";
+import {
+  countPublishedPromptsForTag,
+  getPromptsByTagPage,
+  getTagBySlug,
+} from "@/server/services/tag.service";
 
 export const revalidate = 300;
 
@@ -31,12 +41,16 @@ export async function generateMetadata({
   const tag = await getTagBySlug(slug);
   if (!tag) return { title: "Tag not found" };
 
+  const promptCount = await countPublishedPromptsForTag(tag.id);
+  const indexable = promptCount >= MIN_TAG_PROMPTS_FOR_INDEX;
+
   const title = `#${tag.name} AI prompts — free for ChatGPT, Midjourney & more`;
-  const description = `Browse free, copy-paste-ready prompts tagged #${tag.name.toLowerCase()} for ChatGPT, Claude, Midjourney, Flux, Gemini and every major AI tool.`;
+  const description = `Browse ${promptCount} free, copy-paste-ready prompts tagged #${tag.name.toLowerCase()} for ChatGPT, Claude, Midjourney, Flux, Gemini and every major AI tool.`;
 
   return {
     title: `#${tag.name} prompts`,
     description,
+    robots: indexable ? { index: true, follow: true } : { index: false, follow: true },
     keywords: [
       `${tag.name} prompts`,
       `${tag.name} AI prompts`,
@@ -57,6 +71,8 @@ export default async function TagPage({ params, searchParams }: PageProps) {
 
   const tag = await getTagBySlug(slug);
   if (!tag) notFound();
+
+  const promptCount = await countPublishedPromptsForTag(tag.id);
 
   const { results, hasMore } = await getPromptsByTagPage({
     tagId: tag.id,
@@ -130,13 +146,17 @@ export default async function TagPage({ params, searchParams }: PageProps) {
               — copy and paste for any AI tool.
             </p>
             <p className="mt-2 text-[12px] text-muted-foreground">
-              {results.length === 0
+              {promptCount === 0
                 ? "No prompts yet"
-                : `${results.length.toLocaleString()} ${results.length === 1 ? "prompt" : "prompts"}`}
+                : `${promptCount.toLocaleString()} ${promptCount === 1 ? "prompt" : "prompts"}`}
             </p>
           </div>
           <SortTabs slug={tag.slug} sort={sort} basePath="tag" />
         </header>
+
+        <EditorialIntro
+          paragraphs={getTagEditorial(tag.name, promptCount)}
+        />
 
         {results.length === 0 ? (
           <EmptyState />

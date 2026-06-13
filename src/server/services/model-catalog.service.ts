@@ -147,6 +147,17 @@ export async function getPromptsByModelPage(options: {
   return { results, page, pageSize, hasMore };
 }
 
+/** Published prompt count for a model — editorial + header stats. */
+export async function countPublishedPromptsForModel(
+  modelId: string,
+): Promise<number> {
+  const [row] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(prompts)
+    .where(and(eq(prompts.modelId, modelId), publicPublishedWhere()));
+  return row?.c ?? 0;
+}
+
 /** Models with at least one published prompt. */
 export async function getIndexableModels(): Promise<
   Array<{

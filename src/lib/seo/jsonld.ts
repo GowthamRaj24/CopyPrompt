@@ -458,3 +458,38 @@ export function collectionPageJsonLd(opts: {
     isPartOf: { "@id": `${getSiteUrl()}/#website` },
   };
 }
+
+/**
+ * Article — editorial guides and long-form content pages.
+ */
+export function articleJsonLd(opts: {
+  url: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+}) {
+  const pageUrl = abs(opts.url);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${pageUrl}#article`,
+    url: pageUrl,
+    headline: opts.headline,
+    description: opts.description,
+    datePublished: opts.datePublished,
+    author: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: getSiteUrl(),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: abs("/logo.png"),
+      },
+    },
+    isPartOf: { "@id": `${getSiteUrl()}/#website` },
+  };
+}

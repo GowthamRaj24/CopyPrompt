@@ -4,10 +4,10 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy",
   description:
-    "How mycopyprompt collects, uses, and stores your data. Short version: we collect almost nothing.",
+    "How mycopyprompt collects, uses, and stores your data — including cookies used for Google AdSense advertising.",
 };
 
-const LAST_UPDATED = "May 11, 2026";
+const LAST_UPDATED = "June 13, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -31,9 +31,10 @@ export default function PrivacyPage() {
         <div className="prose space-y-6 text-[15px] leading-[1.75] text-foreground/90">
           <Section title="The short version">
             <p>
-              mycopyprompt is free and ad-free. We don&apos;t sell your data.
-              We don&apos;t track you across the web. We collect the bare
-              minimum needed to run the service.
+              mycopyprompt is free to use. We may show ads through Google
+              AdSense to help cover hosting costs. We don&apos;t sell your
+              personal data. We collect only what we need to run the service
+              and measure aggregate usage.
             </p>
           </Section>
 
@@ -43,8 +44,8 @@ export default function PrivacyPage() {
                 <strong className="font-semibold text-foreground">
                   Anonymous browsing:
                 </strong>{" "}
-                page views and copy counts, in aggregate. No cookies, no
-                fingerprints.
+                page views and copy counts, in aggregate. We do not build
+                cross-site profiles of anonymous visitors.
               </li>
               <li>
                 <strong className="font-semibold text-foreground">
@@ -68,20 +69,64 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
+          <Section title="Cookies and advertising">
+            <p>
+              Google AdSense may set cookies or use similar technologies to
+              serve and measure ads, including personalized ads where
+              permitted by law. Third-party vendors, including Google, use
+              cookies to serve ads based on your prior visits to this site
+              or other sites.
+            </p>
+            <p className="mt-3">
+              You can opt out of personalized advertising by visiting{" "}
+              <a
+                href="https://www.google.com/settings/ads"
+                className="link-underline text-primary"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Google Ads Settings
+              </a>{" "}
+              or{" "}
+              <a
+                href="https://www.aboutads.info/choices/"
+                className="link-underline text-primary"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                aboutads.info
+              </a>
+              .
+            </p>
+            <p className="mt-3">
+              Learn how Google uses data from partner sites:{" "}
+              <a
+                href="https://policies.google.com/technologies/partner-sites"
+                className="link-underline text-primary"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Google partner sites policy
+              </a>
+              .
+            </p>
+          </Section>
+
           <Section title="What we don't do">
             <ul className="ml-5 list-disc space-y-2">
-              <li>We don&apos;t use ad-tracking cookies.</li>
-              <li>We don&apos;t sell your data to anyone.</li>
-              <li>We don&apos;t share your email with partners.</li>
+              <li>We don&apos;t sell your personal data to anyone.</li>
+              <li>We don&apos;t share your email with marketing partners.</li>
               <li>We don&apos;t send marketing emails you didn&apos;t ask for.</li>
             </ul>
           </Section>
 
           <Section title="Third-party services">
             <p>
-              Authentication is handled by Supabase. Verification + reset
-              emails are sent via SMTP through Gmail. The site is hosted
-              on Vercel.
+              Authentication is handled by Supabase. Verification and reset
+              emails are sent via SMTP. The site is hosted on Vercel.
+              Advertising is served by Google AdSense (Google Ireland Limited
+              / Google LLC). Analytics may include Vercel Analytics and
+              Speed Insights.
             </p>
           </Section>
 

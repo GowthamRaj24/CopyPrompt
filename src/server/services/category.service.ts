@@ -193,6 +193,16 @@ export async function getPromptsByCategoryPage(options: {
   return { results, page, pageSize, hasMore };
 }
 
+export async function countPublishedPromptsForCategory(
+  categoryId: string,
+): Promise<number> {
+  const [row] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(prompts)
+    .where(and(eq(prompts.categoryId, categoryId), publicPublishedWhere()));
+  return row?.c ?? 0;
+}
+
 /** @deprecated Use getPromptsByCategoryPage — kept for callers that need a fixed cap. */
 export async function getPromptsByCategory(options: {
   categoryId: string;
@@ -224,4 +234,17 @@ export async function getAllCategories(): Promise<
     })
     .from(categories)
     .orderBy(asc(categories.name));
+}
+
+/** Categories with at least one published prompt — sitemap + crawl budget. */
+export async function getIndexableCategorySlugs(): Promise<Array<{ slug: string }>> {
+  const rows = await db
+    .select({ slug: categories.slug })
+    .from(categories)
+    .innerJoin(prompts, eq(prompts.categoryId, categories.id))
+    .where(publicPublishedWhere())
+    .groupBy(categories.id, categories.slug)
+    .having(sql`count(${prompts.id}) > 0`);
+
+  return rows;
 }

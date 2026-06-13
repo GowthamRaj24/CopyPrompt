@@ -147,6 +147,7 @@ export function SubmitForm({
   const categorySlug = watch("categorySlug");
   const expectedOutcomeValue =
     (watch("expectedOutcome" as never) as unknown as string | undefined) ?? "";
+  const tipsValue = watch("tips") ?? "";
 
   function handleTypeChange(newType: "image" | "text") {
     setType(newType);
@@ -457,6 +458,33 @@ export function SubmitForm({
                   : "advisor, validation…"
               }
             />
+          </Field>
+
+          <Field
+            label="Curator note"
+            required
+            hint="2–3 sentences: when to use this prompt, what to tweak, common pitfalls."
+            error={errors.tips?.message}
+            counter={`${tipsValue.length}/1000`}
+            counterAlert={
+              tipsValue.length > 0 && tipsValue.length < 50
+                ? "need 50+"
+                : undefined
+            }
+          >
+            <div className="submit-editor p-3 sm:p-4">
+              <Textarea
+                {...register("tips")}
+                maxLength={1000}
+                rows={4}
+                className="autosize min-h-[100px] resize-none text-[13px] leading-relaxed"
+                placeholder={
+                  type === "image"
+                    ? "Best at 16:9. Lower guidance if skin looks waxy. Swap {SUBJECT} first before changing lighting…"
+                    : "Run once with your metrics filled in. Lower temperature if outputs ramble. Works best with GPT-4o…"
+                }
+              />
+            </div>
           </Field>
         </StudioPanel>
 

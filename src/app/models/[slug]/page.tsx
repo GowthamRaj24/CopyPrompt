@@ -9,7 +9,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoadMorePromptGrid } from "@/components/prompt/LoadMorePromptGrid";
+import { EditorialIntro } from "@/components/seo/EditorialIntro";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getModelEditorial } from "@/lib/seo/editorial";
 import {
   breadcrumbListJsonLd,
   collectionPageJsonLd,
@@ -17,6 +19,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { PAGINATION } from "@/server/config/constants";
 import {
+  countPublishedPromptsForModel,
   getModelBySlug,
   getPromptsByModelPage,
 } from "@/server/services/model-catalog.service";
@@ -66,6 +69,8 @@ export default async function ModelPage({ params, searchParams }: PageProps) {
 
   const model = await getModelBySlug(slug);
   if (!model) notFound();
+
+  const promptCount = await countPublishedPromptsForModel(model.id);
 
   const { results, hasMore } = await getPromptsByModelPage({
     modelId: model.id,
@@ -144,13 +149,22 @@ export default async function ModelPage({ params, searchParams }: PageProps) {
               . One click to copy.
             </p>
             <p className="mt-2 text-[12px] text-muted-foreground">
-              {results.length === 0
+              {promptCount === 0
                 ? "No prompts yet"
-                : `${results.length.toLocaleString()} ${results.length === 1 ? "prompt" : "prompts"}`}
+                : `${promptCount.toLocaleString()} ${promptCount === 1 ? "prompt" : "prompts"}`}
             </p>
           </div>
           <SortTabs slug={model.slug} sort={sort} />
         </header>
+
+        <EditorialIntro
+          paragraphs={getModelEditorial(
+            model.slug,
+            model.name,
+            model.type,
+            promptCount,
+          )}
+        />
 
         {results.length === 0 ? (
           <EmptyState modelName={model.name} />

@@ -1,7 +1,8 @@
+import { getAllGuideSlugs } from "@/lib/guides/content";
 import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import type { MetadataRoute } from "next";
 import { db } from "@/server/lib/db";
-import { categories } from "@/server/models/category.model";
+import { getIndexableCategorySlugs } from "@/server/services/category.service";
 import { prompts } from "@/server/models/prompt.model";
 import { getIndexableCollectionSlugs } from "@/server/services/collection.service";
 import { listIndexableCreatorHandles } from "@/server/services/creator.service";
@@ -66,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
     safeQuery(
       "categories",
-      () => db.select({ slug: categories.slug }).from(categories),
+      () => getIndexableCategorySlugs(),
       [],
     ),
     safeQuery("tags", () => getAllTagSlugsForSitemap(), []),
@@ -104,16 +105,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     },
     {
-      url: `${BASE_URL}/search?type=image`,
+      url: `${BASE_URL}/guides`,
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "weekly",
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/search?type=text`,
+      url: `${BASE_URL}/contact`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.7,
+      changeFrequency: "yearly",
+      priority: 0.35,
+    },
+    {
+      url: `${BASE_URL}/generate`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.55,
     },
     {
       url: `${BASE_URL}/submit`,
@@ -199,8 +206,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.55,
   }));
 
+  const guideRoutes: MetadataRoute.Sitemap = getAllGuideSlugs().map((slug) => ({
+    url: `${BASE_URL}/guides/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.65,
+  }));
+
   return [
     ...staticRoutes,
+    ...guideRoutes,
     ...categoryRoutes,
     ...modelRoutes,
     ...tagRoutes,

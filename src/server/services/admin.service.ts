@@ -142,6 +142,24 @@ export async function approveSubmission(
 
   const data = submission.promptData as PendingSubmissionListItem["promptData"];
 
+  if (!data.tips?.trim() || data.tips.trim().length < 50) {
+    throw new Error(
+      "Submission missing curator note (tips) — at least 50 characters required",
+    );
+  }
+  if (
+    data.type === "text" &&
+    (!data.expectedOutcome?.trim() || data.expectedOutcome.trim().length < 20)
+  ) {
+    throw new Error("Text submission missing sample output (expectedOutcome)");
+  }
+  if (
+    data.type === "image" &&
+    (!data.imageUrls || data.imageUrls.length === 0)
+  ) {
+    throw new Error("Image submission missing proof images");
+  }
+
   // Look up model + category by slug
   const [model] = await db
     .select({ id: models.id })

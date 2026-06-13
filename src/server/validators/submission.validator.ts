@@ -42,7 +42,14 @@ const baseSchema = {
     .max(5, "Maximum 5 tags")
     .optional()
     .default([]),
-  tips: z.string().max(1000, "Tips too long").optional(),
+  tips: z
+    .string()
+    .min(
+      50,
+      "Add a curator note (at least 50 characters) — when to use this prompt and what to tweak",
+    )
+    .max(1000, "Curator note too long")
+    .trim(),
   /**
    * Optional source prompt id when this submission was remixed from
    * an existing approved prompt. Validated as a UUID; the approve

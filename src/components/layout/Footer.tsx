@@ -40,9 +40,11 @@ export function Footer() {
             <FooterColumn
               title="Product"
               links={[
+                { href: "/guides", label: "Guides" },
                 { href: "/submit", label: "Submit" },
                 { href: "/contributors", label: "Contributors" },
                 { href: "/about", label: "About" },
+                { href: "/contact", label: "Contact" },
                 { href: "/changelog", label: "Changelog" },
               ]}
             />

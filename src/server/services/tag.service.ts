@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { cache } from "react";
 import { pageOffset, slicePage } from "@/lib/pagination";
 import { publicPublishedWhere } from "@/lib/prompt-visibility";
+import { MIN_TAG_PROMPTS_FOR_INDEX } from "@/lib/seo/editorial";
 import { PAGINATION } from "@/server/config/constants";
 import { db } from "@/server/lib/db";
 import { images } from "@/server/models/image.model";
@@ -31,6 +32,16 @@ export const getTagBySlug = cache(
     return row ?? null;
   },
 );
+
+/** Published prompt count for a tag — used for editorial + indexability. */
+export async function countPublishedPromptsForTag(tagId: string): Promise<number> {
+  const [row] = await db
+    .select({ c: sql<number>`count(distinct ${prompts.id})::int` })
+    .from(promptTags)
+    .innerJoin(prompts, eq(prompts.id, promptTags.promptId))
+    .where(and(eq(promptTags.tagId, tagId), publicPublishedWhere()));
+  return row?.c ?? 0;
+}
 
 const tagListColumns = {
   id: prompts.id,
@@ -183,7 +194,7 @@ export async function getAllTagSlugsForSitemap(): Promise<
     .innerJoin(prompts, eq(prompts.id, promptTags.promptId))
     .where(publicPublishedWhere())
     .groupBy(tags.id, tags.slug)
-    .having(sql`count(${prompts.id}) >= 3`);
+    .having(sql`count(${prompts.id}) >= ${MIN_TAG_PROMPTS_FOR_INDEX}`);
 
   return rows;
 }

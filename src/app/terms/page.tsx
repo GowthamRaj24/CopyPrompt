@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "The terms governing your use of mycopyprompt — short, fair, and written in plain English.",
 };
 
-const LAST_UPDATED = "May 11, 2026";
+const LAST_UPDATED = "June 13, 2026";
 
 export default function TermsPage() {
   return (
@@ -59,6 +59,18 @@ export default function TermsPage() {
               every submission, but we&apos;re not perfect. If you find a
               prompt that violates our rules, email us and we&apos;ll
               remove it.
+            </p>
+          </Section>
+
+          <Section title="Advertising">
+            <p>
+              mycopyprompt may display third-party advertisements (including
+              Google AdSense) to help cover operating costs. Ads may use
+              cookies as described in our{" "}
+              <Link href="/privacy" className="link-underline text-primary">
+                Privacy policy
+              </Link>
+              . We do not endorse products or services shown in ads.
             </p>
           </Section>
 

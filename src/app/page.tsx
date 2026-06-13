@@ -12,6 +12,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { BrowseSeoSection } from "@/components/home/BrowseSeoSection";
 import { HeroGenerateCta } from "@/components/home/HeroGenerateCta";
+import { HomeGuidesSection } from "@/components/home/HomeGuidesSection";
 import { RecentlyCopiedRail } from "@/components/home/RecentlyCopiedRail";
 import { SubmitPromptCta } from "@/components/home/SubmitPromptCta";
 
@@ -490,6 +491,7 @@ export default async function HomePage() {
       )}
 
       <HomepageFaqSection faqs={HOMEPAGE_FAQS} />
+      <HomeGuidesSection />
     </>
   );
 }

@@ -8,13 +8,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoadMorePromptGrid } from "@/components/prompt/LoadMorePromptGrid";
+import { EditorialIntro } from "@/components/seo/EditorialIntro";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getCategoryEditorial } from "@/lib/seo/editorial";
 import {
   breadcrumbListJsonLd,
   collectionPageJsonLd,
   itemListJsonLd,
 } from "@/lib/seo/jsonld";
 import {
+  countPublishedPromptsForCategory,
   getCategoryBySlug,
   getPromptsByCategoryPage,
 } from "@/server/services/category.service";
@@ -82,6 +85,8 @@ export default async function CategoryPage({
 
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
+
+  const promptCount = await countPublishedPromptsForCategory(category.id);
 
   const { results, hasMore } = await getPromptsByCategoryPage({
     categoryId: category.id,
@@ -200,15 +205,23 @@ export default async function CategoryPage({
               </p>
             )}
             <p className="mt-2 text-[12px] text-muted-foreground">
-              {results.length === 0
+              {promptCount === 0
                 ? "No prompts yet"
-                : `${results.length.toLocaleString()} ${results.length === 1 ? "prompt" : "prompts"}`}
+                : `${promptCount.toLocaleString()} ${promptCount === 1 ? "prompt" : "prompts"}`}
             </p>
           </div>
 
           {/* Sort */}
           <SortTabs slug={category.slug} sort={sort} />
         </header>
+
+        <EditorialIntro
+          paragraphs={getCategoryEditorial(
+            category.slug,
+            category.name,
+            category.description,
+          )}
+        />
 
         {/* Grid */}
         {results.length === 0 ? (
