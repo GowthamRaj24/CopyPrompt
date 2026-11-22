@@ -61,7 +61,7 @@ export function organizationJsonLd(opts?: { sameAs?: string[] }) {
     description: SITE_TAGLINE,
     logo: {
       "@type": "ImageObject",
-      url: abs("/logo.png"),
+      url: abs("/logo_transparent.png"),
       width: 512,
       height: 512,
     },
@@ -487,7 +487,7 @@ export function articleJsonLd(opts: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: abs("/logo.png"),
+        url: abs("/logo_transparent.png"),
       },
     },
     isPartOf: { "@id": `${getSiteUrl()}/#website` },

@@ -39,9 +39,22 @@ const nextConfig: NextConfig = {
     const ONE_YEAR = "public, max-age=31536000, immutable";
     return [
       {
+        // ads.txt — served fresh for ad-network crawlers. Short cache
+        // ensures Google AdSense re-reads it quickly when changed, while
+        // s-w-r keeps the CDN warm for concurrent bot hits.
+        source: "/ads.txt",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, stale-while-revalidate=86400",
+          },
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+        ],
+      },
+      {
         // Hashed app icons + apple-touch icon — content rarely changes,
         // and when it does we ship a new filename. Safe to cache forever.
-        source: "/:file(favicon\\.ico|apple-icon\\.png|icon-32\\.png|icon-192\\.png|icon-512\\.png|logo\\.png)",
+        source: "/:file(favicon\\.ico|apple-icon\\.png|icon-32\\.png|icon-192\\.png|icon-512\\.png|logo_transparent\\.png)",
         headers: [{ key: "Cache-Control", value: ONE_YEAR }],
       },
       {
