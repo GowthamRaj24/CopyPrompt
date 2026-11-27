@@ -1,3 +1,4 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { cache } from "react";
 import { pageOffset, slicePage } from "@/lib/pagination";
@@ -191,7 +192,7 @@ export async function getUserFavoritesPage(
           .from(images)
           .where(
             and(
-              eq(images.isPrimary, true),
+              eq(images.isPrimary, true), realImagesOnly(),
               inArray(images.promptId, imagePromptIds),
             ),
           )

@@ -117,7 +117,7 @@ const MODEL_EDITORIAL: Record<string, string[]> = {
     "Browse for marketing visuals and conceptual illustrations where OpenAI safety filters apply; curator notes flag common refusal triggers to rephrase.",
   ],
   "stable-diffusion-xl": [
-    "SDXL prompts may include weight syntax and LoRA-friendly trigger words. This collection notes base model assumptions and recommended samplers where curators tested them.",
+    "SDXL prompts may include weight syntax and LoRA-friendly trigger words. This collection notes base model assumptions and recommended samplers where available.",
     "Copy prompts into Automatic1111, ComfyUI, or hosted SDXL endpoints — adjust CFG and steps per the embedded parameter block.",
   ],
   "stable-diffusion-3": [
@@ -157,7 +157,7 @@ const MODEL_EDITORIAL: Record<string, string[]> = {
     "Essential for event graphics and merch mockups; specify font mood even if exact spelling is edited later in design tools.",
   ],
   "leonardo-ai": [
-    "Leonardo AI prompts include platform-specific preset hints and Alchemy settings where curators tested them. Reference images demonstrate preset + prompt pairings.",
+    "Leonardo AI prompts include platform-specific preset hints and Alchemy settings where available.",
     "Browse for game assets and stylized illustration batches.",
   ],
   "adobe-firefly": [
@@ -193,7 +193,7 @@ function modelFallback(
 ): string[] {
   const kind = type === "image" ? "image generation" : "chat and text";
   return [
-    `These ${promptCount} prompts are built specifically for ${name} — ${kind} workflows tested by contributors and curators. Copy any template in one click and paste it directly into ${name}.`,
+    `These ${promptCount} prompts are built specifically for ${name} — ${kind} workflows reviewed before publication. Copy any template in one click and paste it directly into ${name}.`,
     "Popular sort surfaces prompts with the most copies and saves; Latest shows newly approved entries. Read curator notes before changing parameters — they often document temperature, aspect ratio, or safety rephrases that matter for this model.",
   ];
 }

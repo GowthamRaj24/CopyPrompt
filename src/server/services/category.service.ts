@@ -1,3 +1,4 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
@@ -123,7 +124,7 @@ async function mapCategoryRows(
           .from(images)
           .where(
             and(
-              eq(images.isPrimary, true),
+              eq(images.isPrimary, true), realImagesOnly(),
               inArray(images.promptId, imagePromptIds),
             ),
           )

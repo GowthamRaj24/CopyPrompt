@@ -122,9 +122,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  alternates: {
-    canonical: "/",
-  },
+  // No site-wide canonical here: a layout-level canonical is inherited by
+  // every page that doesn't override it, which made /search, /submit, etc.
+  // declare themselves duplicates of the homepage. Each page sets its own.
   icons: {
     icon: [
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
@@ -162,21 +162,6 @@ export default function RootLayout({
             webSiteJsonLd(),
             softwareApplicationJsonLd(),
           ]}
-        />
-
-        {/* Image hosts on the public surface area:
-              - fastly.picsum.photos serves the actual placeholder JPGs
-                (picsum.photos redirects there, so we only preconnect
-                the destination — Lighthouse flagged the picsum origin
-                as an unused preconnect)
-            We avoid preconnecting Supabase storage from the root layout
-            because not every page renders Supabase-hosted images; the
-            pages that do can opt-in individually. */}
-        <link rel="dns-prefetch" href="https://fastly.picsum.photos" />
-        <link
-          rel="preconnect"
-          href="https://fastly.picsum.photos"
-          crossOrigin="anonymous"
         />
 
         {/* Google AdSense site verification — the meta-tag method.

@@ -16,7 +16,10 @@ type CollectionTile = Awaited<
   ReturnType<typeof listCuratedCollections>
 >[number];
 
-export const metadata: Metadata = {
+/** Below this many public collections the index page is too thin to index. */
+const MIN_INDEXABLE_COLLECTIONS = 3;
+
+const baseMetadata: Metadata = {
   title: "Curated prompt collections",
   description: `Hand-picked AI prompt playbooks on ${SITE_BRAND.displayName} — themed boards for every workflow.`,
   alternates: { canonical: `https://${getSiteHostname()}/collections` },
@@ -27,6 +30,24 @@ export const metadata: Metadata = {
     siteName: SITE_BRAND.name,
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [curated, popular] = await Promise.all([
+    safeQuery(
+      "curated-meta",
+      () => listCuratedCollections(MIN_INDEXABLE_COLLECTIONS),
+      [] as Awaited<ReturnType<typeof listCuratedCollections>>,
+    ),
+    safeQuery(
+      "popular-meta",
+      () => listPopularPublicCollections(MIN_INDEXABLE_COLLECTIONS),
+      [] as Awaited<ReturnType<typeof listPopularPublicCollections>>,
+    ),
+  ]);
+  return curated.length + popular.length >= MIN_INDEXABLE_COLLECTIONS
+    ? baseMetadata
+    : { ...baseMetadata, robots: { index: false, follow: true } };
+}
 
 export const revalidate = 600;
 

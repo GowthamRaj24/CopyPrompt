@@ -6,7 +6,10 @@ import { formatCount } from "@/lib/format";
 import { SITE_BRAND, getSiteHostname } from "@/lib/site-brand";
 import { listContributorLeaderboard } from "@/server/services/contributor.service";
 
-export const metadata: Metadata = {
+/** Below this many ranked creators the leaderboard is too thin to index. */
+const MIN_INDEXABLE_CONTRIBUTORS = 5;
+
+const baseMetadata: Metadata = {
   title: "Top contributors",
   description: `The creators behind the most-copied prompts on ${SITE_BRAND.displayName}.`,
   alternates: {
@@ -19,6 +22,17 @@ export const metadata: Metadata = {
     siteName: SITE_BRAND.name,
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const entries = await safeQuery(
+    "leaderboard-meta",
+    () => listContributorLeaderboard(MIN_INDEXABLE_CONTRIBUTORS),
+    [] as Awaited<ReturnType<typeof listContributorLeaderboard>>,
+  );
+  return entries.length >= MIN_INDEXABLE_CONTRIBUTORS
+    ? baseMetadata
+    : { ...baseMetadata, robots: { index: false, follow: true } };
+}
 
 export const revalidate = 600;
 

@@ -5,12 +5,24 @@ import { usePathname } from "next/navigation";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ADSENSE_CLIENT, ADSENSE_SLOTS } from "@/lib/adsense";
 
+/**
+ * No ads on auth/admin screens, private/utility screens, or community pages
+ * that are still thin — Google disallows ads on screens without substantial
+ * publisher content, and these pages are mostly forms or empty lists.
+ */
 const HIDE_PREFIXES = [
   "/signin",
   "/signup",
   "/forgot-password",
   "/reset-password",
   "/admin",
+  "/account",
+  "/favorites",
+  "/submit",
+  "/s/",
+  "/u/",
+  "/contributors",
+  "/collections",
 ];
 
 type SlotKey = "display" | "multiplex";

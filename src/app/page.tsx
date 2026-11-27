@@ -1,4 +1,5 @@
 import { asc, count, isNull } from "drizzle-orm";
+import type { Metadata } from "next";
 import {
   ArrowRightIcon,
   EyeIcon,
@@ -79,6 +80,14 @@ import { getIndexableTags } from "@/server/services/tag.service";
  *   memory in single-digit ms.
  */
 export const revalidate = 1800;
+
+export const metadata: Metadata = {
+  title: {
+    absolute:
+      "Free AI Prompts for ChatGPT, Claude, Gemini & Midjourney | My Copyprompt",
+  },
+  alternates: { canonical: "/" },
+};
 
 // Cached, tagged versions of the per-rail queries. The TTL on each is
 // the same as the route revalidate so they expire together — but tags
@@ -161,7 +170,7 @@ const HOMEPAGE_FAQS = [
   {
     question: "What is mycopyprompt?",
     answer:
-      "mycopyprompt is a free, curated library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is human-reviewed, tagged, and tested before publication.",
+      "mycopyprompt is a free, curated library of copy-paste-ready prompts for ChatGPT, Claude, Midjourney, Flux, Gemini and every other major AI tool. Every prompt is reviewed and categorized before it goes live, and each one is labeled with the model it was written for.",
   },
   {
     question: "Is mycopyprompt free?",

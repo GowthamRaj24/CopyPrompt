@@ -1,3 +1,4 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { and, count, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { publicPublishedWhere } from "@/lib/prompt-visibility";
 import {
@@ -220,7 +221,7 @@ export async function findDigestMatches(
           })
           .from(images)
           .where(
-            and(eq(images.isPrimary, true), inArray(images.promptId, imageIds)),
+            and(eq(images.isPrimary, true), realImagesOnly(), inArray(images.promptId, imageIds)),
           )
       : [];
 

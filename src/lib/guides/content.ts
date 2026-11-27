@@ -156,7 +156,7 @@ Flux often needs **short negatives** ("no watermark, no text overlay") rather th
 
 ## Library starting points
 
-Browse [Flux Dev](/models/flux-dev), [Flux Schnell](/models/flux-schnell), and [Flux Pro](/models/flux-pro) collections on My Copyprompt — each listing includes parameters where curators tested them.
+Browse [Flux Dev](/models/flux-dev), [Flux Schnell](/models/flux-schnell), and [Flux Pro](/models/flux-pro) collections on My Copyprompt — each listing includes the recommended parameters.
 
 ## Submitting Flux prompts
 
@@ -266,7 +266,7 @@ Submissions without proof are unlikely to be approved.
     publishedAt: "2026-06-06",
     body: `## What My Copyprompt is
 
-My Copyprompt is a **curated prompt library**, not a model host. We do not run ChatGPT or Midjourney for you — we store battle-tested prompts, usage notes, and proof so you can copy them into your own tools in one click.
+My Copyprompt is a **curated prompt library**, not a model host. We do not run ChatGPT or Midjourney for you — we store reviewed prompts, usage notes, and sample outputs so you can copy them into your own tools in one click.
 
 ## Find prompts
 

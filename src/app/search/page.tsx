@@ -36,7 +36,15 @@ export async function generateMetadata({
 }: SearchPageProps): Promise<Metadata> {
   const sp = await searchParams;
   const query = sp.q?.trim();
+  // Filtered / paginated result pages are internal search results —
+  // keep them out of the index (Google's guidance) but let crawlers
+  // follow through to the prompts. The bare /search listing stays indexable.
+  const hasParams = Object.values(sp).some(
+    (v) => v !== undefined && v !== "",
+  );
   return {
+    alternates: { canonical: "/search" },
+    ...(hasParams ? { robots: { index: false, follow: true } } : {}),
     title: query ? `Search: "${query}"` : "Search prompts",
     description: query
       ? `Find AI prompts for "${query}" — for every AI tool, free forever.`

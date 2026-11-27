@@ -21,7 +21,6 @@ import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { categories } from "../src/server/models/category.model";
-import { images } from "../src/server/models/image.model";
 import { models } from "../src/server/models/model.model";
 import { promptTags } from "../src/server/models/prompt-tag.model";
 import { prompts } from "../src/server/models/prompt.model";
@@ -77,15 +76,6 @@ function listDataFiles(): string[] {
 
 const pg = postgres(process.env.DATABASE_URL, { max: 1, prepare: false });
 const db = drizzle(pg);
-
-/**
- * Build a stable HTTPS placeholder image URL from a seed string.
- * Picsum keeps the same image for the same seed, so the catalog
- * is visually consistent across re-seeds.
- */
-function picsumUrl(seed: string, size = 800): string {
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${size}/${size}`;
-}
 
 async function main() {
   const files = listDataFiles();
@@ -163,21 +153,8 @@ async function main() {
 
     if (!newPrompt) continue;
 
-    // Insert placeholder images for image-type prompts.
-    if (p.type === "image" && p.imageSeeds && p.imageSeeds.length > 0) {
-      await db.insert(images).values(
-        p.imageSeeds.map((seed, idx) => ({
-          promptId: newPrompt.id,
-          r2Key: `seed/${p.slug}-${idx}.jpg`,
-          cdnUrl: picsumUrl(seed),
-          width: 800,
-          height: 800,
-          alt: `${p.title} — example ${idx + 1}`,
-          position: idx,
-          isPrimary: idx === 0,
-        })),
-      );
-    }
+    // No placeholder images: random stock photos are not outputs of the
+    // prompt and misrepresent it. Real sample images are added separately.
 
     // Upsert tags + insert junctions. Same logic as the admin-approval
     // flow so curated prompts feel identical to community-submitted ones.

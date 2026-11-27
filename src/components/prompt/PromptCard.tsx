@@ -84,7 +84,9 @@ export function PromptCard({
       <div className="card-inner-glow" aria-hidden />
 
       {/* ── Visual region ── */}
-      {isImage ? (
+      {/* Image prompts without a real sample image fall back to the
+          prompt-text preview rather than an empty placeholder box. */}
+      {isImage && prompt.primaryImage ? (
         <ImageVisual
           prompt={prompt}
           unoptimized={unoptimizedImage}
@@ -108,7 +110,7 @@ export function PromptCard({
         </h3>
 
         {/* Excerpt — image cards show prompt text, text cards already preview above */}
-        {isImage && prompt.promptText && (
+        {isImage && prompt.primaryImage && prompt.promptText && (
           <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground/80">
             {prompt.promptText}
           </p>
