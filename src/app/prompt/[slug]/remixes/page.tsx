@@ -41,6 +41,15 @@ export async function generateMetadata({
 
 export const revalidate = 300;
 
+/**
+ * Empty list = render each path on its first visit, then serve it from the
+ * ISR cache (regenerated per `revalidate`). Without this, Next renders the
+ * route dynamically on every request.
+ */
+export async function generateStaticParams() {
+  return [];
+}
+
 export default async function PromptRemixesPage({ params }: PageProps) {
   const { slug } = await params;
   const source = await getPromptBySlug(slug);

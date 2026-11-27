@@ -2,25 +2,22 @@ import { HeartIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { type AppUser, getCurrentUser } from "@/server/lib/auth";
 import { CommandTrigger } from "./CommandTrigger";
 import { HeaderNav } from "./HeaderNav";
 import { LogoLink } from "./Logo";
 import { MobileNav } from "./MobileNav";
+import { HeaderAccount } from "./HeaderAccount";
 import { ThemeToggle } from "./ThemeToggle";
-import { UserMenu } from "./UserMenu";
 
 /**
  * Sticky top header — glass surface, pill nav, grouped actions.
+ *
+ * Deliberately does NOT read the session on the server: this component
+ * lives in the root layout, and any cookie read here makes every route
+ * dynamic (no CDN caching). The signed-in parts (`HeaderAccount`,
+ * `MobileNav`) resolve the user client-side via `CurrentUserProvider`.
  */
-export async function Header() {
-  let user: AppUser | null = null;
-  try {
-    user = await getCurrentUser();
-  } catch (err) {
-    console.error("Header auth lookup failed", err);
-  }
-
+export function Header() {
   return (
     <header className="sticky top-0 z-50">
       <div
@@ -65,24 +62,13 @@ export async function Header() {
               </Link>
             </Button>
 
-            {user ? (
-              <UserMenu user={user} />
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                asChild
-                className="magnetic h-9 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_2px_0_oklch(0_0_0/0.12),inset_0_1px_0_0_oklch(1_0_0/0.12),0_4px_14px_-4px_oklch(0.54_0.225_270/0.55)] hover:bg-primary/92"
-              >
-                <Link href="/signin">Sign in</Link>
-              </Button>
-            )}
+            <HeaderAccount />
           </div>
 
           <div className="flex items-center gap-1 md:hidden">
             <CommandTrigger mobile />
             <ThemeToggle className="size-9 rounded-lg" />
-            <MobileNav user={user} />
+            <MobileNav />
           </div>
         </div>
       </div>

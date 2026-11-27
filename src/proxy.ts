@@ -96,6 +96,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  // Anonymous visitors (the vast majority of traffic) have no Supabase
+  // session cookie, so there is nothing to refresh. Skipping the
+  // `auth.getUser()` network round-trip here saves ~100-300 ms on every
+  // request, including CDN-cacheable pages.
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+  if (!hasSessionCookie) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   let response = NextResponse.next({
     request: { headers: requestHeaders },
   });

@@ -17,8 +17,6 @@ import {
   breadcrumbListJsonLd,
   promptCreativeWorkJsonLd,
 } from "@/lib/seo/jsonld";
-import { after } from "next/server";
-import { queueViewIncrement } from "@/server/lib/counter-batcher";
 import {
   type PromptDetail,
   getPromptBySlug,
@@ -28,14 +26,25 @@ import { ActionsBar } from "./components/ActionsBar";
 import { CopyButton } from "./components/CopyButton";
 import { ImageStack } from "./components/ImageStack";
 import { ParametersList } from "./components/ParametersList";
+import { ViewBeacon } from "./components/ViewBeacon";
 
 /**
- * Per-request rendering — the page still depends on live copy/view/save
- * counts and bumps `view_count` via `next/server`'s `after()` callback.
- * Per-user state (heart + rating) is hydrated client-side, so the
- * server never queries the auth table or user-specific tables here.
+ * ISR: cached at the CDN and regenerated at most every 5 minutes, so the
+ * copy/view/save counts shown can be up to 5 minutes stale. Views are
+ * counted by the client-side `ViewBeacon` (the render no longer runs per
+ * visit). Per-user state (heart + rating) is hydrated client-side, so the
+ * page never needs to know who the visitor is.
  */
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
+
+/**
+ * Empty list = render each path on its first visit, then serve it from the
+ * ISR cache (regenerated per `revalidate`). Without this, Next renders the
+ * route dynamically on every request.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -110,13 +119,6 @@ export default async function PromptDetailPage({ params }: PageProps) {
     6,
   );
 
-  // Fire-and-forget view-count bump — pushed onto the in-memory
-  // batcher, which coalesces all view increments into a single UPDATE
-  // every few seconds. No DB round-trip on the hot path.
-  after(() => {
-    queueViewIncrement(prompt.id);
-  });
-
   const isImage = prompt.model.type === "image";
   // Placeholder stock photos are filtered out in the service layer, so
   // `images` only ever holds real, author-supplied sample outputs.
@@ -171,6 +173,7 @@ export default async function PromptDetailPage({ params }: PageProps) {
       {/* Server-rendered structured data — emitted into initial HTML so
           AI engines and crawlers see it on first byte. */}
       <JsonLd data={jsonLd} />
+      <ViewBeacon promptId={prompt.id} />
 
       {/* Subtle ambient background */}
       <div
