@@ -9,6 +9,25 @@ const QUERY_PREFIX =
   "Represent this sentence for searching relevant passages: ";
 const MAX_CHARS = 8_000;
 
+/**
+ * Options for embedding calls.
+ *
+ * `fast: true` is for request paths (page renders, search): one attempt per
+ * provider, a short per-request timeout, no retry back-off, and an overall
+ * deadline. Without it, the Hugging Face retry loop (3+6+9+12 s sleeps) held
+ * prompt pages open for ~34 s whenever the provider failed.
+ */
+export interface EmbedOptions {
+  fast?: boolean;
+}
+
+/** Overall budget for a request-path embedding call. */
+const FAST_DEADLINE_MS = 3_000;
+/** Per-provider HTTP timeout in fast mode. */
+const FAST_REQUEST_TIMEOUT_MS = 2_500;
+/** Per-provider HTTP timeout for background jobs (backfill, publish). */
+const SLOW_REQUEST_TIMEOUT_MS = 60_000;
+
 export function isEmbeddingConfigured(): boolean {
   return Boolean(env.TOGETHER_API_KEY ?? env.HF_TOKEN ?? env.JINA_API_KEY);
 }
@@ -26,23 +45,52 @@ export function buildEmbeddingText(fields: {
 }
 
 /** Embed a user search query (BGE query instruction prefix). */
-export async function embedQuery(text: string): Promise<number[]> {
+export async function embedQuery(
+  text: string,
+  opts: EmbedOptions = {},
+): Promise<number[]> {
   const trimmed = text.trim().slice(0, MAX_CHARS);
   if (!trimmed) throw new Error("embedQuery: empty text");
-  return embedText(QUERY_PREFIX + trimmed);
+  return embedText(QUERY_PREFIX + trimmed, opts);
 }
 
 /** Embed prompt content for storage / similarity (no query prefix). */
-export async function embedDocument(text: string): Promise<number[]> {
+export async function embedDocument(
+  text: string,
+  opts: EmbedOptions = {},
+): Promise<number[]> {
   const trimmed = text.trim().slice(0, MAX_CHARS);
   if (!trimmed) throw new Error("embedDocument: empty text");
-  return embedText(trimmed);
+  return embedText(trimmed, opts);
 }
 
-async function embedText(text: string): Promise<number[]> {
+async function embedText(
+  text: string,
+  opts: EmbedOptions,
+): Promise<number[]> {
+  if (!opts.fast) return embedWithFallback(text, opts);
+
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`embedding exceeded ${FAST_DEADLINE_MS}ms`)),
+      FAST_DEADLINE_MS,
+    );
+  });
+  try {
+    return await Promise.race([embedWithFallback(text, opts), deadline]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function embedWithFallback(
+  text: string,
+  opts: EmbedOptions,
+): Promise<number[]> {
   if (env.TOGETHER_API_KEY) {
     try {
-      return await embedViaTogether(text);
+      return await embedViaTogether(text, opts);
     } catch (err) {
       if (!env.HF_TOKEN) throw err;
       console.warn("[embeddings] Together failed, trying Hugging Face:", err);
@@ -50,23 +98,29 @@ async function embedText(text: string): Promise<number[]> {
   }
   if (env.HF_TOKEN) {
     try {
-      return await embedViaHuggingFace(text);
+      return await embedViaHuggingFace(text, opts);
     } catch (err) {
       if (!env.JINA_API_KEY) throw err;
       console.warn("[embeddings] Hugging Face failed, trying Jina:", err);
     }
   }
   if (env.JINA_API_KEY) {
-    return embedViaJina(text);
+    return embedViaJina(text, opts);
   }
   throw new Error(
     "No embedding API configured. Set TOGETHER_API_KEY, HF_TOKEN, or JINA_API_KEY in .env.local",
   );
 }
 
-async function embedViaJina(text: string): Promise<number[]> {
+async function embedViaJina(
+  text: string,
+  opts: EmbedOptions,
+): Promise<number[]> {
   const res = await fetch("https://api.jina.ai/v1/embeddings", {
     method: "POST",
+    signal: AbortSignal.timeout(
+      opts.fast ? FAST_REQUEST_TIMEOUT_MS : SLOW_REQUEST_TIMEOUT_MS,
+    ),
     headers: {
       Authorization: `Bearer ${env.JINA_API_KEY}`,
       "Content-Type": "application/json",
@@ -88,12 +142,17 @@ async function embedViaJina(text: string): Promise<number[]> {
   return normalizeVector(vec);
 }
 
-async function embedViaTogether(text: string): Promise<number[]> {
+async function embedViaTogether(
+  text: string,
+  opts: EmbedOptions,
+): Promise<number[]> {
   const client = new Together({ apiKey: env.TOGETHER_API_KEY });
-  const res = await client.embeddings.create({
-    model: BGE_MODEL,
-    input: text,
-  });
+  const res = await client.embeddings.create(
+    { model: BGE_MODEL, input: text },
+    opts.fast
+      ? { timeout: FAST_REQUEST_TIMEOUT_MS, maxRetries: 0 }
+      : { timeout: SLOW_REQUEST_TIMEOUT_MS },
+  );
   const vec = res.data[0]?.embedding;
   if (!vec?.length) throw new Error("Together embeddings returned empty data");
   return normalizeVector(vec);
@@ -102,7 +161,14 @@ async function embedViaTogether(text: string): Promise<number[]> {
 const HF_ROUTER_URL = `https://router.huggingface.co/hf-inference/models/${BGE_MODEL}/pipeline/feature-extraction`;
 const HF_MODELS_URL = `https://api-inference.huggingface.co/models/${BGE_MODEL}`;
 
-async function embedViaHuggingFace(text: string): Promise<number[]> {
+async function embedViaHuggingFace(
+  text: string,
+  opts: EmbedOptions,
+): Promise<number[]> {
+  const maxAttempts = opts.fast ? 1 : 5;
+  const requestTimeout = opts.fast
+    ? FAST_REQUEST_TIMEOUT_MS
+    : SLOW_REQUEST_TIMEOUT_MS;
   const headers = {
     Authorization: `Bearer ${env.HF_TOKEN}`,
     "Content-Type": "application/json",
@@ -113,9 +179,9 @@ async function embedViaHuggingFace(text: string): Promise<number[]> {
   let lastError = "unknown error";
 
   for (const url of urls) {
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 120_000);
+      const timer = setTimeout(() => controller.abort(), requestTimeout);
       try {
         const res = await fetch(url, {
           method: "POST",
@@ -137,7 +203,7 @@ async function embedViaHuggingFace(text: string): Promise<number[]> {
             raw.includes("loading") ||
             raw.includes("Loading");
           lastError = `Hugging Face ${res.status}: ${raw.slice(0, 300)}`;
-          if (retryable && attempt < 4) {
+          if (retryable && attempt < maxAttempts - 1) {
             await sleep(3_000 * (attempt + 1));
             continue;
           }
@@ -148,7 +214,7 @@ async function embedViaHuggingFace(text: string): Promise<number[]> {
         return normalizeVector(poolHfOutput(data));
       } catch (err) {
         lastError = err instanceof Error ? err.message : String(err);
-        if (attempt < 4) {
+        if (attempt < maxAttempts - 1) {
           await sleep(3_000 * (attempt + 1));
           continue;
         }

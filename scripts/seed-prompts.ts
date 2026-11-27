@@ -10,7 +10,6 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { categories } from "../src/server/models/category.model";
-import { images } from "../src/server/models/image.model";
 import { models } from "../src/server/models/model.model";
 import { prompts } from "../src/server/models/prompt.model";
 
@@ -189,20 +188,7 @@ async function main() {
 
     if (!newPrompt) continue;
 
-    // Insert images (using picsum.photos for placeholders)
-    for (let i = 0; i < p.imageSeeds.length; i++) {
-      const seed = p.imageSeeds[i];
-      await db.insert(images).values({
-        promptId: newPrompt.id,
-        r2Key: `seed/${p.slug}-${i}.jpg`,
-        cdnUrl: `https://picsum.photos/seed/${seed}/800/800`,
-        width: 800,
-        height: 800,
-        alt: `${p.title} - example ${i + 1}`,
-        position: i,
-        isPrimary: i === 0,
-      });
-    }
+    // No placeholder images — stock photos misrepresent the prompt's output.
 
     inserted++;
   }

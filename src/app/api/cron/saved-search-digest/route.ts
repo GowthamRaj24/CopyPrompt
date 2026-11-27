@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { env } from "@/server/config/env";
+import { rejectUnauthorizedCron } from "@/server/lib/cron-auth";
 import { sendSavedSearchDigestEmail } from "@/server/lib/email";
 import {
   buildSearchHref,
@@ -13,25 +13,11 @@ import {
  * Walks every saved search, finds new matches since `last_seen_at`,
  * emails the user one digest per day, then bumps `last_seen_at`.
  *
- * Auth: Bearer / `?key=` against CRON_SECRET (Vercel Cron pattern).
+ * Auth: Bearer token against CRON_SECRET (Vercel Cron pattern).
  */
 export async function GET(req: NextRequest) {
-  const secret = env.CRON_SECRET;
-  if (!secret) {
-    return NextResponse.json(
-      { error: "Cron disabled — CRON_SECRET not set" },
-      { status: 503 },
-    );
-  }
-
-  const authHeader = req.headers.get("authorization") ?? "";
-  const bearer = authHeader.toLowerCase().startsWith("bearer ")
-    ? authHeader.slice(7).trim()
-    : "";
-  const queryKey = req.nextUrl.searchParams.get("key") ?? "";
-  if (bearer !== secret && queryKey !== secret) {
-    return new NextResponse(null, { status: 401 });
-  }
+  const unauthorized = rejectUnauthorizedCron(req);
+  if (unauthorized) return unauthorized;
 
   const batches = await loadDigestBatches();
 

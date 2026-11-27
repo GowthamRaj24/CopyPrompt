@@ -1,3 +1,4 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/server/lib/db";
 import { images } from "@/server/models/image.model";
@@ -133,7 +134,7 @@ async function listRecentCopiedPromptsInner(
           })
           .from(images)
           .where(
-            and(eq(images.isPrimary, true), inArray(images.promptId, imageIds)),
+            and(eq(images.isPrimary, true), realImagesOnly(), inArray(images.promptId, imageIds)),
           )
       : [];
 

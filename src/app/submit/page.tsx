@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: "Submit a prompt",
   description:
     "Create and share AI prompts — public catalog or instant private link.",
+  alternates: { canonical: "/submit" },
+  // A sign-in-gated form with almost no content — not useful in search.
+  robots: { index: false, follow: true },
 };
 
 const STARTER_TAGS = [

@@ -15,8 +15,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { formatRelativeTime } from "@/lib/format";
 import {
   breadcrumbListJsonLd,
-  faqJsonLd,
-  howToUsePromptJsonLd,
   promptCreativeWorkJsonLd,
 } from "@/lib/seo/jsonld";
 import { after } from "next/server";
@@ -120,27 +118,18 @@ export default async function PromptDetailPage({ params }: PageProps) {
   });
 
   const isImage = prompt.model.type === "image";
-  const usesPicsum = prompt.images.some((img) =>
-    img.cdnUrl.includes("picsum.photos"),
-  );
+  // Placeholder stock photos are filtered out in the service layer, so
+  // `images` only ever holds real, author-supplied sample outputs.
+  const hasSampleImages = isImage && prompt.images.length > 0;
   const wordCount = prompt.promptText.split(/\s+/).filter(Boolean).length;
   const aspect = prompt.params.aspect_ratio
     ? String(prompt.params.aspect_ratio)
     : null;
 
-  /* ── FAQ — both visible on the page AND emitted as FAQPage schema.
-        Sourcing answers from the prompt itself keeps the content
-        authentic to the page (no manufactured Q&A). Answer engines
-        love these for direct citation. ───────────────────────── */
-  const faqs = buildPromptFaqs({
-    prompt,
-    isImage,
-    wordCount,
-  });
-
-  /* ── Structured data payload. Order doesn't matter for parsers but
-        we group conceptually: identity → navigation → main entity →
-        how-to → FAQ. ──────────────────────────────────────────── */
+  /* ── Structured data: breadcrumb + the prompt itself. We deliberately
+        don't emit FAQPage / HowTo here — the generic per-prompt FAQ was
+        identical boilerplate on every page (a low-value-content signal),
+        and Google no longer shows those rich results for sites like this. */
   const jsonLd = [
     breadcrumbListJsonLd([
       { name: "Home", url: "/" },
@@ -175,12 +164,6 @@ export default async function PromptDetailPage({ params }: PageProps) {
       },
       copyCount: prompt.copyCount,
     }),
-    howToUsePromptJsonLd({
-      promptUrl: `/prompt/${prompt.slug}`,
-      promptTitle: prompt.title,
-      modelName: prompt.model.name,
-    }),
-    faqJsonLd(faqs),
   ];
 
   return (
@@ -224,12 +207,8 @@ export default async function PromptDetailPage({ params }: PageProps) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         {/* LEFT — Visual evidence */}
         <div className="reveal delay-1 lg:col-span-5">
-          {isImage && prompt.images.length > 0 ? (
-            <ImageStack
-              images={prompt.images}
-              title={prompt.title}
-              unoptimized={usesPicsum}
-            />
+          {hasSampleImages ? (
+            <ImageStack images={prompt.images} title={prompt.title} />
           ) : (
             <PromptShowcase prompt={prompt} />
           )}
@@ -392,8 +371,14 @@ export default async function PromptDetailPage({ params }: PageProps) {
           {/* Main display:
                 Image prompts → "The Prompt" code block (the prompt is the data)
                 Text prompts  → "Sample output" card (the prompt is in the left column) */}
-          {isImage ? (
+          {hasSampleImages ? (
             <PromptCodeBlock text={prompt.promptText} maxHeight="400px" />
+          ) : isImage ? (
+            <p className="rounded-lg border border-dashed border-border/60 bg-card/30 px-3.5 py-3 text-[13px] leading-relaxed text-muted-foreground">
+              No sample image yet. Run this prompt in {prompt.model.name} and
+              your result will follow the description above — results vary
+              with the random seed and settings.
+            </p>
           ) : (
             prompt.expectedOutcome && (
               <SampleOutputCard
@@ -436,46 +421,6 @@ export default async function PromptDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-
-      {/* ── FAQ — high-leverage AEO surface. Engines like Google AI
-            Overviews, Perplexity, and voice assistants frequently
-            pull verbatim from FAQPage entries. Visible to humans too;
-            duplicates the FAQPage JSON-LD above so search engines see
-            identical content in both places. ─────────────────── */}
-      <section
-        aria-labelledby="faq-heading"
-        className="mt-14 border-t border-border/40 pt-10 md:mt-20 md:pt-14"
-      >
-        <div className="mb-6 md:mb-8">
-          <p className="eyebrow mb-1">FAQ</p>
-          <h2
-            id="faq-heading"
-            className="text-xl font-bold tracking-[-0.03em] md:text-2xl"
-          >
-            Common questions
-          </h2>
-        </div>
-
-        <div className="space-y-3">
-          {faqs.map((f) => (
-            <details
-              key={f.question}
-              className="group rounded-lg border border-border/60 bg-card/30 px-4 py-3 transition-colors open:border-border hover:border-border"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13.5px] font-medium text-foreground">
-                {f.question}
-                <ChevronRightIcon
-                  className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-open:rotate-90"
-                  aria-hidden
-                />
-              </summary>
-              <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-                {f.answer}
-              </p>
-            </details>
-          ))}
-        </div>
-      </section>
 
       {/* SIMILAR — full-text-search matched on the prompt title.
           Falls back to same-category when FTS finds fewer than 6
@@ -629,71 +574,4 @@ function TrustPill({ children }: { children: React.ReactNode }) {
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max - 1).trimEnd()}…`;
-}
-
-/**
- * Generate per-prompt FAQ content that's both displayed and emitted as
- * FAQPage schema.
- *
- * The answers are derived from the prompt's actual fields (no manufactured
- * data) so the FAQ stays truthful even as prompts change. Engines that
- * cross-check on-page text against JSON-LD will see exact matches.
- */
-function buildPromptFaqs(opts: {
-  prompt: PromptDetail;
-  isImage: boolean;
-  wordCount: number;
-}): Array<{ question: string; answer: string }> {
-  const { prompt, isImage, wordCount } = opts;
-  const modelName = prompt.model.name;
-  const categoryName = prompt.category.name;
-  const popularity =
-    prompt.copyCount > 0
-      ? ` It's been copied ${prompt.copyCount.toLocaleString()} times so far.`
-      : "";
-
-  const faqs: Array<{ question: string; answer: string }> = [
-    {
-      question: `What is the "${prompt.title}" prompt?`,
-      answer: prompt.tips
-        ? `${prompt.tips} The prompt targets ${modelName} and lives in the ${categoryName} category on mycopyprompt.`
-        : `A ${categoryName.toLowerCase()} ${isImage ? "image" : "text"} prompt designed for ${modelName}. ${wordCount.toLocaleString()} words long, free to copy and use.${popularity}`,
-    },
-    {
-      question: `What AI model is this prompt for?`,
-      answer: `This prompt is written for ${modelName}. ${
-        isImage
-          ? `It's tuned for image generation — if you paste it into a text-only chatbot (like ChatGPT) the model will describe the scene instead of producing the image.`
-          : `It's a text/chat prompt — paste it into ${modelName} (or compatible LLMs like Claude or GPT-4) to get the expected output.`
-      }`,
-    },
-    {
-      question: "How do I use this prompt?",
-      answer: `1. Click the Copy button on this page to copy the full prompt. 2. Open ${modelName}. 3. Paste the prompt into a new conversation. 4. Replace any {placeholders} with your specifics, then send. Most prompts produce the right output on the first try; complex ones may need 1-2 iterations.`,
-    },
-    {
-      question: "Is this prompt free to use?",
-      answer: `Yes — every prompt on mycopyprompt is free forever. No paywall, no signup wall for browsing or copying. You can use it for personal or commercial work, just don't redistribute the entire mycopyprompt library.`,
-    },
-    {
-      question: "Can I modify the prompt?",
-      answer: `Absolutely — most prompts are templates. Look for {placeholders} (curly braces) and swap them with your own values. You can also reword sections, add constraints, or chain it with other prompts.`,
-    },
-  ];
-
-  // Only add the "what does it look like" FAQ when the prompt has visual
-  // proof attached — otherwise the answer would feel hollow.
-  if (isImage && prompt.images.length > 0) {
-    faqs.push({
-      question: `What does the output look like?`,
-      answer: `The top of this page shows ${prompt.images.length} reference image${prompt.images.length > 1 ? "s" : ""} produced by this exact prompt in ${modelName}. Your results will vary based on the random seed, but the style and composition should match closely.`,
-    });
-  } else if (!isImage && prompt.expectedOutcome) {
-    faqs.push({
-      question: `What kind of output does this produce?`,
-      answer: `See the "Sample output" panel above — that's a real example of what ${modelName} returns when this prompt runs. Your output will vary in wording but should follow the same structure and depth.`,
-    });
-  }
-
-  return faqs;
 }

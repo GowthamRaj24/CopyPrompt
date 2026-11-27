@@ -1,3 +1,4 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { randomBytes } from "node:crypto";
 import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { cache } from "react";
@@ -287,7 +288,7 @@ export async function listPromptsInCollection(
           })
           .from(images)
           .where(
-            and(eq(images.isPrimary, true), inArray(images.promptId, imageIds)),
+            and(eq(images.isPrimary, true), realImagesOnly(), inArray(images.promptId, imageIds)),
           )
       : [];
 

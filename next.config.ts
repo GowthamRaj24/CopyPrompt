@@ -2,7 +2,28 @@ import type { NextConfig } from "next";
 
 const PRODUCTION_HOST = "mycopyprompt.in";
 
+/**
+ * Baseline security headers on every response.
+ *
+ * Deliberately NOT a full script-src CSP yet: AdSense, Funding Choices
+ * (consent), Turnstile, Supabase and Vercel telemetry need a broad allow
+ * list that should be rolled out in Report-Only mode first. `frame-ancestors`
+ * only controls who may embed *this* site, so it never affects ad iframes.
+ */
+const SECURITY_HEADERS = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=()",
+  },
+];
+
 const nextConfig: NextConfig = {
+  // Don't advertise the framework/version to scanners.
+  poweredByHeader: false,
   // Strip console.* calls (except errors / warnings) from production
   // bundles — saves a few KB and removes the parser cost of every
   // console statement, helping TBT on lower-end devices.
@@ -38,6 +59,10 @@ const nextConfig: NextConfig = {
     // and PWA manifest assets falling into the default short cache.
     const ONE_YEAR = "public, max-age=31536000, immutable";
     return [
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS,
+      },
       {
         // ads.txt — served fresh for ad-network crawlers. Short cache
         // ensures Google AdSense re-reads it quickly when changed, while
@@ -85,9 +110,6 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      // Picsum placeholders for seed prompts
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "fastly.picsum.photos" },
       // Supabase Storage — primary image host (free tier, CDN-backed).
       // Pattern matches any Supabase project (`<ref>.supabase.co`).
       { protocol: "https", hostname: "*.supabase.co" },

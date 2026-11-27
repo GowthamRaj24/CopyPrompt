@@ -1,12 +1,15 @@
+import { realImagesOnly } from "@/server/lib/real-images";
 import { and, asc, cosineDistance, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import {
-  buildEmbeddingText,
-  embedDocument,
   embedQuery,
   isEmbeddingConfigured,
   parseStoredEmbedding,
 } from "@/server/lib/embeddings";
-import { shouldBlendSemanticSearch } from "@/server/services/embedding.service";
+import { after } from "next/server";
+import {
+  refreshPromptEmbedding,
+  shouldBlendSemanticSearch,
+} from "@/server/services/embedding.service";
 import { cache } from "react";
 import { clampPage, pageOffset, slicePage } from "@/lib/pagination";
 import { PROMPT_VISIBILITY, publicPublishedWhere } from "@/lib/prompt-visibility";
@@ -97,7 +100,7 @@ async function batchFetchPrimaryImages(
     .from(images)
     .where(
       and(
-        eq(images.isPrimary, true),
+        eq(images.isPrimary, true), realImagesOnly(),
         inArray(images.promptId, imagePromptIds),
       ),
     );
@@ -383,13 +386,12 @@ function buildSearchOrderBy(
 
 async function searchPromptsSemanticOnly(
   options: SearchOptions,
+  queryVec: number[],
 ): Promise<SearchResults> {
-  const { query, type = "all" } = options;
+  const { type = "all" } = options;
   const pageSize = options.pageSize ?? PAGINATION.SEARCH_PAGE_SIZE;
   const page = clampPage(options.page ?? 1, PAGINATION.SEARCH_MAX_PAGE);
   const offset = pageOffset(page, pageSize);
-  const trimmed = query.trim();
-  const queryVec = await embedQuery(trimmed);
   const dist = cosineDistance(prompts.embedding, queryVec);
   const fetchLimit = pageSize + 1;
 
@@ -454,7 +456,9 @@ export async function searchPrompts(
   let queryVec: number[] | null = null;
   if (useSemanticBlend) {
     try {
-      queryVec = await embedQuery(trimmed);
+      // Request path: bounded to ~3 s, single attempt. On failure we
+      // silently fall back to FTS-only ranking.
+      queryVec = await embedQuery(trimmed, { fast: true });
     } catch (err) {
       console.warn("[search] query embedding failed, FTS only:", err);
     }
@@ -490,9 +494,9 @@ export async function searchPrompts(
   const { items: pageRows, hasMore } = slicePage(dataRows, pageSize);
   const ftsTotal = countRows[0]?.c ?? 0;
 
-  if (pageRows.length === 0 && ftsTotal === 0 && useSemanticBlend) {
+  if (pageRows.length === 0 && ftsTotal === 0 && queryVec) {
     try {
-      return await searchPromptsSemanticOnly(options);
+      return await searchPromptsSemanticOnly(options, queryVec);
     } catch (err) {
       console.warn("[search] semantic-only fallback failed:", err);
       return { results: [], total: 0, page, pageSize, hasMore: false };
@@ -660,7 +664,7 @@ async function fetchPromptDetailById(
             isPrimary: images.isPrimary,
           })
           .from(images)
-          .where(eq(images.promptId, row.id))
+          .where(and(eq(images.promptId, row.id), realImagesOnly()))
           .orderBy(asc(images.position))
       : Promise.resolve([]),
     row.remixSourceId
@@ -871,34 +875,33 @@ async function getSimilarPromptsViaVector(
   if (!(await shouldBlendSemanticSearch())) return [];
 
   const [source] = await db
-    .select({
-      embedding: prompts.embedding,
-      title: prompts.title,
-      promptText: prompts.promptText,
-      tips: prompts.tips,
-      expectedOutcome: prompts.expectedOutcome,
-    })
+    .select({ embedding: prompts.embedding })
     .from(prompts)
     .where(eq(prompts.id, currentPromptId))
     .limit(1);
 
   if (!source) return [];
 
-  let queryVec = parseStoredEmbedding(source.embedding);
+  const queryVec = parseStoredEmbedding(source.embedding);
   if (!queryVec) {
-    if (!isEmbeddingConfigured()) return [];
-    try {
-      queryVec = await embedDocument(
-        buildEmbeddingText({
-          title: source.title,
-          promptText: source.promptText,
-          tips: source.tips,
-          expectedOutcome: source.expectedOutcome,
-        }),
-      );
-    } catch {
-      return [];
+    // Never call the embedding API while rendering a page — a failing
+    // provider used to hold prompt pages open for ~34 s. Instead, heal
+    // the missing vector in the background after the response is sent;
+    // this render falls back to FTS / same-category matches.
+    if (isEmbeddingConfigured()) {
+      try {
+        after(async () => {
+          try {
+            await refreshPromptEmbedding(currentPromptId);
+          } catch (err) {
+            console.warn("[similar] background embedding failed:", err);
+          }
+        });
+      } catch {
+        // `after` is unavailable outside a request scope (scripts) — skip.
+      }
     }
+    return [];
   }
 
   const dist = cosineDistance(prompts.embedding, queryVec);

@@ -162,7 +162,7 @@ export function softwareApplicationJsonLd() {
       // Per-prompt
       "One-click copy with built-in 'open in ChatGPT / Claude / Gemini / Mistral / Pi / Perplexity' deep links",
       "Sample expected output included with every text prompt",
-      "Reference images + negative prompts + parameters for every image prompt",
+      "Negative prompts and parameters for image prompts, with sample images where the author supplied them",
       "Curator notes and usage tips on each prompt",
       "Aggregate copy count, view count, and thumbs-up/down rating per prompt",
       "Similar-prompt recommendations via semantic search",
@@ -346,51 +346,6 @@ export function promptCreativeWorkJsonLd(input: PromptJsonLdInput) {
   }
 
   return node;
-}
-
-/**
- * HowTo — step-by-step instructions to use the prompt.
- * Voice assistants and Google's "How to" rich result both consume this.
- */
-export function howToUsePromptJsonLd(opts: {
-  promptUrl: string;
-  promptTitle: string;
-  modelName: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: `How to use the ${opts.promptTitle} prompt`,
-    description: `Step-by-step instructions for using this prompt with ${opts.modelName}.`,
-    totalTime: "PT2M",
-    step: [
-      {
-        "@type": "HowToStep",
-        position: 1,
-        name: "Copy the prompt",
-        text: `Click the Copy button on the prompt page to copy the full text to your clipboard.`,
-        url: `${abs(opts.promptUrl)}#copy`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 2,
-        name: `Open ${opts.modelName}`,
-        text: `Open ${opts.modelName} in your browser or app, and start a new conversation.`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 3,
-        name: "Paste and customize",
-        text: `Paste the prompt. Replace any {placeholders} with your specifics before sending.`,
-      },
-      {
-        "@type": "HowToStep",
-        position: 4,
-        name: "Iterate",
-        text: `If the first output isn't right, ask follow-up questions or tweak the variables — most prompts need 1-2 iterations.`,
-      },
-    ],
-  };
 }
 
 /**
