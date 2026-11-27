@@ -12,11 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { AppUser } from "@/server/lib/auth";
-
-interface MobileNavProps {
-  user: AppUser | null;
-}
+import { useCurrentUser } from "@/components/auth/CurrentUserProvider";
 
 const NAV_LINKS = [
   { href: "/search", label: "Browse all" },
@@ -26,7 +22,8 @@ const NAV_LINKS = [
   { href: "/favorites", label: "Favorites" },
 ];
 
-export function MobileNav({ user }: MobileNavProps) {
+export function MobileNav() {
+  const { user, status } = useCurrentUser();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -144,7 +141,7 @@ export function MobileNav({ user }: MobileNavProps) {
                 </button>
               </form>
             </>
-          ) : (
+          ) : status === "loading" ? null : (
             <Link
               href="/signin"
               onClick={close}

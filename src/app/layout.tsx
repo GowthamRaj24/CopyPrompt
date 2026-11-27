@@ -4,6 +4,7 @@ import { AdSenseLoader } from "@/components/ads/AdSenseLoader";
 import { LazyMount } from "@/components/ads/LazyMount";
 import { SiteAds } from "@/components/ads/SiteAds";
 import { AmbientOrbs } from "@/components/ambient/AmbientOrbs";
+import { CurrentUserProvider } from "@/components/auth/CurrentUserProvider";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { DeferredToaster } from "@/components/layout/DeferredToaster";
 import { Footer } from "@/components/layout/Footer";
@@ -197,7 +198,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FavoritesProvider>
+          <CurrentUserProvider>
+            <FavoritesProvider>
             <a
               href="#main-content"
               className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:font-medium focus:text-primary-foreground focus:shadow-lg"
@@ -227,7 +229,8 @@ export default function RootLayout({
                 },
               }}
             />
-          </FavoritesProvider>
+            </FavoritesProvider>
+          </CurrentUserProvider>
         </ThemeProvider>
         <VercelTelemetry />
 
